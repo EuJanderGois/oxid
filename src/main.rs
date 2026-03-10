@@ -40,7 +40,15 @@ async fn main() {
     "#;
 
     let mut renderer = MqRenderer;
-    let engine = ScriptEngine::new(script);
+    
+    let engine = match ScriptEngine::new(script) {
+        Ok(engine) => engine,
+        Err(err) => {
+            eprintln!("[scripting/bootstrap] {err}");
+            return;
+        }
+    };
+
     let mut queue = RenderQueue::new();
 
     engine.on_init();
