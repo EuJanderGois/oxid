@@ -2,28 +2,29 @@ use rquickjs::{module::{Declarations, Exports, ModuleDef}, Ctx, Function, Result
 
 use crate::{
     renderer::{
-        color::Color,
         context::with_active_queue,
+        // color::Color as RendererColor
     },
     scripting::plugin::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
 };
 
+use crate::scripting::color::{Color, to_renderer_color};
+
 ///
 /// usa o renderizador para desenhar um círculo.
 /// 
-fn draw_circle(x: f32, y: f32, r: f32) {
+fn draw_circle(x: f32, y: f32, r: f32, color: Color) {
     let _ = with_active_queue(|queue| {
-        queue.draw_circle(x, y, r, Color::new(1.0, 0.5, 0.0, 1.0));
+        queue.draw_circle(x, y, r, to_renderer_color(color));
     });
 }
 
 ///
 /// adiciona o comando draw_rectangle a queue
 /// 
-fn draw_rectangle(x: f32, y: f32, width: f32, height: f32) {
+fn draw_rectangle(x: f32, y: f32, width: f32, height: f32, color: Color) {
     let _ = with_active_queue(|queue| {
-        queue.draw_rectangle(x, y, width, height, 
-            Color::new(1.0, 0.5, 0.0, 1.0));
+        queue.draw_rectangle(x, y, width, height, to_renderer_color(color));
     });
 }
 

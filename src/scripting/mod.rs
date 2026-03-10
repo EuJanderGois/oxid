@@ -1,5 +1,6 @@
 pub mod math;
 pub mod graphics;
+pub mod color;
 pub mod plugin;
 
 use rquickjs::{Context, Ctx, Function, Module, Object, Runtime};
@@ -7,10 +8,10 @@ use plugin::NativePlugin;
 use math::MathPlugin;
 use graphics::GraphicsPlugin;
 
-use crate::renderer::{
+use crate::{renderer::{
     context::{clear_active_queue, set_active_queue},
     queue::RenderQueue,
-};
+}, scripting::color::ColorPlugin};
 
 const HOOK_ON_INIT: &str = "__hook_on_init";
 const HOOK_ON_UPDATE: &str = "__hook_on_update";
@@ -97,7 +98,11 @@ impl ScriptEngine {
 
         ctx.with(|ctx| {
             // registra os modulos
-            register_plugins!(ctx, MathPlugin, GraphicsPlugin);
+            register_plugins!(ctx, 
+                MathPlugin, 
+                GraphicsPlugin,
+                ColorPlugin
+            );
             
             Self::register_stdlib(&ctx);
 
