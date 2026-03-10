@@ -24,28 +24,33 @@ Multiplataforma, rápido e eficiente, **Oxid** foi projetado para oferecer uma e
 ## Olá Mundo
 
 ``` javascript
-import { Component } from "oxid";
+import { GameObject } from "oxid/core";
 import { Transform2D } from "oxid/math";
-import { drawCircle } from "oxid/graphics";
+import { drawCircle, drawRectangle } from "oxid/graphics";
 
-export class MyApp extends Component {
+export class MyApp extends GameObject {
 	constructor() {
 		super();
 		this.jogador = new Transform2D(100.0, 100.0);
-		this.velocidade = 120.0;
+		this.velocidade = 24.0;
 	}
 
-	update(dt) {
+	onUpdate(dt) {
 		this.jogador.x += this.velocidade * dt;
 
 		if (this.jogador.x > 800.0) {
 			this.jogador.x = 0;
 		}
 	}
-	
-	draw() {
+
+	onDraw() {
 		drawCircle(this.jogador.x, this.jogador.y, 25.0);
+		drawRectangle(50.0, 50.0, 100.0, 20.0);
 	}
+}
+
+export function main() {
+	return new MyApp();
 }
 ```
 
