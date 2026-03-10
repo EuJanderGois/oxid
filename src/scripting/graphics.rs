@@ -1,12 +1,20 @@
 use rquickjs::{module::{Declarations, Exports, ModuleDef}, Ctx, Function, Result};
-use macroquad::prelude as mq;
-use crate::scripting::plugin::{NativePlugin, FunctionMeta, FunctionParam, ScriptType};
+
+use crate::{
+    renderer::{
+        color::Color,
+        context::with_active_queue,
+    },
+    scripting::plugin::{NativePlugin, FunctionMeta, FunctionParam, ScriptType},
+};
 
 ///
 /// usa o renderizador para desenhar um círculo.
 /// 
 fn draw_circle(x: f32, y: f32, r: f32) {
-    mq::draw_circle(x, y, r, mq::ORANGE);
+    let _ = with_active_queue(|queue| {
+        queue.draw_circle(x, y, r, Color::new(1.0, 0.5, 0.0, 1.0));
+    });
 }
 
 /// 

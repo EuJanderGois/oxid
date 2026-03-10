@@ -1,12 +1,9 @@
-use oxid::renderer::{
-    color::DARKGRAY,
-    mq_renderer::MqRenderer,
-    queue::RenderQueue,
-    Renderer,
+use oxid::{
+    renderer::{MqRenderer, Renderer, queue::RenderQueue},
+    scripting::ScriptEngine,
 };
-use oxid::scripting::ScriptEngine;
 
-#[macroquad::main("Oxid GE")]
+#[macroquad::main("Modular Scripting")]
 async fn main() {
     let script = r#"
         import { GameObject } from "oxid/core";
@@ -14,7 +11,6 @@ async fn main() {
         import { drawCircle } from "oxid/graphics";
 
         export class MyApp extends GameObject {
-            
             constructor() {
                 super();
                 this.jogador = new Transform2D(100.0, 100.0);
@@ -39,10 +35,10 @@ async fn main() {
         }
     "#;
 
-    let renderer: MqRenderer = MqRenderer;
+    let mut renderer = MqRenderer;
     let engine = ScriptEngine::new(script);
     let mut queue = RenderQueue::new();
-    
+
     engine.on_init();
 
     loop {
@@ -52,10 +48,9 @@ async fn main() {
         let dt = renderer.delta_time();
         engine.on_update(dt);
 
-        queue.clear_background(DARKGRAY);
+        queue.clear_background(oxid::renderer::color::DARKGRAY);
+        engine.on_draw(&mut queue);
 
-        engine.on_draw();
-        let mut queue = engine.take_render_queue();
         renderer.render(&mut queue);
 
         macroquad::prelude::next_frame().await;

@@ -2,14 +2,15 @@ pub mod math;
 pub mod graphics;
 pub mod plugin;
 
-use std::cell::RefCell;
-
 use rquickjs::{Context, Ctx, Function, Module, Object, Runtime};
 use plugin::NativePlugin;
 use math::MathPlugin;
 use graphics::GraphicsPlugin;
 
-use crate::renderer::queue::RenderQueue;
+use crate::renderer::{
+    context::{clear_active_queue, set_active_queue},
+    queue::RenderQueue,
+};
 
 const HOOK_ON_INIT: &str = "__hook_on_init";
 const HOOK_ON_UPDATE: &str = "__hook_on_update";
@@ -26,7 +27,6 @@ macro_rules! register_plugins {
 pub struct ScriptEngine {
     _rt: Runtime,
     ctx: Context,
-    render_queue: RefCell<RenderQueue>,
 }
 
 impl ScriptEngine {
@@ -119,12 +119,10 @@ impl ScriptEngine {
         self.call_f32_hook(HOOK_ON_UPDATE, dt);
     }
 
-    pub fn on_draw(&self) {
-        self.render_queue.borrow_mut().clear();
+    pub fn on_draw(&self, queue: &mut RenderQueue) {
+        set_active_queue(queue);
         self.call_void_hook(HOOK_ON_DRAW);
+        clear_active_queue();
     }
-    
-    pub fn take_render_queue(&self) -> RenderQueue {
-        std::mem::take(&mut *self.render_queue.borrow_mut())
-    }
+
 }
