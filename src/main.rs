@@ -8,7 +8,7 @@ async fn main() {
     let script = r#"
         import { GameObject } from "oxid/core";
         import { Transform2D } from "oxid/math";
-        import { drawCircle } from "oxid/graphics";
+        import { drawCircle, drawRectangle } from "oxid/graphics";
 
         export class MyApp extends GameObject {
             constructor() {
@@ -27,6 +27,7 @@ async fn main() {
 
             onDraw() {
                 drawCircle(this.jogador.x, this.jogador.y, 25.0);
+                drawRectangle(50.0, 50.0, 100.0, 20.0);
             }
         }
 

@@ -1,4 +1,4 @@
-use crate::renderer::{Renderer, color::Color, queue::RenderQueue};
+use crate::renderer::{Renderer, color::Color, command::RenderCommand, queue::RenderQueue};
 
 pub struct MqRenderer;
 
@@ -16,21 +16,35 @@ impl Renderer for MqRenderer {
     }
 
     fn render(&mut self, queue: &mut RenderQueue) {
-        use macroquad::prelude::{clear_background, draw_circle};
+        use macroquad::prelude::{clear_background, draw_circle, draw_rectangle};
 
         for command in queue.drain() {
             match command {
-                crate::renderer::command::RenderCommand::Clear { color } => {
+                
+                RenderCommand::Clear { color } => {
                     clear_background(Self::to_mq_color(color));
-                }
-                crate::renderer::command::RenderCommand::DrawCircle {
+                } // clear
+
+                RenderCommand::DrawCircle {
                     x,
                     y,
                     radius,
                     color,
                 } => {
-                    draw_circle(x, y, radius, Self::to_mq_color(color));
-                }
+                    draw_circle(
+                        x, y, radius, Self::to_mq_color(color));
+                } // draw_circle
+
+                RenderCommand::DrawRectangle { 
+                    x, y, 
+                    width, height, 
+                    color } => {
+                        draw_rectangle(
+                            x, y, 
+                            width, height, 
+                            Self::to_mq_color(color));
+                } // draw_rectangle
+
             }
         }
     }

@@ -40,12 +40,17 @@ impl RenderQueue {
         self.push(RenderCommand::Clear { color });
     }
 
-    pub fn draw_circle(&mut self, x: f32, y: f32, radius: f32, color: Color) {
+    pub fn draw_circle(&mut self, 
+        x: f32, y: f32, radius: f32, color: Color) {
         self.push(RenderCommand::DrawCircle {
-            x,
-            y,
-            radius,
-            color,
+            x, y, radius, color
         });
     }
+
+    pub fn draw_rectangle(&mut self,
+        x: f32, y: f32, width: f32, height: f32, color: Color) {
+            self.push(RenderCommand::DrawRectangle { 
+                x, y, width, height, color 
+            });
+        }
 }

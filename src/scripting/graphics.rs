@@ -5,7 +5,7 @@ use crate::{
         color::Color,
         context::with_active_queue,
     },
-    scripting::plugin::{NativePlugin, FunctionMeta, FunctionParam, ScriptType},
+    scripting::plugin::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
 };
 
 ///
@@ -17,6 +17,16 @@ fn draw_circle(x: f32, y: f32, r: f32) {
     });
 }
 
+///
+/// adiciona o comando draw_rectangle a queue
+/// 
+fn draw_rectangle(x: f32, y: f32, width: f32, height: f32) {
+    let _ = with_active_queue(|queue| {
+        queue.draw_rectangle(x, y, width, height, 
+            Color::new(1.0, 0.5, 0.0, 1.0));
+    });
+}
+
 /// 
 /// gerencia os métodos e módulos de renderização
 /// 
@@ -25,6 +35,7 @@ pub struct GraphicsPlugin;
 impl ModuleDef for GraphicsPlugin {
     fn declare<'js>(declare: &Declarations<'js>) -> Result<()> {
         declare.declare("drawCircle")?;
+        declare.declare("drawRectangle")?;
         Ok(())
     } // declara ao script
 
@@ -32,6 +43,10 @@ impl ModuleDef for GraphicsPlugin {
         exports.export(
             "drawCircle", 
             Function::new(ctx.clone(), draw_circle)?)?;
+
+        exports.export(
+            "drawRectangle", 
+            Function::new(ctx.clone(), draw_rectangle)?)?;
         Ok(())
     } // exporta ao script
 }
