@@ -29,7 +29,7 @@ impl Color {
 }
 
 use crate::renderer::color::{Color as RendererColor};
-pub fn to_renderer_color(color: Color) -> RendererColor {
+pub fn to_renderer_color(color: &Color) -> RendererColor {
     RendererColor::new(color.r, color.g, color.b, color.a)
 }
 

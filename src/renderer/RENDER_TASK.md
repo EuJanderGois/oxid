@@ -37,7 +37,7 @@ pub fn draw_circle(&mut self, x: f32, y: f32, radius: f32, color: Color) {
 
 ## Plugin
 
-O proximo passo é definir como o plugin irá chamar o comando e adicionar a fila. No nosso exemplo ele é definido em `graphics.rs`.
+O proximo passo é definir como o plugin irá chamar o comando e adicionar a fila. No nosso exemplo ele é definido em `shapes.rs`.
 
 ``` rust
 fn draw_circle(x: f32, y: f32, r: f32) {

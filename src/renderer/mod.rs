@@ -3,6 +3,7 @@ pub mod command;
 pub mod queue;
 pub mod context;
 pub mod mq_renderer;
+pub mod texture;
 
 use crate::renderer::{queue::RenderQueue};
 pub use mq_renderer::MqRenderer;

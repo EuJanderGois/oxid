@@ -1,13 +1,19 @@
 pub mod math;
-pub mod graphics;
+pub mod shapes;
 pub mod color;
+pub mod input;
+pub mod text;
+pub mod texture;
 pub mod plugin;
 pub mod error;
 
-use rquickjs::{Context, Ctx, Function, Module, Object, Runtime};
+use rquickjs::{CaughtError, Context, Ctx, Function, Module, Object, Runtime};
 use plugin::NativePlugin;
 use math::MathPlugin;
-use graphics::GraphicsPlugin;
+use shapes::ShapesPlugin;
+use input::InputPlugin;
+use text::TextPlugin;
+use texture::TexturePlugin;
 use error::ScriptEngineError;
 
 use crate::{renderer::{
@@ -27,6 +33,14 @@ pub struct ScriptEngine {
 }
 
 impl ScriptEngine {
+    fn hook_error(ctx: &Ctx<'_>, hook_name: &'static str, error: rquickjs::Error) -> ScriptEngineError {
+        let source = CaughtError::from_error(ctx, error).to_string();
+
+        ScriptEngineError::HookExecution {
+            hook: hook_name,
+            source,
+        }
+    }
 
     fn register_plugins(ctx: &Ctx<'_>) -> Result<(), ScriptEngineError> {
         MathPlugin::register(ctx).map_err(|e| ScriptEngineError::PluginRegister {
@@ -34,13 +48,28 @@ impl ScriptEngine {
             source: e.to_string(),
         })?;
 
-        GraphicsPlugin::register(ctx).map_err(|e| ScriptEngineError::PluginRegister {
-            plugin: GraphicsPlugin::NAME,
+        ShapesPlugin::register(ctx).map_err(|e| ScriptEngineError::PluginRegister {
+            plugin: ShapesPlugin::NAME,
             source: e.to_string(),
         })?;
 
         ColorPlugin::register(ctx).map_err(|e| ScriptEngineError::PluginRegister {
             plugin: ColorPlugin::NAME,
+            source: e.to_string(),
+        })?;
+
+        InputPlugin::register(ctx).map_err(|e| ScriptEngineError::PluginRegister {
+            plugin: InputPlugin::NAME,
+            source: e.to_string(),
+        })?;
+
+        TextPlugin::register(ctx).map_err(|e| ScriptEngineError::PluginRegister {
+            plugin: TextPlugin::NAME,
+            source: e.to_string(),
+        })?;
+
+        TexturePlugin::register(ctx).map_err(|e| ScriptEngineError::PluginRegister {
+            plugin: TexturePlugin::NAME,
             source: e.to_string(),
         })?;
 
@@ -143,10 +172,7 @@ impl ScriptEngine {
                 })?;
 
             func.call::<_, ()>(())
-                .map_err(|e| ScriptEngineError::HookExecution {
-                    hook: hook_name,
-                    source: e.to_string(),
-                })
+                .map_err(|e| Self::hook_error(&ctx, hook_name, e))
         })
     }
 
@@ -161,10 +187,7 @@ impl ScriptEngine {
                 })?;
 
             func.call::<_, ()>((value,))
-                .map_err(|e| ScriptEngineError::HookExecution {
-                    hook: hook_name,
-                    source: e.to_string(),
-                })
+                .map_err(|e| Self::hook_error(&ctx, hook_name, e))
         })
     }
 

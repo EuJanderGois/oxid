@@ -40,6 +40,22 @@ impl RenderQueue {
         self.push(RenderCommand::Clear { color });
     }
 
+    pub fn draw_arc(&mut self,
+        x: f32,
+        y: f32,
+        sides: u8,
+        radius: f32,
+        rotation: f32,
+        thickness: f32,
+        arc: f32,
+        color: Color,
+    ) {
+        self.push(RenderCommand::DrawArc { 
+            x, y, sides, radius, rotation, thickness, 
+            arc, color 
+        });
+    }
+
     pub fn draw_circle(&mut self, 
         x: f32, y: f32, radius: f32, color: Color) {
         self.push(RenderCommand::DrawCircle {
@@ -53,4 +69,51 @@ impl RenderQueue {
                 x, y, width, height, color 
             });
         }
+
+    pub fn draw_text(&mut self,
+        text: String, x: f32, y: f32, font_size: f32, color: Color) {
+        self.push(RenderCommand::DrawText {
+            text, x, y, font_size, color
+        });
+    }
+
+    pub fn draw_multiline_text(
+        &mut self,
+        text: String,
+        x: f32,
+        y: f32,
+        font_size: f32,
+        line_distance: Option<f32>,
+        color: Color,
+    ) {
+        self.push(RenderCommand::DrawMultilineText {
+            text,
+            x,
+            y,
+            font_size,
+            line_distance,
+            color,
+        });
+    }
+
+    pub fn draw_texture(
+        &mut self,
+        texture_key: String,
+        x: f32,
+        y: f32,
+        width: Option<f32>,
+        height: Option<f32>,
+        rotation: f32,
+        color: Color,
+    ) {
+        self.push(RenderCommand::DrawTexture {
+            texture_key,
+            x,
+            y,
+            width,
+            height,
+            rotation,
+            color,
+        });
+    }
 }
