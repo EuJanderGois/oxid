@@ -6,14 +6,10 @@ use std::{
 };
 
 use macroquad::prelude::{
-    DrawTextureParams,
-    Image,
-    Texture2D as MacroquadTexture2D,
-    draw_texture_ex,
-    vec2,
+    DrawTextureParams, Image, Texture2D as MacroquadTexture2D, draw_texture_ex, vec2,
 };
 
-use crate::renderer::color::Color;
+use crate::{i18n, renderer::color::Color};
 
 pub struct LoadedTexture {
     pub key: String,
@@ -39,17 +35,22 @@ fn resolve_texture_path(path: &str) -> Result<PathBuf, String> {
     let trimmed = path.trim();
 
     if trimmed.is_empty() {
-        return Err("texture path não pode ser vazio.".to_string());
+        return Err(i18n::text("renderer.texture.empty_path"));
     }
 
-    let resolved = Path::new(trimmed)
-        .canonicalize()
-        .map_err(|err| format!("falha ao localizar textura '{trimmed}': {err}"))?;
+    let resolved = Path::new(trimmed).canonicalize().map_err(|err| {
+        let source = err.to_string();
+        i18n::text_with(
+            "renderer.texture.resolve_failed",
+            &[("path", trimmed), ("source", &source)],
+        )
+    })?;
 
     if !resolved.is_file() {
-        return Err(format!(
-            "o caminho '{}' não aponta para um arquivo de textura.",
-            resolved.display(),
+        let resolved_path = resolved.display().to_string();
+        return Err(i18n::text_with(
+            "renderer.texture.not_a_file",
+            &[("path", &resolved_path)],
         ));
     }
 
@@ -71,10 +72,21 @@ pub fn load_texture(path: &str) -> Result<LoadedTexture, String> {
         return Ok(texture);
     }
 
-    let bytes = fs::read(&resolved)
-        .map_err(|err| format!("falha ao ler textura '{}': {err}", resolved.display()))?;
-    let image = Image::from_file_with_format(&bytes, None)
-        .map_err(|err| format!("falha ao decodificar textura '{}': {err}", resolved.display()))?;
+    let resolved_path = resolved.display().to_string();
+    let bytes = fs::read(&resolved).map_err(|err| {
+        let source = err.to_string();
+        i18n::text_with(
+            "renderer.texture.read_failed",
+            &[("path", &resolved_path), ("source", &source)],
+        )
+    })?;
+    let image = Image::from_file_with_format(&bytes, None).map_err(|err| {
+        let source = err.to_string();
+        i18n::text_with(
+            "renderer.texture.decode_failed",
+            &[("path", &resolved_path), ("source", &source)],
+        )
+    })?;
 
     let width = image.width as f32;
     let height = image.height as f32;
@@ -107,14 +119,14 @@ pub fn draw_cached_texture(
         (Some(width), Some(height)) => Some(vec2(width, height)),
         (None, None) => None,
         _ => {
-            return Err("dest_size da textura deve informar largura e altura juntas.".to_string());
+            return Err(i18n::text("renderer.texture.invalid_dest_size"));
         }
     };
 
     TEXTURE_CACHE.with(|cache| {
         let cache = cache.borrow();
         let texture = cache.get(key).ok_or_else(|| {
-            format!("textura '{key}' não foi carregada antes de desenhar.")
+            i18n::text_with("renderer.texture.not_loaded", &[("texture_key", key)])
         })?;
 
         draw_texture_ex(

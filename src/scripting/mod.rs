@@ -1,25 +1,29 @@
-pub mod math;
-pub mod shapes;
 pub mod color;
+pub mod error;
 pub mod input;
+pub mod math;
+pub mod plugin;
+pub mod shapes;
 pub mod text;
 pub mod texture;
-pub mod plugin;
-pub mod error;
 
-use rquickjs::{CaughtError, Context, Ctx, Function, Module, Object, Runtime};
-use plugin::NativePlugin;
-use math::MathPlugin;
-use shapes::ShapesPlugin;
+use error::ScriptEngineError;
 use input::InputPlugin;
+use math::MathPlugin;
+use plugin::NativePlugin;
+use rquickjs::{CaughtError, Context, Ctx, Function, Module, Object, Runtime};
+use shapes::ShapesPlugin;
 use text::TextPlugin;
 use texture::TexturePlugin;
-use error::ScriptEngineError;
 
-use crate::{renderer::{
-    context::{clear_active_queue, set_active_queue},
-    queue::RenderQueue,
-}, scripting::color::ColorPlugin};
+use crate::{
+    i18n,
+    renderer::{
+        context::{clear_active_queue, set_active_queue},
+        queue::RenderQueue,
+    },
+    scripting::color::ColorPlugin,
+};
 
 const HOOK_ON_INIT: &str = "__hook_on_init";
 const HOOK_ON_UPDATE: &str = "__hook_on_update";
@@ -33,7 +37,11 @@ pub struct ScriptEngine {
 }
 
 impl ScriptEngine {
-    fn hook_error(ctx: &Ctx<'_>, hook_name: &'static str, error: rquickjs::Error) -> ScriptEngineError {
+    fn hook_error(
+        ctx: &Ctx<'_>,
+        hook_name: &'static str,
+        error: rquickjs::Error,
+    ) -> ScriptEngineError {
         let source = CaughtError::from_error(ctx, error).to_string();
 
         ScriptEngineError::HookExecution {
@@ -118,58 +126,67 @@ impl ScriptEngine {
         Ok(())
     }
 
-    fn compile_hooks<'a>(
-        ctx: &Ctx<'a>,
-        globals: &Object<'a>,
-    ) -> Result<(), ScriptEngineError> {
-        let hook_on_init: Function = ctx.eval(
-            format!("() => {{ if ({APP_INSTANCE}.onInit) {APP_INSTANCE}.onInit(); }}")
-        ).map_err(|e| ScriptEngineError::HookCompile {
-            hook: "onInit",
-            source: e.to_string(),
+    fn compile_hooks<'a>(ctx: &Ctx<'a>, globals: &Object<'a>) -> Result<(), ScriptEngineError> {
+        let hook_on_init: Function = ctx
+            .eval(format!(
+                "() => {{ if ({APP_INSTANCE}.onInit) {APP_INSTANCE}.onInit(); }}"
+            ))
+            .map_err(|e| ScriptEngineError::HookCompile {
+                hook: "onInit",
+                source: e.to_string(),
+            })?;
+
+        let hook_on_update: Function = ctx
+            .eval(format!(
+                "(dt) => {{ if ({APP_INSTANCE}.onUpdate) {APP_INSTANCE}.onUpdate(dt); }}"
+            ))
+            .map_err(|e| ScriptEngineError::HookCompile {
+                hook: "onUpdate",
+                source: e.to_string(),
+            })?;
+
+        let hook_on_draw: Function = ctx
+            .eval(format!(
+                "() => {{ if ({APP_INSTANCE}.onDraw) {APP_INSTANCE}.onDraw(); }}"
+            ))
+            .map_err(|e| ScriptEngineError::HookCompile {
+                hook: "onDraw",
+                source: e.to_string(),
+            })?;
+
+        globals
+            .set(HOOK_ON_INIT, hook_on_init)
+            .map_err(|e| ScriptEngineError::HookCompile {
+                hook: "onInit",
+                source: e.to_string(),
+            })?;
+
+        globals.set(HOOK_ON_UPDATE, hook_on_update).map_err(|e| {
+            ScriptEngineError::HookCompile {
+                hook: "onUpdate",
+                source: e.to_string(),
+            }
         })?;
 
-        let hook_on_update: Function = ctx.eval(
-            format!("(dt) => {{ if ({APP_INSTANCE}.onUpdate) {APP_INSTANCE}.onUpdate(dt); }}")
-        ).map_err(|e| ScriptEngineError::HookCompile {
-            hook: "onUpdate",
-            source: e.to_string(),
-        })?;
-
-        let hook_on_draw: Function = ctx.eval(
-            format!("() => {{ if ({APP_INSTANCE}.onDraw) {APP_INSTANCE}.onDraw(); }}")
-        ).map_err(|e| ScriptEngineError::HookCompile {
-            hook: "onDraw",
-            source: e.to_string(),
-        })?;
-
-        globals.set(HOOK_ON_INIT, hook_on_init).map_err(|e| ScriptEngineError::HookCompile {
-            hook: "onInit",
-            source: e.to_string(),
-        })?;
-
-        globals.set(HOOK_ON_UPDATE, hook_on_update).map_err(|e| ScriptEngineError::HookCompile {
-            hook: "onUpdate",
-            source: e.to_string(),
-        })?;
-
-        globals.set(HOOK_ON_DRAW, hook_on_draw).map_err(|e| ScriptEngineError::HookCompile {
-            hook: "onDraw",
-            source: e.to_string(),
-        })?;
+        globals
+            .set(HOOK_ON_DRAW, hook_on_draw)
+            .map_err(|e| ScriptEngineError::HookCompile {
+                hook: "onDraw",
+                source: e.to_string(),
+            })?;
 
         Ok(())
     }
 
     fn call_void_hook(&self, hook_name: &'static str) -> Result<(), ScriptEngineError> {
         self.ctx.with(|ctx| {
-            let func: Function = ctx
-                .globals()
-                .get(hook_name)
-                .map_err(|e| ScriptEngineError::HookExecution {
+            let func: Function = ctx.globals().get(hook_name).map_err(|e| {
+                let source = e.to_string();
+                ScriptEngineError::HookExecution {
                     hook: hook_name,
-                    source: format!("hook não encontrado: {e}"),
-                })?;
+                    source: i18n::text_with("scripting.error.hook_missing", &[("source", &source)]),
+                }
+            })?;
 
             func.call::<_, ()>(())
                 .map_err(|e| Self::hook_error(&ctx, hook_name, e))
@@ -178,13 +195,13 @@ impl ScriptEngine {
 
     fn call_f32_hook(&self, hook_name: &'static str, value: f32) -> Result<(), ScriptEngineError> {
         self.ctx.with(|ctx| {
-            let func: Function = ctx
-                .globals()
-                .get(hook_name)
-                .map_err(|e| ScriptEngineError::HookExecution {
+            let func: Function = ctx.globals().get(hook_name).map_err(|e| {
+                let source = e.to_string();
+                ScriptEngineError::HookExecution {
                     hook: hook_name,
-                    source: format!("hook não encontrado: {e}"),
-                })?;
+                    source: i18n::text_with("scripting.error.hook_missing", &[("source", &source)]),
+                }
+            })?;
 
             func.call::<_, ()>((value,))
                 .map_err(|e| Self::hook_error(&ctx, hook_name, e))
@@ -192,11 +209,9 @@ impl ScriptEngine {
     }
 
     pub fn new(script_code: &str) -> Result<Self, ScriptEngineError> {
-        let rt = Runtime::new()
-            .map_err(|e| ScriptEngineError::RuntimeInit(e.to_string()))?;
+        let rt = Runtime::new().map_err(|e| ScriptEngineError::RuntimeInit(e.to_string()))?;
 
-        let ctx = Context::full(&rt)
-            .map_err(|e| ScriptEngineError::ContextInit(e.to_string()))?;
+        let ctx = Context::full(&rt).map_err(|e| ScriptEngineError::ContextInit(e.to_string()))?;
 
         ctx.with(|ctx| -> Result<(), ScriptEngineError> {
             Self::register_plugins(&ctx)?;
@@ -215,13 +230,29 @@ impl ScriptEngine {
 
     pub fn on_init(&self) {
         if let Err(err) = self.call_void_hook(HOOK_ON_INIT) {
-            eprintln!("[scripting/onInit] {err}");
+            let source = err.to_string();
+            eprintln!(
+                "{}",
+                i18n::prefixed_with(
+                    "scripting",
+                    "scripting.error.on_init",
+                    &[("source", &source)]
+                )
+            );
         }
     }
 
     pub fn on_update(&self, dt: f32) {
         if let Err(err) = self.call_f32_hook(HOOK_ON_UPDATE, dt) {
-            eprintln!("[scripting/onUpdate] {err}");
+            let source = err.to_string();
+            eprintln!(
+                "{}",
+                i18n::prefixed_with(
+                    "scripting",
+                    "scripting.error.on_update",
+                    &[("source", &source)],
+                )
+            );
         }
     }
 
@@ -229,10 +260,17 @@ impl ScriptEngine {
         set_active_queue(queue);
 
         if let Err(err) = self.call_void_hook(HOOK_ON_DRAW) {
-            eprintln!("[scripting/onDraw] {err}");
+            let source = err.to_string();
+            eprintln!(
+                "{}",
+                i18n::prefixed_with(
+                    "scripting",
+                    "scripting.error.on_draw",
+                    &[("source", &source)]
+                )
+            );
         }
 
         clear_active_queue();
     }
-
 }

@@ -1,11 +1,11 @@
 pub mod color;
 pub mod command;
-pub mod queue;
 pub mod context;
 pub mod mq_renderer;
+pub mod queue;
 pub mod texture;
 
-use crate::renderer::{queue::RenderQueue};
+use crate::renderer::queue::RenderQueue;
 pub use mq_renderer::MqRenderer;
 
 pub trait Renderer {

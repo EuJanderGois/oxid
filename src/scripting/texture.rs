@@ -1,21 +1,16 @@
 use std::string::String as StdString;
 
 use rquickjs::{
-    Class,
-    Ctx,
-    Exception,
-    Function,
-    JsLifetime,
-    Result,
+    Class, Ctx, Exception, Function, JsLifetime, Result,
     class::{OwnedBorrow, Trace},
     function::Opt,
     module::{Declarations, Exports, ModuleDef},
 };
 
 use crate::{
+    i18n,
     renderer::{
-        color::Color as RendererColor,
-        context::with_active_queue,
+        color::Color as RendererColor, context::with_active_queue,
         texture::load_texture as load_renderer_texture,
     },
     scripting::{
@@ -53,10 +48,8 @@ fn white() -> RendererColor {
 
 fn validate_rotation(ctx: &Ctx<'_>, rotation: f32) -> Result<f32> {
     if !rotation.is_finite() {
-        return Err(Exception::throw_range(
-            ctx,
-            "rotation deve ser um número finito.",
-        ));
+        let message = i18n::text("scripting.api.invalid_rotation");
+        return Err(Exception::throw_range(ctx, &message));
     }
 
     Ok(rotation)
@@ -64,28 +57,21 @@ fn validate_rotation(ctx: &Ctx<'_>, rotation: f32) -> Result<f32> {
 
 fn validate_size(ctx: &Ctx<'_>, size: &Transform2D) -> Result<()> {
     if !size.x.is_finite() || size.x <= 0.0 {
-        return Err(Exception::throw_range(
-            ctx,
-            "size.x deve ser um número finito maior que zero.",
-        ));
+        let message = i18n::text("scripting.api.invalid_size_x");
+        return Err(Exception::throw_range(ctx, &message));
     }
 
     if !size.y.is_finite() || size.y <= 0.0 {
-        return Err(Exception::throw_range(
-            ctx,
-            "size.y deve ser um número finito maior que zero.",
-        ));
+        let message = i18n::text("scripting.api.invalid_size_y");
+        return Err(Exception::throw_range(ctx, &message));
     }
 
     Ok(())
 }
 
-fn load_texture<'js>(
-    ctx: Ctx<'js>,
-    path: StdString,
-) -> Result<Class<'js, ScriptTexture2D>> {
-    let texture = load_renderer_texture(&path)
-        .map_err(|err| Exception::throw_message(&ctx, &err))?;
+fn load_texture<'js>(ctx: Ctx<'js>, path: StdString) -> Result<Class<'js, ScriptTexture2D>> {
+    let texture =
+        load_renderer_texture(&path).map_err(|err| Exception::throw_message(&ctx, &err))?;
 
     Class::instance(
         ctx,
@@ -98,7 +84,15 @@ fn draw_texture<'js>(
     position: OwnedBorrow<'js, Transform2D>,
 ) {
     let _ = with_active_queue(|queue| {
-        queue.draw_texture(texture.key.clone(), position.x, position.y, None, None, 0.0, white());
+        queue.draw_texture(
+            texture.key.clone(),
+            position.x,
+            position.y,
+            None,
+            None,
+            0.0,
+            white(),
+        );
     });
 }
 

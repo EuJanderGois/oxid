@@ -1,8 +1,5 @@
 // src/renderer/queue.rs
-use crate::renderer::{
-    color::Color,
-    command::RenderCommand,
-};
+use crate::renderer::{color::Color, command::RenderCommand};
 
 #[derive(Default, Debug)]
 pub struct RenderQueue {
@@ -40,7 +37,8 @@ impl RenderQueue {
         self.push(RenderCommand::Clear { color });
     }
 
-    pub fn draw_arc(&mut self,
+    pub fn draw_arc(
+        &mut self,
         x: f32,
         y: f32,
         sides: u8,
@@ -50,30 +48,44 @@ impl RenderQueue {
         arc: f32,
         color: Color,
     ) {
-        self.push(RenderCommand::DrawArc { 
-            x, y, sides, radius, rotation, thickness, 
-            arc, color 
+        self.push(RenderCommand::DrawArc {
+            x,
+            y,
+            sides,
+            radius,
+            rotation,
+            thickness,
+            arc,
+            color,
         });
     }
 
-    pub fn draw_circle(&mut self, 
-        x: f32, y: f32, radius: f32, color: Color) {
+    pub fn draw_circle(&mut self, x: f32, y: f32, radius: f32, color: Color) {
         self.push(RenderCommand::DrawCircle {
-            x, y, radius, color
+            x,
+            y,
+            radius,
+            color,
         });
     }
 
-    pub fn draw_rectangle(&mut self,
-        x: f32, y: f32, width: f32, height: f32, color: Color) {
-            self.push(RenderCommand::DrawRectangle { 
-                x, y, width, height, color 
-            });
-        }
+    pub fn draw_rectangle(&mut self, x: f32, y: f32, width: f32, height: f32, color: Color) {
+        self.push(RenderCommand::DrawRectangle {
+            x,
+            y,
+            width,
+            height,
+            color,
+        });
+    }
 
-    pub fn draw_text(&mut self,
-        text: String, x: f32, y: f32, font_size: f32, color: Color) {
+    pub fn draw_text(&mut self, text: String, x: f32, y: f32, font_size: f32, color: Color) {
         self.push(RenderCommand::DrawText {
-            text, x, y, font_size, color
+            text,
+            x,
+            y,
+            font_size,
+            color,
         });
     }
 

@@ -1,32 +1,27 @@
 use std::string::String as StdString;
 
 use macroquad::prelude::{
-    KeyCode,
-    MouseButton,
-    is_key_down as mq_is_key_down,
-    is_key_pressed as mq_is_key_pressed,
-    is_key_released as mq_is_key_released,
-    is_mouse_button_down as mq_is_mouse_button_down,
+    KeyCode, MouseButton, is_key_down as mq_is_key_down, is_key_pressed as mq_is_key_pressed,
+    is_key_released as mq_is_key_released, is_mouse_button_down as mq_is_mouse_button_down,
     is_mouse_button_pressed as mq_is_mouse_button_pressed,
-    is_mouse_button_released as mq_is_mouse_button_released,
-    mouse_position as mq_mouse_position,
+    is_mouse_button_released as mq_is_mouse_button_released, mouse_position as mq_mouse_position,
 };
 use rquickjs::{
-    Class,
-    Ctx,
-    Exception,
-    Function,
-    Result,
+    Class, Ctx, Exception, Function, Result,
     module::{Declarations, Exports, ModuleDef},
 };
 
-use crate::scripting::{
-    math::Transform2D,
-    plugin::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
+use crate::{
+    i18n,
+    scripting::{
+        math::Transform2D,
+        plugin::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
+    },
 };
 
 const KEY_NAME_DOCS: &str = "Nome da tecla. Ignora maiúsculas/minúsculas, espaços, '_' e '-'. Exemplos: \"A\", \"ArrowLeft\", \"Space\", \"Enter\", \"Escape\", \"LeftShift\", \"F1\".";
-const MOUSE_BUTTON_DOCS: &str = "Nome do botão do mouse. Valores aceitos: \"left\", \"middle\" e \"right\".";
+const MOUSE_BUTTON_DOCS: &str =
+    "Nome do botão do mouse. Valores aceitos: \"left\", \"middle\" e \"right\".";
 
 fn normalize_input_name(name: &str) -> StdString {
     let mut normalized = StdString::with_capacity(name.len());
@@ -43,19 +38,13 @@ fn normalize_input_name(name: &str) -> StdString {
 }
 
 fn invalid_key_name(ctx: &Ctx<'_>, name: &str) -> rquickjs::Error {
-    Exception::throw_type(
-        ctx,
-        &format!(
-            "tecla inválida: '{name}'. Exemplos válidos: A, ArrowLeft, Space, Enter, Escape, LeftShift, F1."
-        ),
-    )
+    let message = i18n::text_with("scripting.api.invalid_key_name", &[("name", name)]);
+    Exception::throw_type(ctx, &message)
 }
 
 fn invalid_mouse_button(ctx: &Ctx<'_>, name: &str) -> rquickjs::Error {
-    Exception::throw_type(
-        ctx,
-        &format!("botão do mouse inválido: '{name}'. Use left, middle ou right."),
-    )
+    let message = i18n::text_with("scripting.api.invalid_mouse_button", &[("name", name)]);
+    Exception::throw_type(ctx, &message)
 }
 
 fn parse_alphanumeric_key(name: &str) -> Option<KeyCode> {
@@ -249,11 +238,15 @@ fn is_mouse_button_down(ctx: Ctx<'_>, button: StdString) -> Result<bool> {
 }
 
 fn is_mouse_button_pressed(ctx: Ctx<'_>, button: StdString) -> Result<bool> {
-    Ok(mq_is_mouse_button_pressed(parse_mouse_button(&ctx, &button)?))
+    Ok(mq_is_mouse_button_pressed(parse_mouse_button(
+        &ctx, &button,
+    )?))
 }
 
 fn is_mouse_button_released(ctx: Ctx<'_>, button: StdString) -> Result<bool> {
-    Ok(mq_is_mouse_button_released(parse_mouse_button(&ctx, &button)?))
+    Ok(mq_is_mouse_button_released(parse_mouse_button(
+        &ctx, &button,
+    )?))
 }
 
 /// gerencia os métodos e módulos de input.
@@ -274,7 +267,10 @@ impl ModuleDef for InputPlugin {
     fn evaluate<'js>(ctx: &Ctx<'js>, exports: &Exports<'js>) -> Result<()> {
         exports.export("isKeyDown", Function::new(ctx.clone(), is_key_down)?)?;
         exports.export("isKeyPressed", Function::new(ctx.clone(), is_key_pressed)?)?;
-        exports.export("isKeyReleased", Function::new(ctx.clone(), is_key_released)?)?;
+        exports.export(
+            "isKeyReleased",
+            Function::new(ctx.clone(), is_key_released)?,
+        )?;
         exports.export("mousePosition", Function::new(ctx.clone(), mouse_position)?)?;
         exports.export(
             "isMouseButtonDown",

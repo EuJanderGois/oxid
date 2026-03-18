@@ -2,18 +2,14 @@ use std::string::String as StdString;
 
 use macroquad::prelude::measure_text as mq_measure_text;
 use rquickjs::{
-    Class,
-    Ctx,
-    Exception,
-    Function,
-    JsLifetime,
-    Result,
+    Class, Ctx, Exception, Function, JsLifetime, Result,
     class::{OwnedBorrow, Trace},
     function::Opt,
     module::{Declarations, Exports, ModuleDef},
 };
 
 use crate::{
+    i18n,
     renderer::context::with_active_queue,
     scripting::{
         color::{Color, to_renderer_color},
@@ -60,10 +56,8 @@ impl TextMetrics {
 
 fn validate_font_size(ctx: &Ctx<'_>, font_size: f32) -> Result<f32> {
     if !font_size.is_finite() || font_size <= 0.0 || font_size > u16::MAX as f32 {
-        return Err(Exception::throw_range(
-            ctx,
-            "fontSize deve ser um número finito entre 0 e 65535.",
-        ));
+        let message = i18n::text("scripting.api.invalid_font_size");
+        return Err(Exception::throw_range(ctx, &message));
     }
 
     Ok(font_size)
@@ -71,10 +65,10 @@ fn validate_font_size(ctx: &Ctx<'_>, font_size: f32) -> Result<f32> {
 
 fn validate_line_distance(ctx: &Ctx<'_>, line_distance: Option<f32>) -> Result<Option<f32>> {
     match line_distance {
-        Some(distance) if !distance.is_finite() || distance <= 0.0 => Err(Exception::throw_range(
-            ctx,
-            "lineDistance deve ser um número finito maior que zero.",
-        )),
+        Some(distance) if !distance.is_finite() || distance <= 0.0 => {
+            let message = i18n::text("scripting.api.invalid_line_distance");
+            Err(Exception::throw_range(ctx, &message))
+        }
         _ => Ok(line_distance),
     }
 }
@@ -139,7 +133,11 @@ fn draw_multiline_text<'js>(
 ///
 /// mede um texto de linha única usando a fonte padrão.
 ///
-fn measure_text<'js>(ctx: Ctx<'js>, text: StdString, font_size: f32) -> Result<Class<'js, TextMetrics>> {
+fn measure_text<'js>(
+    ctx: Ctx<'js>,
+    text: StdString,
+    font_size: f32,
+) -> Result<Class<'js, TextMetrics>> {
     let font_size = validate_font_size(&ctx, font_size)?;
     let metrics = mq_measure_text(&text, None, font_size as u16, 1.0);
 
@@ -168,18 +166,12 @@ impl ModuleDef for TextPlugin {
             "TextMetrics",
             Class::<TextMetrics>::create_constructor(ctx)?,
         )?;
-        exports.export(
-            "drawText",
-            Function::new(ctx.clone(), draw_text)?,
-        )?;
+        exports.export("drawText", Function::new(ctx.clone(), draw_text)?)?;
         exports.export(
             "drawMultilineText",
             Function::new(ctx.clone(), draw_multiline_text)?,
         )?;
-        exports.export(
-            "measureText",
-            Function::new(ctx.clone(), measure_text)?,
-        )?;
+        exports.export("measureText", Function::new(ctx.clone(), measure_text)?)?;
         Ok(())
     }
 }

@@ -1,12 +1,11 @@
-use rquickjs::{class::Trace, Class, Ctx, JsLifetime, Result};
 use rquickjs::module::{Declarations, Exports, ModuleDef};
+use rquickjs::{Class, Ctx, JsLifetime, Result, class::Trace};
 
 use crate::scripting::plugin::NativePlugin;
 
-
 ///
 /// vetor de x e y.
-/// 
+///
 #[rquickjs::class]
 #[derive(Clone, Trace, JsLifetime)]
 pub struct Transform2D {
@@ -24,10 +23,9 @@ impl Transform2D {
     }
 }
 
-
-/// 
+///
 /// gerencia os métodos e módulos de matemática.
-/// 
+///
 pub struct MathPlugin;
 
 impl ModuleDef for MathPlugin {

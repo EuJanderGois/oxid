@@ -1,0 +1,10 @@
+{
+  "name": "my-game",
+  "main": "main.js",
+  "oxid": {
+    "title": "my-game - Oxid Engine",
+    "width": 800,
+    "height": 600,
+    "locale": "pt-BR"
+  }
+}
