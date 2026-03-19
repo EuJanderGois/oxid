@@ -1,0 +1,208 @@
+{
+  // Catálogo de traduções do Oxid.
+  //
+  // Regras para tradutores:
+  // - Mensagens simples podem continuar como string.
+  // - Mensagens ricas podem usar:
+  //   - "tone": error | warning | success | info | muted
+  //   - "icon": símbolo opcional exibido antes da primeira linha
+  //   - "color": override opcional de cor (red, yellow, green, cyan, blue, magenta, white, black)
+  //   - "message": string única ou array de strings para saída multilinha
+  // - Preserve placeholders exatamente como aparecem: {project_name}, {source}, etc.
+  "version": "0.1.0",
+  "cli": {
+    "prefix": "[ Oxid CLI ]:",
+    "error": {
+      // placeholders:
+      // - {project_name}: nome/caminho solicitado para o projeto
+      "directory_already_exists": {
+        "tone": "error",
+        "message": [
+          "O diretório '{project_name}' já existe.",
+          "Escolha outro nome ou remova a pasta atual antes de continuar."
+        ]
+      },
+      // placeholders:
+      // - {project_name}: nome/caminho solicitado para o projeto
+      // - {source}: erro original do sistema operacional
+      "creating_dir": {
+        "tone": "error",
+        "message": [
+          "Não foi possível criar o diretório do projeto '{project_name}'.",
+          "Detalhe técnico: {source}"
+        ]
+      },
+      // placeholders:
+      // - {filename}: nome do arquivo que falhou ao ser criado
+      // - {source}: erro original do sistema operacional
+      "write_file": {
+        "tone": "error",
+        "message": [
+          "Falha ao criar {filename}.",
+          "Detalhe técnico: {source}"
+        ]
+      }
+    },
+    "logs": {
+      // placeholders:
+      // - {project_name}: nome/caminho solicitado para o projeto
+      "project_created": {
+        "tone": "success",
+        "message": "Projeto '{project_name}' criado com sucesso."
+      },
+      // placeholders:
+      // - {project_name}: nome/caminho solicitado para o projeto
+      "first_run": {
+        "tone": "info",
+        "message": [
+          "Tudo pronto para o primeiro run.",
+          "Use `cd {project_name} && oxid run` para iniciar."
+        ]
+      }
+    }
+  },
+  "runtime": {
+    "prefix": "[ Runtime ]:",
+    "error": {
+      "config_file_not_found": {
+        "tone": "error",
+        "message": [
+          "package.json não foi encontrado no diretório atual.",
+          "Execute o comando dentro de um projeto Oxid ou crie um novo com `oxid new`."
+        ]
+      },
+      // placeholders:
+      // - {source}: erro original do sistema operacional
+      "read_config_file": {
+        "tone": "error",
+        "message": [
+          "Não foi possível ler o arquivo package.json.",
+          "Detalhe técnico: {source}"
+        ]
+      },
+      // placeholders:
+      // - {source}: erro retornado pelo parser
+      "parsing": {
+        "tone": "error",
+        "message": [
+          "O arquivo package.json é inválido para o runtime atual.",
+          "Detalhe técnico: {source}"
+        ]
+      },
+      "entry_not_configured": {
+        "tone": "error",
+        "message": [
+          "Nenhum arquivo de entrada foi configurado para o runtime.",
+          "Defina `oxid.entry` no package.json para indicar o script principal."
+        ]
+      },
+      // placeholders:
+      // - {entry_file}: arquivo configurado em package.json -> oxid.entry
+      "entry_file_not_found": {
+        "tone": "error",
+        "message": [
+          "O arquivo de entrada '{entry_file}' definido em `oxid.entry` não foi encontrado.",
+          "Verifique o caminho configurado em package.json."
+        ]
+      },
+      // placeholders:
+      // - {entry_file}: arquivo configurado em package.json -> oxid.entry
+      // - {source}: erro original do sistema operacional
+      "script_read": {
+        "tone": "error",
+        "message": [
+          "Não foi possível ler o script {entry_file}.",
+          "Detalhe técnico: {source}"
+        ]
+      }
+    }
+  },
+  "renderer": {
+    "prefix": "[ Renderer ]:",
+    "error": {
+      // placeholders:
+      // - {source}: mensagem já formatada pela camada de textura
+      "texture_draw": {
+        "tone": "error",
+        "message": "{source}"
+      }
+    },
+    "texture": {
+      "empty_path": "O caminho da textura não pode ser vazio.",
+      // placeholders:
+      // - {path}: caminho informado
+      // - {source}: erro original do sistema operacional
+      "resolve_failed": "Falha ao localizar textura '{path}': {source}",
+      // placeholders:
+      // - {path}: caminho resolvido
+      "not_a_file": "O caminho '{path}' não aponta para um arquivo de textura.",
+      // placeholders:
+      // - {path}: caminho resolvido
+      // - {source}: erro original do sistema operacional
+      "read_failed": "Falha ao ler textura '{path}': {source}",
+      // placeholders:
+      // - {path}: caminho resolvido
+      // - {source}: erro retornado pelo decoder
+      "decode_failed": "Falha ao decodificar textura '{path}': {source}",
+      "invalid_dest_size": "dest_size da textura deve informar largura e altura juntas.",
+      // placeholders:
+      // - {texture_key}: chave interna da textura já carregada
+      "not_loaded": "Textura '{texture_key}' não foi carregada antes de desenhar."
+    }
+  },
+  "scripting": {
+    "prefix": "[ Scripting ]:",
+    "error": {
+      // placeholders:
+      // - {source}: erro detalhado do bootstrap
+      "bootstrap": {
+        "tone": "error",
+        "message": [
+          "Falha durante o bootstrap do script.",
+          "{source}"
+        ]
+      },
+      "on_init": {
+        "tone": "error",
+        "message": [
+          "Falha durante onInit.",
+          "{source}"
+        ]
+      },
+      "on_update": {
+        "tone": "error",
+        "message": [
+          "Falha durante onUpdate.",
+          "{source}"
+        ]
+      },
+      "on_draw": {
+        "tone": "error",
+        "message": [
+          "Falha durante onDraw.",
+          "{source}"
+        ]
+      },
+      "runtime_init": "Falha na inicialização do script runtime: {source}",
+      "context_init": "Falha ao criar contexto do script runtime: {source}",
+      "plugin_register": "Falha ao registrar plugin '{plugin}': {source}",
+      "stdlib_register": "Falha ao registrar stdlib: {source}",
+      "entry_module_declare": "Falha ao declarar módulo de entrada: {source}",
+      "entry_module_eval": "Falha ao processar módulo de entrada: {source}",
+      "main_namespace": "Falha ao obter main namespace: {source}",
+      "app_instance": "Falha ao criar instância da aplicação: {source}",
+      "hook_compile": "Falha ao compilar hook '{hook}': {source}",
+      "hook_execution": "Falha ao executar hook '{hook}': {source}",
+      "hook_missing": "Hook não encontrado: {source}"
+    },
+    "api": {
+      "invalid_key_name": "Tecla inválida: '{name}'. Exemplos válidos: A, ArrowLeft, Space, Enter, Escape, LeftShift, F1.",
+      "invalid_mouse_button": "Botão do mouse inválido: '{name}'. Use left, middle ou right.",
+      "invalid_font_size": "fontSize deve ser um número finito entre 0 e 65535.",
+      "invalid_line_distance": "lineDistance deve ser um número finito maior que zero.",
+      "invalid_rotation": "rotation deve ser um número finito.",
+      "invalid_size_x": "size.x deve ser um número finito maior que zero.",
+      "invalid_size_y": "size.y deve ser um número finito maior que zero."
+    }
+  }
+}

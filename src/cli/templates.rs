@@ -143,8 +143,8 @@ pub fn package_json(project_name: &str, locale: &str) -> String {
     format!(
         r#"{{
   "name": "{}",
-  "main": "main.js",
   "oxid": {{
+    "entry": "main.js",
     "title": "{} - Oxid Engine",
     "width": 800,
     "height": 600,

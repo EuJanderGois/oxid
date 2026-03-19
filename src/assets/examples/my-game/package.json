@@ -1,7 +1,7 @@
 {
   "name": "my-game",
-  "main": "main.js",
   "oxid": {
+    "entry": "main.js",
     "title": "my-game - Oxid Engine",
     "width": 800,
     "height": 600,

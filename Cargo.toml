@@ -5,6 +5,8 @@ edition = "2024"
 
 [dependencies]
 clap = { version = "4.6.0", features = ["derive"] }
+console = "0.16.2"
+jsonc-parser = { version = "0.29.0", features = ["serde"] }
 macroquad = "=0.4.14"
 rquickjs = {version="0.11.0",features=["classes", "macro"]}
 serde = { version = "1.0.228", features = ["derive"] }

@@ -4,12 +4,12 @@
     "license": "MIT",
     "private": true,
     "type": "module",
-    "main": "./main.js",
     "scripts": {
         "dev": "oxid run --dev",
         "start": "oxid run"
     },
     "oxid": {
+        "entry": "./main.js",
         "title": "Simple Game",
         "width": 800,
         "height": 600,

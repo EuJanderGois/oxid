@@ -1,0 +1,193 @@
+{
+  // Oxid translation catalog.
+  //
+  // Notes for translators:
+  // - Simple messages may stay as a string.
+  // - Rich messages may use:
+  //   - "tone": error | warning | success | info | muted
+  //   - "icon": optional symbol rendered before the first line
+  //   - "color": optional explicit color override
+  //   - "message": a single string or an array of strings for multiline output
+  // - Keep placeholders exactly as they are: {project_name}, {source}, etc.
+  "version": "0.1.0",
+  "cli": {
+    "prefix": "[ Oxid CLI ]:",
+    "error": {
+      // placeholders:
+      // - {project_name}: requested project name/path
+      "directory_already_exists": {
+        "tone": "error",
+        "message": [
+          "Directory '{project_name}' already exists.",
+          "Choose another name or remove the current folder before continuing."
+        ]
+      },
+      // placeholders:
+      // - {project_name}: requested project name/path
+      // - {source}: original OS error
+      "creating_dir": {
+        "tone": "error",
+        "message": [
+          "Could not create the project directory '{project_name}'.",
+          "Technical detail: {source}"
+        ]
+      },
+      // placeholders:
+      // - {filename}: file that failed to be created
+      // - {source}: original OS error
+      "write_file": {
+        "tone": "error",
+        "message": [
+          "Failed to create {filename}.",
+          "Technical detail: {source}"
+        ]
+      }
+    },
+    "logs": {
+      // placeholders:
+      // - {project_name}: requested project name/path
+      "project_created": {
+        "tone": "success",
+        "message": "Project '{project_name}' created successfully."
+      },
+      // placeholders:
+      // - {project_name}: requested project name/path
+      "first_run": {
+        "tone": "info",
+        "message": [
+          "Everything is ready for the first run.",
+          "Use `cd {project_name} && oxid run` to start."
+        ]
+      }
+    }
+  },
+  "runtime": {
+    "prefix": "[ Runtime ]:",
+    "error": {
+      "config_file_not_found": {
+        "tone": "error",
+        "message": [
+          "package.json was not found in the current directory.",
+          "Run the command inside an Oxid project or create one with `oxid new`."
+        ]
+      },
+      // placeholders:
+      // - {source}: original OS error
+      "read_config_file": {
+        "tone": "error",
+        "message": [
+          "Could not read package.json.",
+          "Technical detail: {source}"
+        ]
+      },
+      // placeholders:
+      // - {source}: parser error
+      "parsing": {
+        "tone": "error",
+        "message": [
+          "package.json is invalid for the current runtime.",
+          "Technical detail: {source}"
+        ]
+      },
+      "entry_not_configured": {
+        "tone": "error",
+        "message": [
+          "No runtime entry file is configured.",
+          "Set `oxid.entry` in package.json to point to the main script."
+        ]
+      },
+      // placeholders:
+      // - {entry_file}: file configured in package.json -> oxid.entry
+      "entry_file_not_found": {
+        "tone": "error",
+        "message": [
+          "The entry file '{entry_file}' defined in `oxid.entry` was not found.",
+          "Check the path configured in package.json."
+        ]
+      },
+      // placeholders:
+      // - {entry_file}: file configured in package.json -> oxid.entry
+      // - {source}: original OS error
+      "script_read": {
+        "tone": "error",
+        "message": [
+          "Could not read script {entry_file}.",
+          "Technical detail: {source}"
+        ]
+      }
+    }
+  },
+  "renderer": {
+    "prefix": "[ Renderer ]:",
+    "error": {
+      // placeholders:
+      // - {source}: preformatted message from the texture layer
+      "texture_draw": {
+        "tone": "error",
+        "message": "{source}"
+      }
+    },
+    "texture": {
+      "empty_path": "Texture path cannot be empty.",
+      "resolve_failed": "Failed to resolve texture '{path}': {source}",
+      "not_a_file": "Path '{path}' does not point to a texture file.",
+      "read_failed": "Failed to read texture '{path}': {source}",
+      "decode_failed": "Failed to decode texture '{path}': {source}",
+      "invalid_dest_size": "Texture dest_size must provide width and height together.",
+      "not_loaded": "Texture '{texture_key}' was not loaded before drawing."
+    }
+  },
+  "scripting": {
+    "prefix": "[ Scripting ]:",
+    "error": {
+      "bootstrap": {
+        "tone": "error",
+        "message": [
+          "Script bootstrap failed.",
+          "{source}"
+        ]
+      },
+      "on_init": {
+        "tone": "error",
+        "message": [
+          "onInit failed.",
+          "{source}"
+        ]
+      },
+      "on_update": {
+        "tone": "error",
+        "message": [
+          "onUpdate failed.",
+          "{source}"
+        ]
+      },
+      "on_draw": {
+        "tone": "error",
+        "message": [
+          "onDraw failed.",
+          "{source}"
+        ]
+      },
+      "runtime_init": "Failed to initialize script runtime: {source}",
+      "context_init": "Failed to create script runtime context: {source}",
+      "plugin_register": "Failed to register plugin '{plugin}': {source}",
+      "stdlib_register": "Failed to register stdlib: {source}",
+      "entry_module_declare": "Failed to declare entry module: {source}",
+      "entry_module_eval": "Failed to evaluate entry module: {source}",
+      "main_namespace": "Failed to resolve main namespace: {source}",
+      "app_instance": "Failed to create application instance: {source}",
+      "hook_compile": "Failed to compile hook '{hook}': {source}",
+      "hook_execution": "Failed to execute hook '{hook}': {source}",
+      "hook_missing": "Hook not found: {source}"
+    },
+    "api": {
+      "invalid_key_name": "Invalid key: '{name}'. Valid examples: A, ArrowLeft, Space, Enter, Escape, LeftShift, F1.",
+      "invalid_mouse_button": "Invalid mouse button: '{name}'. Use left, middle or right.",
+      "invalid_font_size": "fontSize must be a finite number between 0 and 65535.",
+      "invalid_line_distance": "lineDistance must be a finite number greater than zero.",
+      "invalid_rotation": "rotation must be a finite number.",
+      "invalid_size_x": "size.x must be a finite number greater than zero.",
+      "invalid_size_y": "size.y must be a finite number greater than zero."
+    }
+  }
+}

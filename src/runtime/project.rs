@@ -8,12 +8,21 @@ struct OxidConfig {
     title: String,
     width: i32,
     height: i32,
+    #[serde(default)]
+    entry: Option<String>,
 }
 
 #[derive(Deserialize)]
 struct PackageJson {
-    main: String,
+    #[serde(default)]
+    main: Option<String>,
     oxid: OxidConfig,
+}
+
+impl PackageJson {
+    fn entry_file(&self) -> Option<&str> {
+        self.oxid.entry.as_deref().or(self.main.as_deref())
+    }
 }
 
 pub struct LoadedProject {
@@ -76,13 +85,17 @@ pub fn load_from_current_dir() -> Result<LoadedProject, String> {
         i18n::prefixed_with("runtime", "runtime.error.parsing", &[("source", &source)])
     })?;
 
-    let entry_path = Path::new(&package.main);
+    let entry_file = package
+        .entry_file()
+        .ok_or_else(|| i18n::prefixed("runtime", "runtime.error.entry_not_configured"))?;
+
+    let entry_path = Path::new(entry_file);
 
     if !entry_path.exists() {
         return Err(i18n::prefixed_with(
             "runtime",
             "runtime.error.entry_file_not_found",
-            &[("entry_file", &package.main)],
+            &[("entry_file", entry_file)],
         ));
     }
 
@@ -91,7 +104,7 @@ pub fn load_from_current_dir() -> Result<LoadedProject, String> {
         i18n::prefixed_with(
             "runtime",
             "runtime.error.script_read",
-            &[("entry_file", &package.main), ("source", &source)],
+            &[("entry_file", entry_file), ("source", &source)],
         )
     })?;
 
