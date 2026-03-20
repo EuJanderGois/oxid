@@ -1,11 +1,12 @@
-# 🎮 Oxid
+<div align="center">
+  <img src="https://raw.githubusercontent.com/EuJanderGois/oxid/refs/heads/main/website/static/img/oxid.svg" alt="Oxid Logo" width="250" />
 
-<div style="display:flex;gap:8px;">
+  <h1>Oxid</h1>
 
-![GitHub License](https://img.shields.io/github/license/EuJanderGois/oxid?style=for-the-badge&logo=opensourceinitiative)
-
-![GitHub Tag](https://img.shields.io/github/v/tag/EuJanderGois/oxid?style=for-the-badge&label=Version)
-
+  <p>
+    <img src="https://img.shields.io/github/license/EuJanderGois/oxid?style=for-the-badge&logo=opensourceinitiative" alt="GitHub License" />
+    <img src="https://img.shields.io/github/v/tag/EuJanderGois/oxid?style=for-the-badge&label=Version" alt="GitHub Tag" />
+  </p>
 </div>
 
 > Zero-setup game engine with instant JavaScript scripting.
