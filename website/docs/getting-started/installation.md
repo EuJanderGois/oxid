@@ -4,8 +4,6 @@ title: Installation
 slug: /getting-started/installation
 ---
 
---------------------------------
-
 # Install the CLI
 
 The Oxid CLI is distributed through GitHub Releases and can be installed either by downloading a prebuilt binary or by building the CLI from source.
@@ -130,4 +128,4 @@ And run it:
 oxid run
 ```
 
-For more information about the available CLI commands, see the [CLI documentation](/docs/cli).
+For more information about the available CLI commands, see the [CLI documentation](/cli).
