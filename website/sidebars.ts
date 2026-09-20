@@ -66,6 +66,19 @@ const sidebars: SidebarsConfig = {
       },
       items: ['roadmap/v1'],
     },
+    {
+      type: 'category',
+      label: 'Technical Information',
+      link: {
+        type: 'doc',
+        id: 'technical-information/index',
+      },
+      items: [
+        'technical-information/development-workflow',
+        'technical-information/versioning-and-releases',
+        'technical-information/ci-cd'
+      ],
+    },
   ],
 };
 
