@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -31,8 +33,22 @@ jobs:
       - name: Test
         run: cargo test --all-targets
 
-      - name: Build
-        run: cargo build --release
+      - name: Verify tag is on main
+        shell: bash
+        run: |
+          git fetch origin main
+
+          TAG_COMMIT="$(git rev-list -n 1 "$GITHUB_REF_NAME")"
+          MAIN_COMMIT="$(git rev-parse origin/main)"
+
+          if ! git merge-base --is-ancestor "$TAG_COMMIT" origin/main; then
+            echo "Release tag $GITHUB_REF_NAME does not point to a commit contained in main."
+            echo "Releases must originate from main."
+            exit 1
+          fi
+
+          echo "Release commit: $TAG_COMMIT"
+          echo "Main HEAD: $MAIN_COMMIT"
 
       - name: Verify tag matches Cargo version
         shell: bash
@@ -44,6 +60,9 @@ jobs:
             echo "Tag version ($TAG_VERSION) does not match Cargo.toml ($CARGO_VERSION)."
             exit 1
           fi
+
+      - name: Build
+        run: cargo build --release
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
