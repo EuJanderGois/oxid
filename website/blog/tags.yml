@@ -1,9 +1,0 @@
-release:
-  label: Release
-  permalink: /release
-  description: Release notes and shipped changes
-
-roadmap:
-  label: Roadmap
-  permalink: /roadmap
-  description: Direction notes for future Oxid work
