@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+:root {
+  --ifm-color-primary: #0f766e;
+  --ifm-color-primary-dark: #0c685f;
+  --ifm-color-primary-darker: #0b6259;
+  --ifm-color-primary-darkest: #094f48;
+  --ifm-color-primary-light: #12857d;
+  --ifm-color-primary-lighter: #139186;
+  --ifm-color-primary-lightest: #18aa9c;
+  --ifm-background-color: #f4f7f4;
+  --ifm-background-surface-color: #ffffff;
+  --ifm-font-family-base: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --ifm-font-family-monospace: 'IBM Plex Mono', 'SFMono-Regular', monospace;
+  --ifm-heading-font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+  --ifm-heading-font-weight: 700;
+  --ifm-navbar-background-color: rgba(244, 247, 244, 0.82);
+  --ifm-navbar-link-hover-color: #0b6259;
+  --ifm-footer-background-color: #10181a;
+  --ifm-code-font-size: 95%;
+  --ifm-code-background: rgba(15, 118, 110, 0.08);
+  --docusaurus-highlighted-code-line-bg: rgba(15, 118, 110, 0.1);
+  --oxid-hero-accent: #ffd166;
+  --oxid-hero-ink: #0f172a;
+  --oxid-border: rgba(15, 23, 42, 0.08);
+  --oxid-shadow: 0 24px 80px rgba(15, 23, 42, 0.12);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #3dd4c3;
+  --ifm-color-primary-dark: #29c4b2;
+  --ifm-color-primary-darker: #25bba9;
+  --ifm-color-primary-darkest: #1d9b8b;
+  --ifm-color-primary-light: #53daca;
+  --ifm-color-primary-lighter: #60ddce;
+  --ifm-color-primary-lightest: #83e6da;
+  --ifm-background-color: #0c1117;
+  --ifm-background-surface-color: #121923;
+  --ifm-navbar-background-color: rgba(12, 17, 23, 0.86);
+  --ifm-footer-background-color: #081018;
+  --ifm-code-background: rgba(61, 212, 195, 0.12);
+  --docusaurus-highlighted-code-line-bg: rgba(61, 212, 195, 0.16);
+  --oxid-hero-accent: #f4b740;
+  --oxid-hero-ink: #e6edf7;
+  --oxid-border: rgba(230, 237, 247, 0.08);
+  --oxid-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at top, rgba(255, 209, 102, 0.14), transparent 32%),
+    linear-gradient(180deg, rgba(15, 118, 110, 0.04), transparent 28%);
+}
+
+.navbar {
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--oxid-border);
+}
+
+.footer {
+  border-top: 1px solid var(--oxid-border);
+}
+
+.theme-doc-markdown header + p {
+  font-size: 1.05rem;
+}
+
+.theme-doc-markdown h2,
+.theme-doc-markdown h3 {
+  letter-spacing: -0.02em;
+}
+
+.pagination-nav__link {
+  border-color: var(--oxid-border);
+}
