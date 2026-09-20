@@ -12,7 +12,7 @@ cd my-game
 oxid run
 ```
 
-`oxid run` expects to find a `package.json` in the **current working directory**.
+`oxid run` expects to find a `package.json` in the **current working directory** and does not yet support paths as arguments.
 
 ## How the runtime resolves your project
 

@@ -17,6 +17,7 @@ oxid run
 - that directory must contain a valid `package.json`
 - the manifest must contain an `oxid` object
 - the configured entry file must exist
+- does not yet support arguments
 
 ## What it loads
 
