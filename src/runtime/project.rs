@@ -1,5 +1,8 @@
 use serde::Deserialize;
-use std::{fs, path::Path};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use oxid::i18n;
 
@@ -28,6 +31,7 @@ impl PackageJson {
 
 pub struct LoadedProject {
     pub script: String,
+    pub root: PathBuf,
     title: String,
     width: i32,
     height: i32,
@@ -94,15 +98,16 @@ pub fn load(path: &Path) -> Result<LoadedProject, String> {
         )
     })?;
 
-    let package: PackageJson = serde_json::from_str(&manifest_content).map_err(|err| {
-        let source = err.to_string();
+    let package: PackageJson =
+        serde_json::from_str(&manifest_content).map_err(|err| {
+            let source = err.to_string();
 
-        i18n::prefixed_with(
-            "runtime",
-            "runtime.error.parsing",
-            &[("source", &source)],
-        )
-    })?;
+            i18n::prefixed_with(
+                "runtime",
+                "runtime.error.parsing",
+                &[("source", &source)],
+            )
+        })?;
 
     let entry_file = package
         .entry_file()
@@ -138,6 +143,7 @@ pub fn load(path: &Path) -> Result<LoadedProject, String> {
 
     Ok(LoadedProject {
         script,
+        root: path.to_path_buf(),
         title: package.oxid.title,
         width: package.oxid.width,
         height: package.oxid.height,

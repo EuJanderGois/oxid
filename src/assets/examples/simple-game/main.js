@@ -23,7 +23,7 @@ export class MyApp extends GameObject {
     }
 
     onInit() {
-        this.mascote = loadTexture("assets/oxil.png");
+        this.mascote = loadTexture("./assets/oxil.png");
     }
 
     onUpdate(dt) {

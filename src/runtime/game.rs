@@ -7,6 +7,8 @@ use oxid::{
 use super::LoadedProject;
 
 pub fn launch(project: LoadedProject) {
+    oxid::renderer::texture::set_project_root(&project.root);
+
     let config = project.window_config();
 
     macroquad::Window::from_config(
@@ -47,7 +49,10 @@ async fn run_game(script: String) {
         let dt = renderer.delta_time();
         engine.on_update(dt);
 
-        queue.clear_background(oxid::renderer::color::DARKGRAY);
+        queue.clear_background(
+            oxid::renderer::color::DARKGRAY,
+        );
+
         engine.on_draw(&mut queue);
 
         renderer.render(&mut queue);
