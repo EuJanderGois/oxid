@@ -4,8 +4,8 @@ use oxid::i18n;
 
 use super::templates;
 
-pub fn create_project(project_name: &str, locale: &str) -> Result<(), String> {
-    let path = Path::new(project_name);
+pub fn create_project(project_name: &str, destination: &Path, locale: &str) -> Result<(), String> {
+    let path = destination.join(project_name);
 
     if path.exists() {
         return Err(i18n::prefixed_with(
@@ -15,8 +15,9 @@ pub fn create_project(project_name: &str, locale: &str) -> Result<(), String> {
         ));
     }
 
-    fs::create_dir(path).map_err(|err| {
+    fs::create_dir_all(&path).map_err(|err| {
         let source = err.to_string();
+
         i18n::prefixed_with(
             "cli",
             "cli.error.creating_dir",
@@ -25,13 +26,14 @@ pub fn create_project(project_name: &str, locale: &str) -> Result<(), String> {
     })?;
 
     write_project_file(
-        path,
+        &path,
         "package.json",
         &templates::package_json(project_name, locale),
     )?;
-    write_project_file(path, "main.js", templates::MAIN_JS)?;
-    write_project_file(path, "tsconfig.json", templates::TSCONFIG_JSON)?;
-    write_project_file(path, "oxid.d.ts", templates::OXID_D_TS)?;
+
+    write_project_file(&path, "main.js", templates::MAIN_JS)?;
+    write_project_file(&path, "tsconfig.json", templates::TSCONFIG_JSON)?;
+    write_project_file(&path, "oxid.d.ts", templates::OXID_D_TS)?;
 
     println!(
         "{}",
@@ -41,12 +43,15 @@ pub fn create_project(project_name: &str, locale: &str) -> Result<(), String> {
             &[("project_name", project_name)],
         )
     );
+
+    let project_path = path.to_string_lossy();
+
     println!(
         "{}",
         i18n::prefixed_with(
             "cli",
             "cli.logs.first_run",
-            &[("project_name", project_name)],
+            &[("project_path", &project_path)],
         )
     );
 
@@ -56,6 +61,7 @@ pub fn create_project(project_name: &str, locale: &str) -> Result<(), String> {
 fn write_project_file(project_dir: &Path, filename: &str, contents: &str) -> Result<(), String> {
     fs::write(project_dir.join(filename), contents).map_err(|err| {
         let source = err.to_string();
+
         i18n::prefixed_with(
             "cli",
             "cli.error.write_file",

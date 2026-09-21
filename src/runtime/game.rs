@@ -4,13 +4,24 @@ use oxid::{
     scripting::ScriptEngine,
 };
 
-pub async fn run_game(script: String) {
+use super::LoadedProject;
+
+pub fn launch(project: LoadedProject) {
+    oxid::renderer::texture::set_project_root(&project.root);
+
+    let config = project.window_config();
+
+    macroquad::Window::from_config(config, run_game(project.script));
+}
+
+async fn run_game(script: String) {
     let mut renderer = MqRenderer;
 
     let engine = match ScriptEngine::new(&script) {
         Ok(engine) => engine,
         Err(err) => {
             let source = err.to_string();
+
             eprintln!(
                 "{}",
                 i18n::prefixed_with(
@@ -19,6 +30,7 @@ pub async fn run_game(script: String) {
                     &[("source", &source)],
                 )
             );
+
             return;
         }
     };
@@ -35,6 +47,7 @@ pub async fn run_game(script: String) {
         engine.on_update(dt);
 
         queue.clear_background(oxid::renderer::color::DARKGRAY);
+
         engine.on_draw(&mut queue);
 
         renderer.render(&mut queue);

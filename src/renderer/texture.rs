@@ -24,11 +24,21 @@ struct CachedTexture {
 }
 
 thread_local! {
-    static TEXTURE_CACHE: RefCell<HashMap<String, CachedTexture>> = RefCell::new(HashMap::new());
+    static TEXTURE_CACHE: RefCell<HashMap<String, CachedTexture>> =
+        RefCell::new(HashMap::new());
+
+    static PROJECT_ROOT: RefCell<Option<PathBuf>> =
+        RefCell::new(None);
 }
 
 fn to_mq_color(color: Color) -> macroquad::prelude::Color {
     macroquad::prelude::Color::new(color.r, color.g, color.b, color.a)
+}
+
+pub fn set_project_root(path: &Path) {
+    PROJECT_ROOT.with(|root| {
+        *root.borrow_mut() = Some(path.to_path_buf());
+    });
 }
 
 fn resolve_texture_path(path: &str) -> Result<PathBuf, String> {
@@ -38,8 +48,22 @@ fn resolve_texture_path(path: &str) -> Result<PathBuf, String> {
         return Err(i18n::text("renderer.texture.empty_path"));
     }
 
-    let resolved = Path::new(trimmed).canonicalize().map_err(|err| {
+    let input = Path::new(trimmed);
+
+    let resolved = if input.is_absolute() {
+        input.to_path_buf()
+    } else {
+        PROJECT_ROOT.with(|root| {
+            root.borrow()
+                .as_ref()
+                .map(|project_root| project_root.join(input))
+                .unwrap_or_else(|| input.to_path_buf())
+        })
+    };
+
+    let resolved = resolved.canonicalize().map_err(|err| {
         let source = err.to_string();
+
         i18n::text_with(
             "renderer.texture.resolve_failed",
             &[("path", trimmed), ("source", &source)],
@@ -48,6 +72,7 @@ fn resolve_texture_path(path: &str) -> Result<PathBuf, String> {
 
     if !resolved.is_file() {
         let resolved_path = resolved.display().to_string();
+
         return Err(i18n::text_with(
             "renderer.texture.not_a_file",
             &[("path", &resolved_path)],
@@ -63,6 +88,7 @@ pub fn load_texture(path: &str) -> Result<LoadedTexture, String> {
 
     if let Some(texture) = TEXTURE_CACHE.with(|cache| {
         let cache = cache.borrow();
+
         cache.get(&key).map(|cached| LoadedTexture {
             key: key.clone(),
             width: cached.width,
@@ -73,15 +99,19 @@ pub fn load_texture(path: &str) -> Result<LoadedTexture, String> {
     }
 
     let resolved_path = resolved.display().to_string();
+
     let bytes = fs::read(&resolved).map_err(|err| {
         let source = err.to_string();
+
         i18n::text_with(
             "renderer.texture.read_failed",
             &[("path", &resolved_path), ("source", &source)],
         )
     })?;
+
     let image = Image::from_file_with_format(&bytes, None).map_err(|err| {
         let source = err.to_string();
+
         i18n::text_with(
             "renderer.texture.decode_failed",
             &[("path", &resolved_path), ("source", &source)],
@@ -90,6 +120,7 @@ pub fn load_texture(path: &str) -> Result<LoadedTexture, String> {
 
     let width = image.width as f32;
     let height = image.height as f32;
+
     let texture = MacroquadTexture2D::from_image(&image);
 
     TEXTURE_CACHE.with(|cache| {
@@ -125,6 +156,7 @@ pub fn draw_cached_texture(
 
     TEXTURE_CACHE.with(|cache| {
         let cache = cache.borrow();
+
         let texture = cache.get(key).ok_or_else(|| {
             i18n::text_with("renderer.texture.not_loaded", &[("texture_key", key)])
         })?;
