@@ -11,10 +11,7 @@ pub fn launch(project: LoadedProject) {
 
     let config = project.window_config();
 
-    macroquad::Window::from_config(
-        config,
-        run_game(project.script),
-    );
+    macroquad::Window::from_config(config, run_game(project.script));
 }
 
 async fn run_game(script: String) {
@@ -49,9 +46,7 @@ async fn run_game(script: String) {
         let dt = renderer.delta_time();
         engine.on_update(dt);
 
-        queue.clear_background(
-            oxid::renderer::color::DARKGRAY,
-        );
+        queue.clear_background(oxid::renderer::color::DARKGRAY);
 
         engine.on_draw(&mut queue);
 

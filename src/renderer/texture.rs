@@ -6,8 +6,7 @@ use std::{
 };
 
 use macroquad::prelude::{
-    draw_texture_ex, vec2, DrawTextureParams, Image,
-    Texture2D as MacroquadTexture2D,
+    DrawTextureParams, Image, Texture2D as MacroquadTexture2D, draw_texture_ex, vec2,
 };
 
 use crate::{i18n, renderer::color::Color};
@@ -135,11 +134,7 @@ pub fn load_texture(path: &str) -> Result<LoadedTexture, String> {
         );
     });
 
-    Ok(LoadedTexture {
-        key,
-        width,
-        height,
-    })
+    Ok(LoadedTexture { key, width, height })
 }
 
 pub fn draw_cached_texture(
@@ -163,10 +158,7 @@ pub fn draw_cached_texture(
         let cache = cache.borrow();
 
         let texture = cache.get(key).ok_or_else(|| {
-            i18n::text_with(
-                "renderer.texture.not_loaded",
-                &[("texture_key", key)],
-            )
+            i18n::text_with("renderer.texture.not_loaded", &[("texture_key", key)])
         })?;
 
         draw_texture_ex(

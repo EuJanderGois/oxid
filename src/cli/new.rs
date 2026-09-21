@@ -4,11 +4,7 @@ use oxid::i18n;
 
 use super::templates;
 
-pub fn create_project(
-    project_name: &str,
-    destination: &Path,
-    locale: &str,
-) -> Result<(), String> {
+pub fn create_project(project_name: &str, destination: &Path, locale: &str) -> Result<(), String> {
     let path = destination.join(project_name);
 
     if path.exists() {
@@ -62,11 +58,7 @@ pub fn create_project(
     Ok(())
 }
 
-fn write_project_file(
-    project_dir: &Path,
-    filename: &str,
-    contents: &str,
-) -> Result<(), String> {
+fn write_project_file(project_dir: &Path, filename: &str, contents: &str) -> Result<(), String> {
     fs::write(project_dir.join(filename), contents).map_err(|err| {
         let source = err.to_string();
 

@@ -66,8 +66,7 @@ pub fn detect_locale(path: &Path) -> Option<String> {
 
     let manifest_content = fs::read_to_string(manifest_path).ok()?;
 
-    let package =
-        serde_json::from_str::<PackageLocaleProbe>(&manifest_content).ok()?;
+    let package = serde_json::from_str::<PackageLocaleProbe>(&manifest_content).ok()?;
 
     package.oxid.and_then(|oxid| oxid.locale)
 }
@@ -98,25 +97,15 @@ pub fn load(path: &Path) -> Result<LoadedProject, String> {
         )
     })?;
 
-    let package: PackageJson =
-        serde_json::from_str(&manifest_content).map_err(|err| {
-            let source = err.to_string();
+    let package: PackageJson = serde_json::from_str(&manifest_content).map_err(|err| {
+        let source = err.to_string();
 
-            i18n::prefixed_with(
-                "runtime",
-                "runtime.error.parsing",
-                &[("source", &source)],
-            )
-        })?;
+        i18n::prefixed_with("runtime", "runtime.error.parsing", &[("source", &source)])
+    })?;
 
     let entry_file = package
         .entry_file()
-        .ok_or_else(|| {
-            i18n::prefixed(
-                "runtime",
-                "runtime.error.entry_not_configured",
-            )
-        })?;
+        .ok_or_else(|| i18n::prefixed("runtime", "runtime.error.entry_not_configured"))?;
 
     let entry_path = path.join(entry_file);
 
@@ -134,10 +123,7 @@ pub fn load(path: &Path) -> Result<LoadedProject, String> {
         i18n::prefixed_with(
             "runtime",
             "runtime.error.script_read",
-            &[
-                ("entry_file", entry_file),
-                ("source", &source),
-            ],
+            &[("entry_file", entry_file), ("source", &source)],
         )
     })?;
 
