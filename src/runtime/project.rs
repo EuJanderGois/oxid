@@ -8,6 +8,7 @@ struct OxidConfig {
     title: String,
     width: i32,
     height: i32,
+
     #[serde(default)]
     entry: Option<String>,
 }
@@ -35,9 +36,11 @@ pub struct LoadedProject {
 impl LoadedProject {
     pub fn window_config(&self) -> macroquad::conf::Conf {
         let mut conf = macroquad::conf::Conf::default();
+
         conf.miniquad_conf.window_title = self.title.clone();
         conf.miniquad_conf.window_width = self.width;
         conf.miniquad_conf.window_height = self.height;
+
         conf
     }
 }
@@ -54,15 +57,25 @@ struct PackageLocaleProbe {
     oxid: Option<OxidLocaleConfig>,
 }
 
-pub fn detect_locale_from_current_dir() -> Option<String> {
-    let manifest_content = fs::read_to_string("package.json").ok()?;
-    let package = serde_json::from_str::<PackageLocaleProbe>(&manifest_content).ok()?;
+pub fn detect_locale(path: &Path) -> Option<String> {
+    let manifest_path = path.join("package.json");
+
+    let manifest_content = fs::read_to_string(manifest_path).ok()?;
+
+    let package =
+        serde_json::from_str::<PackageLocaleProbe>(&manifest_content).ok()?;
 
     package.oxid.and_then(|oxid| oxid.locale)
 }
 
-pub fn load_from_current_dir() -> Result<LoadedProject, String> {
-    let manifest_path = Path::new("package.json");
+pub fn detect_locale_from_current_dir() -> Option<String> {
+    let path = std::env::current_dir().ok()?;
+
+    detect_locale(&path)
+}
+
+pub fn load(path: &Path) -> Result<LoadedProject, String> {
+    let manifest_path = path.join("package.json");
 
     if !manifest_path.exists() {
         return Err(i18n::prefixed(
@@ -71,8 +84,9 @@ pub fn load_from_current_dir() -> Result<LoadedProject, String> {
         ));
     }
 
-    let manifest_content = fs::read_to_string(manifest_path).map_err(|err| {
+    let manifest_content = fs::read_to_string(&manifest_path).map_err(|err| {
         let source = err.to_string();
+
         i18n::prefixed_with(
             "runtime",
             "runtime.error.read_config_file",
@@ -82,14 +96,24 @@ pub fn load_from_current_dir() -> Result<LoadedProject, String> {
 
     let package: PackageJson = serde_json::from_str(&manifest_content).map_err(|err| {
         let source = err.to_string();
-        i18n::prefixed_with("runtime", "runtime.error.parsing", &[("source", &source)])
+
+        i18n::prefixed_with(
+            "runtime",
+            "runtime.error.parsing",
+            &[("source", &source)],
+        )
     })?;
 
     let entry_file = package
         .entry_file()
-        .ok_or_else(|| i18n::prefixed("runtime", "runtime.error.entry_not_configured"))?;
+        .ok_or_else(|| {
+            i18n::prefixed(
+                "runtime",
+                "runtime.error.entry_not_configured",
+            )
+        })?;
 
-    let entry_path = Path::new(entry_file);
+    let entry_path = path.join(entry_file);
 
     if !entry_path.exists() {
         return Err(i18n::prefixed_with(
@@ -99,12 +123,16 @@ pub fn load_from_current_dir() -> Result<LoadedProject, String> {
         ));
     }
 
-    let script = fs::read_to_string(entry_path).map_err(|err| {
+    let script = fs::read_to_string(&entry_path).map_err(|err| {
         let source = err.to_string();
+
         i18n::prefixed_with(
             "runtime",
             "runtime.error.script_read",
-            &[("entry_file", entry_file), ("source", &source)],
+            &[
+                ("entry_file", entry_file),
+                ("source", &source),
+            ],
         )
     })?;
 
@@ -114,4 +142,18 @@ pub fn load_from_current_dir() -> Result<LoadedProject, String> {
         width: package.oxid.width,
         height: package.oxid.height,
     })
+}
+
+pub fn load_from_current_dir() -> Result<LoadedProject, String> {
+    let path = std::env::current_dir().map_err(|err| {
+        let source = err.to_string();
+
+        i18n::prefixed_with(
+            "runtime",
+            "runtime.error.current_dir",
+            &[("source", &source)],
+        )
+    })?;
+
+    load(&path)
 }

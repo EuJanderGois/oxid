@@ -1,5 +1,6 @@
 mod args;
 mod new;
+mod run;
 mod templates;
 
 use clap::Parser;
@@ -12,8 +13,12 @@ pub fn run() {
     let active_locale = configure_locale(&cli);
 
     let result = match cli.command {
-        Commands::New { project_name } => new::create_project(&project_name, &active_locale),
-        Commands::Run => run_project(),
+        Commands::New {
+            project_name,
+            destination,
+        } => new::create_project(&project_name, &destination, &active_locale),
+
+        Commands::Run { path } => run::run_project(path),
     };
 
     if let Err(err) = result {
@@ -22,16 +27,14 @@ pub fn run() {
     }
 }
 
-fn run_project() -> Result<(), String> {
-    let project = crate::runtime::load_project_from_current_dir()?;
-    crate::runtime::launch(project);
-    Ok(())
-}
-
 fn configure_locale(cli: &Cli) -> String {
     let env_lang = env::var("OXID_LANG").ok();
+
     let project_lang = match (&cli.command, cli.lang.as_ref(), env_lang.as_ref()) {
-        (Commands::Run, None, None) => crate::runtime::detect_project_locale_from_current_dir(),
+        (Commands::Run { path }, None, None) => {
+            crate::runtime::detect_project_locale(path.as_deref())
+        }
+
         _ => None,
     };
 

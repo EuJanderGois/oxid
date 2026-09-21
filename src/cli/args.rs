@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -14,6 +16,14 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    New { project_name: String },
-    Run,
+    New {
+        project_name: String,
+
+        #[arg(short, long, default_value = ".")]
+        destination: PathBuf,
+    },
+
+    Run {
+        path: Option<PathBuf>,
+    },
 }
