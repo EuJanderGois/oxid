@@ -48,12 +48,14 @@ pub fn create_project(
         )
     );
 
+    let project_path = path.to_string_lossy();
+
     println!(
         "{}",
         i18n::prefixed_with(
             "cli",
             "cli.logs.first_run",
-            &[("project_name", project_name)],
+            &[("project_path", &project_path)],
         )
     );
 

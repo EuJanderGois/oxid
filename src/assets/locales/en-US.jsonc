@@ -51,12 +51,12 @@
         "message": "Project '{project_name}' created successfully."
       },
       // placeholders:
-      // - {project_name}: requested project name/path
+      // - {project_path}: requested project name/path
       "first_run": {
         "tone": "info",
         "message": [
           "Everything is ready for the first run.",
-          "Use `cd {project_name} && oxid run` to start."
+          "Use `oxid run {project_path}` to start."
         ]
       }
     }
