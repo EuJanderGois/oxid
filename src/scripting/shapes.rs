@@ -108,7 +108,7 @@ impl NativePlugin for ShapesPlugin {
                     FunctionParam {
                         name: "radius",
                         ty: ScriptType::Number,
-                        docs: "Arc radius.",,
+                        docs: "Arc radius.",
                         optional: false,
                     },
                     FunctionParam {

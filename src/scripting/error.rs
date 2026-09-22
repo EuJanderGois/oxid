@@ -7,7 +7,7 @@ pub enum ScriptEngineError {
     RuntimeInit(String),
     ContextInit(String),
     PluginRegister {
-        plugin: &'static str,
+        plugin: String,
         source: String,
     },
     StdlibRegister(String),

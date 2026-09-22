@@ -197,7 +197,7 @@ mod tests {
             functions: &FUNCTIONS,
         }]);
 
-        assert!(output.contains("import type { Vector2D } from "oxid/math";"));
+        assert!(output.contains("import type { Vector2D } from \"oxid/math\";"));
         assert!(output.contains("draw(position: Vector2D): void;"));
     }
 

@@ -1,6 +1,6 @@
 //! Core scripting module and Entity metadata.
 
-use rquickjs::{Ctx, Module, Result};
+use rquickjs::{Ctx, Module};
 
 use super::{
     error::ScriptEngineError,

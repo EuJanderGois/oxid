@@ -118,6 +118,7 @@ pub struct NativeModule {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::super::generator::generate_d_ts;
 
     #[test]
     fn generates_cross_module_type_imports() {
