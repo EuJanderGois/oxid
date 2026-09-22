@@ -1,4 +1,4 @@
-export class GameObject {
+export class Entity {
     onInit() {}
     onUpdate(dt) {}
     onDraw() {}

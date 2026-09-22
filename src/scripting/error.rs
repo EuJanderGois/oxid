@@ -6,23 +6,14 @@ use crate::i18n;
 pub enum ScriptEngineError {
     RuntimeInit(String),
     ContextInit(String),
-    PluginRegister {
-        plugin: &'static str,
-        source: String,
-    },
+    PluginRegister { plugin: String, source: String },
     StdlibRegister(String),
     EntryModuleDeclare(String),
     EntryModuleEval(String),
     MainNamespace(String),
     AppInstance(String),
-    HookCompile {
-        hook: &'static str,
-        source: String,
-    },
-    HookExecution {
-        hook: &'static str,
-        source: String,
-    },
+    HookCompile { hook: &'static str, source: String },
+    HookExecution { hook: &'static str, source: String },
 }
 
 impl fmt::Display for ScriptEngineError {

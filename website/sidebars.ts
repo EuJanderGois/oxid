@@ -37,7 +37,8 @@ const sidebars: SidebarsConfig = {
         'scripting/lifecycle',
         'scripting/modules',
         'scripting/types',
-        'scripting/game-object',
+        'scripting/entity',
+        'scripting/api-generation',
       ],
     },
     {
@@ -75,6 +76,7 @@ const sidebars: SidebarsConfig = {
       },
       items: [
         'technical-information/development-workflow',
+        'technical-information/native-modules',
         'technical-information/versioning-and-releases',
         'technical-information/ci-cd'
       ],

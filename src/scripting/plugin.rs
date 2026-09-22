@@ -1,15 +1,10 @@
-//! gerencia plugins nativos
-//!
-//! plugins nativos são módulos escritos em rust que expõe funcionalidades
-//! a script API
+//! Native scripting API metadata and registration helpers.
 
-use core::fmt::{self};
+use core::fmt;
 
 use rquickjs::{Ctx, Result, module::ModuleDef};
 
-///
-/// parametro de função
-///
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FunctionParam {
     pub name: &'static str,
     pub ty: ScriptType,
@@ -17,12 +12,7 @@ pub struct FunctionParam {
     pub optional: bool,
 }
 
-///
-/// meta dados de uma função.
-///
-/// usado pra construção de documentação e arquivos de
-/// definição (.d.ts).
-///
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FunctionMeta {
     pub module: &'static str,
     pub name: &'static str,
@@ -31,13 +21,40 @@ pub struct FunctionMeta {
     pub params: &'static [FunctionParam],
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TypePropertyMeta {
+    pub name: &'static str,
+    pub ty: ScriptType,
+    pub docs: &'static str,
+    pub readonly: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TypeConstructorMeta {
+    pub params: &'static [FunctionParam],
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TypeMeta {
+    pub module: &'static str,
+    pub name: &'static str,
+    pub docs: &'static str,
+    pub constructors: &'static [TypeConstructorMeta],
+    pub properties: &'static [TypePropertyMeta],
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ModuleMeta {
+    pub name: &'static str,
+    pub docs: &'static str,
+    pub types: &'static [TypeMeta],
+    pub functions: &'static [FunctionMeta],
+}
+
 pub trait NativeFunction {
     fn meta() -> &'static FunctionMeta;
 }
 
-///
-/// variantes de tipos possíveis
-///
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ScriptType {
     Number,
@@ -45,57 +62,22 @@ pub enum ScriptType {
     Boolean,
     Void,
     Any,
-    Custom(&'static str),
+    Custom(&'static str, &'static str),
 }
 
 impl fmt::Display for ScriptType {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ScriptType::Number => write!(f, "number"),
             ScriptType::String => write!(f, "string"),
             ScriptType::Boolean => write!(f, "boolean"),
             ScriptType::Void => write!(f, "void"),
             ScriptType::Any => write!(f, "any"),
-            ScriptType::Custom(text) => write!(f, "{text}"),
-        }
-    } // formata para string
-}
-
-///
-/// gera definições de função baseado em meta dados
-///
-/// TODO: generate_module_d_ts
-///
-pub fn generate_func_d_ts(meta: &FunctionMeta) -> String {
-    let mut jsdoc_params = String::new();
-    let mut signature_params = String::new();
-
-    for (index, param) in meta.params.iter().enumerate() {
-        jsdoc_params.push_str(&format!(" * @param {} {}\n", param.name, param.docs));
-
-        if index > 0 {
-            signature_params.push_str(", ");
-        }
-
-        if param.optional {
-            signature_params.push_str(&format!("{}?: {}", param.name, param.ty));
-        } else {
-            signature_params.push_str(&format!("{}: {}", param.name, param.ty));
+            ScriptType::Custom(_, name) => write!(f, "{name}"),
         }
     }
-
-    format!(
-        "/**\n * {}\n{} */\nexport function {}({}): {};\n",
-        meta.docs, jsdoc_params, meta.name, signature_params, meta.returns
-    )
 }
 
-///
-/// gerencia e registra plugins nativos
-///
-/// exige que o plugin seja uma estrutura de tamanho conhecido.
-/// pode opicionalmente registrar meta dados para geração de definição.
-///
 pub trait NativePlugin: ModuleDef + Sized {
     const NAME: &'static str;
 
@@ -103,11 +85,117 @@ pub trait NativePlugin: ModuleDef + Sized {
         &[]
     }
 
-    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
-        // Usa o '?' para propagar possíveis erros e descarta o módulo retornado
-        rquickjs::Module::declare_def::<Self, _>(ctx.clone(), Self::NAME)?;
+    fn types() -> &'static [TypeMeta] {
+        &[]
+    }
 
-        // Retorna sucesso vazio, conforme a assinatura da função exige
+    fn docs() -> &'static str {
+        ""
+    }
+
+    fn metadata() -> ModuleMeta {
+        ModuleMeta {
+            name: Self::NAME,
+            docs: Self::docs(),
+            types: Self::types(),
+            functions: Self::functions(),
+        }
+    }
+
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
+        rquickjs::Module::declare_def::<Self, _>(ctx.clone(), Self::NAME)?;
         Ok(())
+    }
+}
+
+pub struct NativeModule {
+    pub name: &'static str,
+    pub metadata: fn() -> ModuleMeta,
+    pub register: for<'js> fn(&Ctx<'js>) -> Result<()>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::generator::generate_d_ts;
+    use super::*;
+
+    #[test]
+    fn generates_cross_module_type_imports() {
+        static FUNCTIONS: [FunctionMeta; 1] = [FunctionMeta {
+            module: "oxid/example",
+            name: "draw",
+            docs: "Draws something.",
+            returns: ScriptType::Void,
+            params: &[FunctionParam {
+                name: "position",
+                ty: ScriptType::Custom("oxid/math", "Vector2D"),
+                docs: "Draw position.",
+                optional: false,
+            }],
+        }];
+
+        let module = ModuleMeta {
+            name: "oxid/example",
+            docs: "Example module.",
+            types: &[],
+            functions: &FUNCTIONS,
+        };
+
+        let output = generate_d_ts(&[module]);
+
+        assert!(output.contains("import type { Vector2D } from \"oxid/math\";"));
+        assert!(output.contains("draw(position: Vector2D): void;"));
+    }
+
+    #[test]
+    fn generated_api_uses_vector2d_for_coordinate_values() {
+        let output = crate::scripting::generate_api_d_ts();
+
+        assert!(output.contains("export class Vector2D"));
+        assert!(!output.contains("Transform2D"));
+    }
+
+    #[test]
+    fn generates_mutable_and_readonly_properties() {
+        static TYPES: [TypeMeta; 1] = [TypeMeta {
+            module: "oxid/example",
+            name: "Example",
+            docs: "Example type.",
+            constructors: &[TypeConstructorMeta {
+                params: &[FunctionParam {
+                    name: "value",
+                    ty: ScriptType::Number,
+                    docs: "Initial value.",
+                    optional: false,
+                }],
+            }],
+            properties: &[
+                TypePropertyMeta {
+                    name: "value",
+                    ty: ScriptType::Number,
+                    docs: "Current value.",
+                    readonly: false,
+                },
+                TypePropertyMeta {
+                    name: "id",
+                    ty: ScriptType::Number,
+                    docs: "Identifier.",
+                    readonly: true,
+                },
+            ],
+        }];
+
+        let module = ModuleMeta {
+            name: "oxid/example",
+            docs: "Example module.",
+            types: &TYPES,
+            functions: &[],
+        };
+
+        let output = generate_d_ts(&[module]);
+
+        assert!(output.contains("constructor(value: number);"));
+        assert!(output.contains("value: number;"));
+        assert!(output.contains("readonly id: number;"));
     }
 }

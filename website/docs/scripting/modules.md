@@ -19,11 +19,11 @@ The runtime currently registers these modules:
 
 ### `oxid/core`
 
-Base `GameObject` class used by the default scripting pattern.
+Base `Entity` class used by the default scripting pattern.
 
 ### `oxid/math`
 
-2D utility types such as `Transform2D`.
+2D utility types such as `Vector2D`.
 
 ### `oxid/color`
 
@@ -44,3 +44,9 @@ Keyboard and mouse queries backed by the native runtime.
 ### `oxid/texture`
 
 Texture loading and textured drawing helpers.
+
+## API metadata
+
+Each native module also describes its public types and functions through metadata. That metadata is used to generate `oxid.d.ts`, so the runtime API and editor declarations share the same source of truth.
+
+When adding an API to Oxid itself, update the module metadata alongside the implementation instead of editing a generated declaration file.

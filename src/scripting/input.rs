@@ -14,14 +14,14 @@ use rquickjs::{
 use crate::{
     i18n,
     scripting::{
-        math::Transform2D,
+        math::Vector2D,
         plugin::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
     },
 };
 
-const KEY_NAME_DOCS: &str = "Nome da tecla. Ignora maiúsculas/minúsculas, espaços, '_' e '-'. Exemplos: \"A\", \"ArrowLeft\", \"Space\", \"Enter\", \"Escape\", \"LeftShift\", \"F1\".";
+const KEY_NAME_DOCS: &str = "Key name. Case-insensitive; spaces, '_' and '-' are ignored. Examples: \"A\", \"ArrowLeft\", \"Space\", \"Enter\", \"Escape\", \"LeftShift\", \"F1\".";
 const MOUSE_BUTTON_DOCS: &str =
-    "Nome do botão do mouse. Valores aceitos: \"left\", \"middle\" e \"right\".";
+    "Mouse button name. Accepted values: \"left\", \"middle\", and \"right\".";
 
 fn normalize_input_name(name: &str) -> StdString {
     let mut normalized = StdString::with_capacity(name.len());
@@ -228,9 +228,9 @@ fn is_key_released(ctx: Ctx<'_>, key: StdString) -> Result<bool> {
     Ok(mq_is_key_released(parse_key_code(&ctx, &key)?))
 }
 
-fn mouse_position<'js>(ctx: Ctx<'js>) -> Result<Class<'js, Transform2D>> {
+fn mouse_position<'js>(ctx: Ctx<'js>) -> Result<Class<'js, Vector2D>> {
     let (x, y) = mq_mouse_position();
-    Class::instance(ctx, Transform2D::new(x, y))
+    Class::instance(ctx, Vector2D::new(x, y))
 }
 
 fn is_mouse_button_down(ctx: Ctx<'_>, button: StdString) -> Result<bool> {
@@ -249,7 +249,7 @@ fn is_mouse_button_released(ctx: Ctx<'_>, button: StdString) -> Result<bool> {
     )?))
 }
 
-/// gerencia os métodos e módulos de input.
+/// Provides input helpers and module bindings.
 pub struct InputPlugin;
 
 impl ModuleDef for InputPlugin {
@@ -296,7 +296,7 @@ impl NativePlugin for InputPlugin {
             FunctionMeta {
                 module: "oxid/input",
                 name: "isKeyDown",
-                docs: "Retorna true enquanto a tecla estiver pressionada.",
+                docs: "Returns true while the key is held down.",
                 returns: ScriptType::Boolean,
                 params: &[FunctionParam {
                     name: "key",
@@ -308,7 +308,7 @@ impl NativePlugin for InputPlugin {
             FunctionMeta {
                 module: "oxid/input",
                 name: "isKeyPressed",
-                docs: "Retorna true apenas no frame em que a tecla foi pressionada.",
+                docs: "Returns true only during the frame when the key was pressed.",
                 returns: ScriptType::Boolean,
                 params: &[FunctionParam {
                     name: "key",
@@ -320,7 +320,7 @@ impl NativePlugin for InputPlugin {
             FunctionMeta {
                 module: "oxid/input",
                 name: "isKeyReleased",
-                docs: "Retorna true apenas no frame em que a tecla foi solta.",
+                docs: "Returns true only during the frame when the key was released.",
                 returns: ScriptType::Boolean,
                 params: &[FunctionParam {
                     name: "key",
@@ -332,14 +332,14 @@ impl NativePlugin for InputPlugin {
             FunctionMeta {
                 module: "oxid/input",
                 name: "mousePosition",
-                docs: "Retorna a posição atual do mouse em coordenadas de tela.",
-                returns: ScriptType::Custom("Transform2D"),
+                docs: "Returns the current mouse position in screen coordinates.",
+                returns: ScriptType::Custom("oxid/math", "Vector2D"),
                 params: &[],
             },
             FunctionMeta {
                 module: "oxid/input",
                 name: "isMouseButtonDown",
-                docs: "Retorna true enquanto o botão do mouse estiver pressionado.",
+                docs: "Returns true while the mouse button is held down.",
                 returns: ScriptType::Boolean,
                 params: &[FunctionParam {
                     name: "button",
@@ -351,7 +351,7 @@ impl NativePlugin for InputPlugin {
             FunctionMeta {
                 module: "oxid/input",
                 name: "isMouseButtonPressed",
-                docs: "Retorna true apenas no frame em que o botão do mouse foi pressionado.",
+                docs: "Returns true only during the frame when the mouse button was pressed.",
                 returns: ScriptType::Boolean,
                 params: &[FunctionParam {
                     name: "button",
@@ -363,7 +363,7 @@ impl NativePlugin for InputPlugin {
             FunctionMeta {
                 module: "oxid/input",
                 name: "isMouseButtonReleased",
-                docs: "Retorna true apenas no frame em que o botão do mouse foi solto.",
+                docs: "Returns true only during the frame when the mouse button was released.",
                 returns: ScriptType::Boolean,
                 params: &[FunctionParam {
                     name: "button",

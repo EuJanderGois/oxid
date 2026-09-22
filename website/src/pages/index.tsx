@@ -42,15 +42,15 @@ function HomepageHeader() {
             <span>package.json</span>
           </div>
           <pre className={styles.codeBlock}>
-            <code>{`import { GameObject } from "oxid/core";
-import { Transform2D } from "oxid/math";
+            <code>{`import { Entity } from "oxid/core";
+import { Vector2D } from "oxid/math";
 import { drawText } from "oxid/text";
 import { Color } from "oxid/color";
 
-export class MyApp extends GameObject {
+export class MyApp extends Entity {
   constructor() {
     super();
-    this.position = new Transform2D(280, 220);
+    this.position = new Vector2D(280, 220);
     this.color = new Color(1, 1, 1, 1);
   }
 
@@ -94,7 +94,7 @@ function WorkflowSection() {
             <span className={styles.step}>02</span>
             <Heading as="h3">Script</Heading>
             <p>
-              Write game logic in JavaScript using <code>GameObject</code>,
+              Write game logic in JavaScript using <code>Entity</code>,
               lifecycle hooks and the built-in Oxid modules.
             </p>
           </div>

@@ -33,7 +33,7 @@ pub fn create_project(project_name: &str, destination: &Path, locale: &str) -> R
 
     write_project_file(&path, "main.js", templates::MAIN_JS)?;
     write_project_file(&path, "tsconfig.json", templates::TSCONFIG_JSON)?;
-    write_project_file(&path, "oxid.d.ts", templates::OXID_D_TS)?;
+    write_project_file(&path, "oxid.d.ts", &oxid::scripting::generate_api_d_ts())?;
 
     println!(
         "{}",

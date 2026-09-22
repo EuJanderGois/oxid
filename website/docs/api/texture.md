@@ -33,8 +33,8 @@ Draws a texture at its original size.
 
 Draws a texture using a destination size and optional rotation.
 
-- `position`: `Transform2D`
-- `size`: `Transform2D`
+- `position`: `Vector2D`
+- `size`: `Vector2D`
 - `rotation`: radians
 
 The runtime validates that size values are finite and greater than zero.

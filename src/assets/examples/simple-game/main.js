@@ -1,5 +1,5 @@
-import { GameObject } from "oxid/core";
-import { Transform2D } from "oxid/math";
+import { Entity } from "oxid/core";
+import { Vector2D } from "oxid/math";
 import { isKeyDown, isMouseButtonDown, mousePosition } from "oxid/input";
 import { drawCircle, drawRectangle, drawArc } from "oxid/shapes";
 import { drawText, drawMultilineText, measureText } from "oxid/text";
@@ -10,14 +10,14 @@ const RED = new Color(1.0, 0.0, 0.0, 1.0);
 const WHITE = new Color(1.0, 1.0, 1.0, 1.0);
 const LABEL = "PLAYER";
 
-export class MyApp extends GameObject {
+export class MyApp extends Entity {
     constructor() {
         super();
-        this.jogador = new Transform2D(100.0, 100.0);
-        this.arco = new Transform2D(80.0, 80.0);
-        this.ui = new Transform2D(20.0, 30.0);
-        this.mascotePos = new Transform2D(320.0, 120.0);
-        this.mascoteSize = new Transform2D(160.0, 160.0);
+        this.jogador = new Vector2D(100.0, 100.0);
+        this.arco = new Vector2D(80.0, 80.0);
+        this.ui = new Vector2D(20.0, 30.0);
+        this.mascotePos = new Vector2D(320.0, 120.0);
+        this.mascoteSize = new Vector2D(160.0, 160.0);
         this.mascoteRotacao = 0.0;
         this.velocidade = 180.0;
     }
@@ -40,7 +40,7 @@ export class MyApp extends GameObject {
 
     onDraw() {
         const labelMetrics = measureText(LABEL, 24.0);
-        const labelPosition = new Transform2D(
+        const labelPosition = new Vector2D(
             this.jogador.x - labelMetrics.width / 2.0,
             this.jogador.y - 35.0,
         );

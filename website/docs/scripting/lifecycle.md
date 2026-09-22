@@ -37,9 +37,9 @@ The runtime executes hooks in this order:
 ## Example
 
 ```javascript
-import {GameObject} from 'oxid/core';
+import {Entity} from 'oxid/core';
 
-class MyApp extends GameObject {
+class MyApp extends Entity {
   onInit() {
     console.log('ready');
   }
