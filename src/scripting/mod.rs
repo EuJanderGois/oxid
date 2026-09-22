@@ -10,7 +10,7 @@ pub mod texture;
 use error::ScriptEngineError;
 use input::InputPlugin;
 use math::MathPlugin;
-use plugin::NativePlugin;
+use plugin::{ModuleMeta, NativePlugin, TypeConstructorMeta, TypeMeta};
 use rquickjs::{CaughtError, Context, Ctx, Function, Module, Object, Runtime};
 use shapes::ShapesPlugin;
 use text::TextPlugin;
@@ -30,6 +30,35 @@ const HOOK_ON_UPDATE: &str = "__hook_on_update";
 const HOOK_ON_DRAW: &str = "__hook_on_draw";
 const APP_INSTANCE: &str = "__app_instance";
 const MAIN_NAMESPACE: &str = "__main";
+
+const CORE_META: ModuleMeta = ModuleMeta {
+    name: "oxid/core",
+    docs: "Core da aplicação e ciclo de vida de entidades.",
+    types: &[TypeMeta {
+        module: "oxid/core",
+        name: "Entity",
+        docs: "Classe base do padrão de scripting do Oxid.",
+        constructors: &[TypeConstructorMeta { params: &[] }],
+        properties: &[],
+    }],
+    functions: &[],
+};
+
+pub fn api_metadata() -> Vec<ModuleMeta> {
+    vec![
+        CORE_META,
+        MathPlugin::metadata(),
+        ColorPlugin::metadata(),
+        ShapesPlugin::metadata(),
+        InputPlugin::metadata(),
+        TextPlugin::metadata(),
+        TexturePlugin::metadata(),
+    ]
+}
+
+pub fn generate_api_d_ts() -> String {
+    plugin::generate_d_ts(&api_metadata())
+}
 
 pub struct ScriptEngine {
     _rt: Runtime,
@@ -85,7 +114,7 @@ impl ScriptEngine {
     }
 
     fn register_stdlib(ctx: &Ctx<'_>) -> Result<(), ScriptEngineError> {
-        let base_code = "export class GameObject { onInit(){} onUpdate(){} onDraw(){} }";
+        let base_code = include_str!("stdlib/Entity.js");
 
         let oxid_mod = Module::declare(ctx.clone(), "oxid/core", base_code)
             .map_err(|e| ScriptEngineError::StdlibRegister(e.to_string()))?;

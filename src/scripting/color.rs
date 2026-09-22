@@ -1,7 +1,9 @@
 use rquickjs::module::{Declarations, Exports, ModuleDef};
 use rquickjs::{Class, Ctx, JsLifetime, Result, class::Trace};
 
-use crate::scripting::plugin::NativePlugin;
+use crate::scripting::plugin::{
+    FunctionParam, NativePlugin, ScriptType, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
+};
 
 ///
 /// vetor de x e y.
@@ -51,4 +53,71 @@ impl ModuleDef for ColorPlugin {
 
 impl NativePlugin for ColorPlugin {
     const NAME: &'static str = "oxid/color";
+
+    fn docs() -> &'static str {
+        "Tipos para representar cores RGBA."
+    }
+
+    fn types() -> &'static [TypeMeta] {
+        static TYPES: [TypeMeta; 1] = [TypeMeta {
+            module: "oxid/color",
+            name: "Color",
+            docs: "Cor RGBA mutável.",
+            constructors: &[TypeConstructorMeta {
+                params: &[
+                    FunctionParam {
+                        name: "r",
+                        ty: ScriptType::Number,
+                        docs: "Componente vermelho.",
+                        optional: false,
+                    },
+                    FunctionParam {
+                        name: "g",
+                        ty: ScriptType::Number,
+                        docs: "Componente verde.",
+                        optional: false,
+                    },
+                    FunctionParam {
+                        name: "b",
+                        ty: ScriptType::Number,
+                        docs: "Componente azul.",
+                        optional: false,
+                    },
+                    FunctionParam {
+                        name: "a",
+                        ty: ScriptType::Number,
+                        docs: "Componente alfa.",
+                        optional: false,
+                    },
+                ],
+            }],
+            properties: &[
+                TypePropertyMeta {
+                    name: "r",
+                    ty: ScriptType::Number,
+                    docs: "Componente vermelho.",
+                    readonly: false,
+                },
+                TypePropertyMeta {
+                    name: "g",
+                    ty: ScriptType::Number,
+                    docs: "Componente verde.",
+                    readonly: false,
+                },
+                TypePropertyMeta {
+                    name: "b",
+                    ty: ScriptType::Number,
+                    docs: "Componente azul.",
+                    readonly: false,
+                },
+                TypePropertyMeta {
+                    name: "a",
+                    ty: ScriptType::Number,
+                    docs: "Componente alfa.",
+                    readonly: false,
+                },
+            ],
+        }];
+        &TYPES
+    }
 }

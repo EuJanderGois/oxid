@@ -1,26 +1,39 @@
 ---
-title: Types
+title: Types and editor support
 slug: /scripting/types
 ---
 
-# Type definitions and editor support
+# Types and editor support
 
-Oxid ships `oxid.d.ts` in newly generated projects so editors can understand the runtime modules and their public APIs.
+Oxid projects receive an `oxid.d.ts` file containing declarations for the scripting API exposed by that Oxid build.
 
-## What this gives you
+## Generated declarations
 
-- autocomplete for `oxid/*` imports
-- signatures for classes and functions exposed by the runtime
-- basic checking when `checkJs` is enabled
+The declarations are generated from the same metadata used to describe the native scripting modules. They cover:
 
-## What this does not mean
+- `Entity`
+- `Vector2D`
+- `Color`
+- `TextMetrics`
+- `Texture2D`
+- native scripting functions and their parameters
 
-This does **not** mean Oxid has official TypeScript runtime support today.
+This provides autocomplete and JavaScript-aware type checking when `checkJs` is enabled in the generated `tsconfig.json`.
 
-The current scripting flow is:
+## JavaScript remains the runtime language
 
-- write JavaScript
-- use `oxid.d.ts` for tooling
-- let your editor use `tsconfig.json` for JS-aware feedback
+`oxid.d.ts` does not add TypeScript execution to the engine. The runtime still evaluates JavaScript through QuickJS.
 
-If you personally transpile other languages to JavaScript, that is outside the official runtime flow documented here.
+The normal workflow is:
+
+```text
+JavaScript source
+      ↓
+QuickJS runtime
+
+oxid.d.ts
+      ↓
+editor / static checking
+```
+
+See [API metadata and generated typings](./api-generation) for the extension and generation model.

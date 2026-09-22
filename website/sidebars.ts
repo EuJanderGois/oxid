@@ -37,7 +37,8 @@ const sidebars: SidebarsConfig = {
         'scripting/lifecycle',
         'scripting/modules',
         'scripting/types',
-        'scripting/game-object',
+        'scripting/entity',
+        'scripting/api-generation',
       ],
     },
     {

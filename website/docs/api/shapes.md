@@ -13,7 +13,7 @@ import {drawArc, drawCircle, drawRectangle} from 'oxid/shapes';
 
 Draws an arc on screen.
 
-- `position`: `Transform2D`
+- `position`: `Vector2D`
 - `sides`: numeric curve resolution
 - `radius`: arc radius
 - `rotation`: starting rotation in degrees

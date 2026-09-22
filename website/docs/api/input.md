@@ -47,7 +47,7 @@ Unknown key names raise a runtime error.
 ## Mouse
 
 ```ts
-mousePosition(): Transform2D
+mousePosition(): Vector2D
 isMouseButtonDown(button: string): boolean
 isMouseButtonPressed(button: string): boolean
 isMouseButtonReleased(button: string): boolean

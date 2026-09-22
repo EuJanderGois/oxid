@@ -14,8 +14,10 @@ use crate::{
         texture::load_texture as load_renderer_texture,
     },
     scripting::{
-        math::Transform2D,
-        plugin::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
+        math::Vector2D,
+        plugin::{
+            FunctionMeta, FunctionParam, NativePlugin, ScriptType, TypeMeta, TypePropertyMeta,
+        },
     },
 };
 
@@ -55,7 +57,7 @@ fn validate_rotation(ctx: &Ctx<'_>, rotation: f32) -> Result<f32> {
     Ok(rotation)
 }
 
-fn validate_size(ctx: &Ctx<'_>, size: &Transform2D) -> Result<()> {
+fn validate_size(ctx: &Ctx<'_>, size: &Vector2D) -> Result<()> {
     if !size.x.is_finite() || size.x <= 0.0 {
         let message = i18n::text("scripting.api.invalid_size_x");
         return Err(Exception::throw_range(ctx, &message));
@@ -81,7 +83,7 @@ fn load_texture<'js>(ctx: Ctx<'js>, path: StdString) -> Result<Class<'js, Script
 
 fn draw_texture<'js>(
     texture: OwnedBorrow<'js, ScriptTexture2D>,
-    position: OwnedBorrow<'js, Transform2D>,
+    position: OwnedBorrow<'js, Vector2D>,
 ) {
     let _ = with_active_queue(|queue| {
         queue.draw_texture(
@@ -99,8 +101,8 @@ fn draw_texture<'js>(
 fn draw_texture_scaled<'js>(
     ctx: Ctx<'js>,
     texture: OwnedBorrow<'js, ScriptTexture2D>,
-    position: OwnedBorrow<'js, Transform2D>,
-    size: OwnedBorrow<'js, Transform2D>,
+    position: OwnedBorrow<'js, Vector2D>,
+    size: OwnedBorrow<'js, Vector2D>,
     rotation: Opt<f32>,
 ) -> Result<()> {
     validate_size(&ctx, &size)?;
@@ -145,13 +147,47 @@ impl ModuleDef for TexturePlugin {
 impl NativePlugin for TexturePlugin {
     const NAME: &'static str = "oxid/texture";
 
+    fn docs() -> &'static str {
+        "Carregamento e desenho de texturas 2D."
+    }
+
+    fn types() -> &'static [TypeMeta] {
+        static TYPES: [TypeMeta; 1] = [TypeMeta {
+            module: "oxid/texture",
+            name: "Texture2D",
+            docs: "Textura carregada pelo runtime com dimensões e caminho de origem.",
+            constructors: &[],
+            properties: &[
+                TypePropertyMeta {
+                    name: "path",
+                    ty: ScriptType::String,
+                    docs: "Caminho usado para carregar a textura.",
+                    readonly: true,
+                },
+                TypePropertyMeta {
+                    name: "width",
+                    ty: ScriptType::Number,
+                    docs: "Largura da textura em pixels.",
+                    readonly: true,
+                },
+                TypePropertyMeta {
+                    name: "height",
+                    ty: ScriptType::Number,
+                    docs: "Altura da textura em pixels.",
+                    readonly: true,
+                },
+            ],
+        }];
+        &TYPES
+    }
+
     fn functions() -> &'static [FunctionMeta] {
         &[
             FunctionMeta {
                 module: "oxid/texture",
                 name: "loadTexture",
                 docs: "Carrega uma textura do disco e retorna um objeto Texture2D reutilizável.",
-                returns: ScriptType::Custom("Texture2D"),
+                returns: ScriptType::Custom("oxid/texture", "Texture2D"),
                 params: &[FunctionParam {
                     name: "path",
                     ty: ScriptType::String,
@@ -167,13 +203,13 @@ impl NativePlugin for TexturePlugin {
                 params: &[
                     FunctionParam {
                         name: "texture",
-                        ty: ScriptType::Custom("Texture2D"),
+                        ty: ScriptType::Custom("oxid/texture", "Texture2D"),
                         docs: "Textura retornada por loadTexture.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "position",
-                        ty: ScriptType::Custom("Transform2D"),
+                        ty: ScriptType::Custom("oxid/math", "Vector2D"),
                         docs: "Posição do canto superior esquerdo em coordenadas de tela.",
                         optional: false,
                     },
@@ -187,19 +223,19 @@ impl NativePlugin for TexturePlugin {
                 params: &[
                     FunctionParam {
                         name: "texture",
-                        ty: ScriptType::Custom("Texture2D"),
+                        ty: ScriptType::Custom("oxid/texture", "Texture2D"),
                         docs: "Textura retornada por loadTexture.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "position",
-                        ty: ScriptType::Custom("Transform2D"),
+                        ty: ScriptType::Custom("oxid/math", "Vector2D"),
                         docs: "Posição do canto superior esquerdo em coordenadas de tela.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "size",
-                        ty: ScriptType::Custom("Transform2D"),
+                        ty: ScriptType::Custom("oxid/math", "Vector2D"),
                         docs: "Largura e altura de destino da textura.",
                         optional: false,
                     },

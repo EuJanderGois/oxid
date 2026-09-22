@@ -14,7 +14,7 @@ use rquickjs::{
 use crate::{
     i18n,
     scripting::{
-        math::Transform2D,
+        math::Vector2D,
         plugin::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
     },
 };
@@ -228,9 +228,9 @@ fn is_key_released(ctx: Ctx<'_>, key: StdString) -> Result<bool> {
     Ok(mq_is_key_released(parse_key_code(&ctx, &key)?))
 }
 
-fn mouse_position<'js>(ctx: Ctx<'js>) -> Result<Class<'js, Transform2D>> {
+fn mouse_position<'js>(ctx: Ctx<'js>) -> Result<Class<'js, Vector2D>> {
     let (x, y) = mq_mouse_position();
-    Class::instance(ctx, Transform2D::new(x, y))
+    Class::instance(ctx, Vector2D::new(x, y))
 }
 
 fn is_mouse_button_down(ctx: Ctx<'_>, button: StdString) -> Result<bool> {
@@ -333,7 +333,7 @@ impl NativePlugin for InputPlugin {
                 module: "oxid/input",
                 name: "mousePosition",
                 docs: "Retorna a posição atual do mouse em coordenadas de tela.",
-                returns: ScriptType::Custom("Transform2D"),
+                returns: ScriptType::Custom("oxid/math", "Vector2D"),
                 params: &[],
             },
             FunctionMeta {

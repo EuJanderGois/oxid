@@ -51,16 +51,16 @@ Oxid creates the project structure and provides the runtime and editor type defi
 A minimal Oxid application can look like this:
 
 ```javascript
-import { GameObject } from "oxid/core";
-import { Transform2D } from "oxid/math";
+import { Entity } from "oxid/core";
+import { Vector2D } from "oxid/math";
 import { drawText } from "oxid/text";
 import { Color } from "oxid/color";
 
-export class MyApp extends GameObject {
+export class MyApp extends Entity {
     constructor() {
         super();
 
-        this.position = new Transform2D(300.0, 300.0);
+        this.position = new Vector2D(300.0, 300.0);
         this.color = new Color(1.0, 1.0, 1.0, 1.0);
     }
 

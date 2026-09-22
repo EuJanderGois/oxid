@@ -13,8 +13,11 @@ use crate::{
     renderer::context::with_active_queue,
     scripting::{
         color::{Color, to_renderer_color},
-        math::Transform2D,
-        plugin::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
+        math::Vector2D,
+        plugin::{
+            FunctionMeta, FunctionParam, NativePlugin, ScriptType, TypeConstructorMeta, TypeMeta,
+            TypePropertyMeta,
+        },
     },
 };
 
@@ -81,7 +84,7 @@ fn validate_line_distance(ctx: &Ctx<'_>, line_distance: Option<f32>) -> Result<O
 fn draw_text<'js>(
     ctx: Ctx<'js>,
     text: StdString,
-    position: OwnedBorrow<'js, Transform2D>,
+    position: OwnedBorrow<'js, Vector2D>,
     font_size: f32,
     color: OwnedBorrow<'js, Color>,
 ) -> Result<()> {
@@ -108,7 +111,7 @@ fn draw_text<'js>(
 fn draw_multiline_text<'js>(
     ctx: Ctx<'js>,
     text: StdString,
-    position: OwnedBorrow<'js, Transform2D>,
+    position: OwnedBorrow<'js, Vector2D>,
     font_size: f32,
     color: OwnedBorrow<'js, Color>,
     line_distance: Opt<f32>,
@@ -179,6 +182,61 @@ impl ModuleDef for TextPlugin {
 impl NativePlugin for TextPlugin {
     const NAME: &'static str = "oxid/text";
 
+    fn docs() -> &'static str {
+        "Renderização e medição de texto 2D."
+    }
+
+    fn types() -> &'static [TypeMeta] {
+        static TYPES: [TypeMeta; 1] = [TypeMeta {
+            module: "oxid/text",
+            name: "TextMetrics",
+            docs: "Métricas calculadas para uma linha de texto.",
+            constructors: &[TypeConstructorMeta {
+                params: &[
+                    FunctionParam {
+                        name: "width",
+                        ty: ScriptType::Number,
+                        docs: "Largura do texto.",
+                        optional: false,
+                    },
+                    FunctionParam {
+                        name: "height",
+                        ty: ScriptType::Number,
+                        docs: "Altura do texto.",
+                        optional: false,
+                    },
+                    FunctionParam {
+                        name: "offsetY",
+                        ty: ScriptType::Number,
+                        docs: "Offset vertical da métrica.",
+                        optional: false,
+                    },
+                ],
+            }],
+            properties: &[
+                TypePropertyMeta {
+                    name: "width",
+                    ty: ScriptType::Number,
+                    docs: "Largura do texto.",
+                    readonly: true,
+                },
+                TypePropertyMeta {
+                    name: "height",
+                    ty: ScriptType::Number,
+                    docs: "Altura do texto.",
+                    readonly: true,
+                },
+                TypePropertyMeta {
+                    name: "offset_y",
+                    ty: ScriptType::Number,
+                    docs: "Offset vertical da métrica.",
+                    readonly: true,
+                },
+            ],
+        }];
+        &TYPES
+    }
+
     fn functions() -> &'static [FunctionMeta] {
         &[
             FunctionMeta {
@@ -195,7 +253,7 @@ impl NativePlugin for TextPlugin {
                     },
                     FunctionParam {
                         name: "position",
-                        ty: ScriptType::Custom("Transform2D"),
+                        ty: ScriptType::Custom("oxid/math", "Vector2D"),
                         docs: "Posição do texto em coordenadas de tela.",
                         optional: false,
                     },
@@ -207,7 +265,7 @@ impl NativePlugin for TextPlugin {
                     },
                     FunctionParam {
                         name: "color",
-                        ty: ScriptType::Custom("Color"),
+                        ty: ScriptType::Custom("oxid/color", "Color"),
                         docs: "Cor usada no texto.",
                         optional: false,
                     },
@@ -227,7 +285,7 @@ impl NativePlugin for TextPlugin {
                     },
                     FunctionParam {
                         name: "position",
-                        ty: ScriptType::Custom("Transform2D"),
+                        ty: ScriptType::Custom("oxid/math", "Vector2D"),
                         docs: "Posição inicial do bloco de texto em coordenadas de tela.",
                         optional: false,
                     },
@@ -239,7 +297,7 @@ impl NativePlugin for TextPlugin {
                     },
                     FunctionParam {
                         name: "color",
-                        ty: ScriptType::Custom("Color"),
+                        ty: ScriptType::Custom("oxid/color", "Color"),
                         docs: "Cor usada no texto.",
                         optional: false,
                     },
@@ -255,7 +313,7 @@ impl NativePlugin for TextPlugin {
                 module: "oxid/text",
                 name: "measureText",
                 docs: "Mede um texto de linha única usando a fonte padrão e retorna largura, altura e offset_y.",
-                returns: ScriptType::Custom("TextMetrics"),
+                returns: ScriptType::Custom("oxid/text", "TextMetrics"),
                 params: &[
                     FunctionParam {
                         name: "text",

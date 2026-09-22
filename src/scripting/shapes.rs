@@ -14,11 +14,11 @@ use crate::{
 
 use crate::scripting::{
     color::{Color, to_renderer_color},
-    math::Transform2D,
+    math::Vector2D,
 };
 
 fn draw_arc<'js>(
-    pos: OwnedBorrow<'js, Transform2D>,
+    pos: OwnedBorrow<'js, Vector2D>,
     sides: u8,
     radius: f32,
     rotation: f32,
@@ -95,7 +95,7 @@ impl NativePlugin for ShapesPlugin {
                 params: &[
                     FunctionParam {
                         name: "position",
-                        ty: ScriptType::Custom("Transform2D"),
+                        ty: ScriptType::Custom("oxid/math", "Vector2D"),
                         docs: "Posição do arco.",
                         optional: false,
                     },
@@ -131,7 +131,7 @@ impl NativePlugin for ShapesPlugin {
                     },
                     FunctionParam {
                         name: "color",
-                        ty: ScriptType::Custom("Color"),
+                        ty: ScriptType::Custom("oxid/color", "Color"),
                         docs: "Cor usada no desenho.",
                         optional: false,
                     },
@@ -163,7 +163,7 @@ impl NativePlugin for ShapesPlugin {
                     },
                     FunctionParam {
                         name: "color",
-                        ty: ScriptType::Custom("Color"),
+                        ty: ScriptType::Custom("oxid/color", "Color"),
                         docs: "Cor usada no desenho.",
                         optional: false,
                     },
@@ -201,7 +201,7 @@ impl NativePlugin for ShapesPlugin {
                     },
                     FunctionParam {
                         name: "color",
-                        ty: ScriptType::Custom("Color"),
+                        ty: ScriptType::Custom("oxid/color", "Color"),
                         docs: "Cor usada no desenho.",
                         optional: false,
                     },

@@ -5,18 +5,18 @@ slug: /api/core
 
 # `oxid/core`
 
-## `GameObject`
+## `Entity`
 
 ```javascript
-import {GameObject} from 'oxid/core';
+import {Entity} from 'oxid/core';
 ```
 
-`GameObject` is the base class used by the current scripting model.
+`Entity` is the base class used by the default scripting model. It provides the lifecycle hook shape expected by the runtime.
 
 ### Hooks
 
 ```ts
-class GameObject {
+class Entity {
   onInit?(): void;
   onUpdate?(dt: number): void;
   onDraw?(): void;

@@ -25,7 +25,7 @@ Returned by `measureText`.
 
 Draws a single line of text.
 
-- `position` uses `Transform2D`
+- `position` uses `Vector2D`
 - `fontSize` must be greater than zero
 - the `y` coordinate is treated as the text baseline
 
