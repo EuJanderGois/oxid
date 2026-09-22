@@ -8,9 +8,8 @@ pub const APP_INSTANCE: &str = "__app_instance";
 pub const MAIN_NAMESPACE: &str = "__main";
 
 pub fn register_modules(ctx: &Ctx<'_>) -> Result<(), ScriptEngineError> {
-    registry::register_native_modules(ctx).map_err(|(plugin, source)| {
-        ScriptEngineError::PluginRegister { plugin, source }
-    })?;
+    registry::register_native_modules(ctx)
+        .map_err(|(plugin, source)| ScriptEngineError::PluginRegister { plugin, source })?;
     core::register(ctx)
 }
 

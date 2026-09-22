@@ -106,7 +106,6 @@ pub trait NativePlugin: ModuleDef + Sized {
         rquickjs::Module::declare_def::<Self, _>(ctx.clone(), Self::NAME)?;
         Ok(())
     }
-
 }
 
 pub struct NativeModule {
@@ -117,8 +116,8 @@ pub struct NativeModule {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::generator::generate_d_ts;
+    use super::*;
 
     #[test]
     fn generates_cross_module_type_imports() {

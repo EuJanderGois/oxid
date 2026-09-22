@@ -1,8 +1,6 @@
 //! TypeScript declaration generation from scripting API metadata.
 
-use super::plugin::{
-    FunctionMeta, FunctionParam, ModuleMeta, ScriptType, TypeMeta,
-};
+use super::plugin::{FunctionMeta, FunctionParam, ModuleMeta, ScriptType, TypeMeta};
 
 fn type_imports(
     ty: ScriptType,
@@ -169,11 +167,12 @@ pub fn generate_d_ts(modules: &[ModuleMeta]) -> String {
     output
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::scripting::plugin::{FunctionParam, ModuleMeta, ScriptType, TypeConstructorMeta, TypeMeta};
+    use crate::scripting::plugin::{
+        FunctionParam, ModuleMeta, ScriptType, TypeConstructorMeta, TypeMeta,
+    };
 
     #[test]
     fn generates_cross_module_type_imports() {

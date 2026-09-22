@@ -21,7 +21,7 @@ use crate::{
 
 const KEY_NAME_DOCS: &str = "Key name. Case-insensitive; spaces, '_' and '-' are ignored. Examples: \"A\", \"ArrowLeft\", \"Space\", \"Enter\", \"Escape\", \"LeftShift\", \"F1\".";
 const MOUSE_BUTTON_DOCS: &str =
-"Mouse button name. Accepted values: \"left\", \"middle\", and \"right\".";
+    "Mouse button name. Accepted values: \"left\", \"middle\", and \"right\".";
 
 fn normalize_input_name(name: &str) -> StdString {
     let mut normalized = StdString::with_capacity(name.len());

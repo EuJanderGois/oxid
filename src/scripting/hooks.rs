@@ -10,7 +10,6 @@ pub const HOOK_ON_INIT: &str = "__hook_on_init";
 pub const HOOK_ON_UPDATE: &str = "__hook_on_update";
 pub const HOOK_ON_DRAW: &str = "__hook_on_draw";
 
-
 pub fn compile_hooks<'a>(ctx: &Ctx<'a>, globals: &Object<'a>) -> Result<(), ScriptEngineError> {
     let hook_on_init: Function = ctx
         .eval(format!(
@@ -46,12 +45,12 @@ pub fn compile_hooks<'a>(ctx: &Ctx<'a>, globals: &Object<'a>) -> Result<(), Scri
             source: e.to_string(),
         })?;
 
-    globals.set(HOOK_ON_UPDATE, hook_on_update).map_err(|e| {
-        ScriptEngineError::HookCompile {
+    globals
+        .set(HOOK_ON_UPDATE, hook_on_update)
+        .map_err(|e| ScriptEngineError::HookCompile {
             hook: "onUpdate",
             source: e.to_string(),
-        }
-    })?;
+        })?;
 
     globals
         .set(HOOK_ON_DRAW, hook_on_draw)
@@ -62,7 +61,6 @@ pub fn compile_hooks<'a>(ctx: &Ctx<'a>, globals: &Object<'a>) -> Result<(), Scri
 
     Ok(())
 }
-
 
 pub fn call_void_hook(context: &Context, hook_name: &'static str) -> Result<(), ScriptEngineError> {
     context.with(|ctx| {
@@ -79,8 +77,11 @@ pub fn call_void_hook(context: &Context, hook_name: &'static str) -> Result<(), 
     })
 }
 
-
-pub fn call_f32_hook(context: &Context, hook_name: &'static str, value: f32) -> Result<(), ScriptEngineError> {
+pub fn call_f32_hook(
+    context: &Context,
+    hook_name: &'static str,
+    value: f32,
+) -> Result<(), ScriptEngineError> {
     context.with(|ctx| {
         let func: Function = ctx.globals().get(hook_name).map_err(|e| {
             let source = e.to_string();
