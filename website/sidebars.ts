@@ -76,6 +76,7 @@ const sidebars: SidebarsConfig = {
       },
       items: [
         'technical-information/development-workflow',
+        'technical-information/native-modules',
         'technical-information/versioning-and-releases',
         'technical-information/ci-cd'
       ],

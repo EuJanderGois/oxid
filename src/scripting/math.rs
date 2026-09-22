@@ -6,7 +6,7 @@ use crate::scripting::plugin::{
 };
 
 ///
-/// vetor de x e y.
+/// Represents a two-dimensional vector with x and y components.
 ///
 #[rquickjs::class]
 #[derive(Clone, Trace, JsLifetime)]
@@ -26,7 +26,7 @@ impl Vector2D {
 }
 
 ///
-/// gerencia os métodos e módulos de matemática.
+/// Provides mathematical types and module bindings.
 ///
 pub struct MathPlugin;
 
@@ -46,26 +46,26 @@ impl NativePlugin for MathPlugin {
     const NAME: &'static str = "oxid/math";
 
     fn docs() -> &'static str {
-        "Tipos e utilitários matemáticos 2D."
+        "2D mathematical types and utilities."
     }
 
     fn types() -> &'static [TypeMeta] {
         static TYPES: [TypeMeta; 1] = [TypeMeta {
             module: "oxid/math",
             name: "Vector2D",
-            docs: "Vetor 2D mutável com componentes x e y.",
+            docs: "Mutable 2D vector with x and y components.",
             constructors: &[TypeConstructorMeta {
                 params: &[
                     FunctionParam {
                         name: "x",
                         ty: ScriptType::Number,
-                        docs: "Componente horizontal.",
+                        docs: "Horizontal component.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "y",
                         ty: ScriptType::Number,
-                        docs: "Componente vertical.",
+                        docs: "Vertical component.",
                         optional: false,
                     },
                 ],
@@ -74,13 +74,13 @@ impl NativePlugin for MathPlugin {
                 TypePropertyMeta {
                     name: "x",
                     ty: ScriptType::Number,
-                    docs: "Componente horizontal.",
+                    docs: "Horizontal component.",
                     readonly: false,
                 },
                 TypePropertyMeta {
                     name: "y",
                     ty: ScriptType::Number,
-                    docs: "Componente vertical.",
+                    docs: "Vertical component.",
                     readonly: false,
                 },
             ],

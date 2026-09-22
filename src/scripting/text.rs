@@ -22,7 +22,7 @@ use crate::{
 };
 
 ///
-/// métricas de layout para um texto de linha única.
+/// Layout metrics for a single line of text.
 ///
 #[rquickjs::class]
 #[derive(Clone, Trace, JsLifetime)]
@@ -79,7 +79,7 @@ fn validate_line_distance(ctx: &Ctx<'_>, line_distance: Option<f32>) -> Result<O
 ///
 /// adiciona o comando draw_text a queue.
 ///
-/// a coordenada y representa a baseline do texto, seguindo a convenção do macroquad.
+/// The y coordinate represents the text baseline, following Macroquad conventions.
 ///
 fn draw_text<'js>(
     ctx: Ctx<'js>,
@@ -104,7 +104,7 @@ fn draw_text<'js>(
 }
 
 ///
-/// adiciona um bloco de texto multilinha a queue.
+/// adds a multiline text block to the render queue.
 ///
 /// a coordenada y representa a baseline da primeira linha.
 ///
@@ -134,7 +134,7 @@ fn draw_multiline_text<'js>(
 }
 
 ///
-/// mede um texto de linha única usando a fonte padrão.
+/// Measures a single line of text using the default font.
 ///
 fn measure_text<'js>(
     ctx: Ctx<'js>,
@@ -151,7 +151,7 @@ fn measure_text<'js>(
 }
 
 ///
-/// texto 2D.
+/// 2D text.
 ///
 pub struct TextPlugin;
 
@@ -183,32 +183,32 @@ impl NativePlugin for TextPlugin {
     const NAME: &'static str = "oxid/text";
 
     fn docs() -> &'static str {
-        "Renderização e medição de texto 2D."
+        "2D text rendering and measurement."
     }
 
     fn types() -> &'static [TypeMeta] {
         static TYPES: [TypeMeta; 1] = [TypeMeta {
             module: "oxid/text",
             name: "TextMetrics",
-            docs: "Métricas calculadas para uma linha de texto.",
+            docs: "Metrics calculated for a single line of text.",
             constructors: &[TypeConstructorMeta {
                 params: &[
                     FunctionParam {
                         name: "width",
                         ty: ScriptType::Number,
-                        docs: "Largura do texto.",
+                        docs: "Text width.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "height",
                         ty: ScriptType::Number,
-                        docs: "Altura do texto.",
+                        docs: "Text height.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "offsetY",
                         ty: ScriptType::Number,
-                        docs: "Offset vertical da métrica.",
+                        docs: "Vertical metric offset.",
                         optional: false,
                     },
                 ],
@@ -217,19 +217,19 @@ impl NativePlugin for TextPlugin {
                 TypePropertyMeta {
                     name: "width",
                     ty: ScriptType::Number,
-                    docs: "Largura do texto.",
+                    docs: "Text width.",
                     readonly: true,
                 },
                 TypePropertyMeta {
                     name: "height",
                     ty: ScriptType::Number,
-                    docs: "Altura do texto.",
+                    docs: "Text height.",
                     readonly: true,
                 },
                 TypePropertyMeta {
                     name: "offset_y",
                     ty: ScriptType::Number,
-                    docs: "Offset vertical da métrica.",
+                    docs: "Vertical metric offset.",
                     readonly: true,
                 },
             ],
@@ -242,19 +242,19 @@ impl NativePlugin for TextPlugin {
             FunctionMeta {
                 module: "oxid/text",
                 name: "drawText",
-                docs: "Desenha texto 2D na tela. A coordenada y representa a baseline do texto.",
+                docs: "Draws 2D text on the screen. The y coordinate represents the text baseline.",
                 returns: ScriptType::Void,
                 params: &[
                     FunctionParam {
                         name: "text",
                         ty: ScriptType::String,
-                        docs: "Conteúdo textual a ser desenhado.",
+                        docs: "Text content to draw.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "position",
                         ty: ScriptType::Custom("oxid/math", "Vector2D"),
-                        docs: "Posição do texto em coordenadas de tela.",
+                        docs: "Text position in screen coordinates.",
                         optional: false,
                     },
                     FunctionParam {
@@ -266,7 +266,7 @@ impl NativePlugin for TextPlugin {
                     FunctionParam {
                         name: "color",
                         ty: ScriptType::Custom("oxid/color", "Color"),
-                        docs: "Cor usada no texto.",
+                        docs: "Color used for the text.",
                         optional: false,
                     },
                 ],
@@ -274,19 +274,19 @@ impl NativePlugin for TextPlugin {
             FunctionMeta {
                 module: "oxid/text",
                 name: "drawMultilineText",
-                docs: "Desenha texto multilinha usando '\\n' como separador. A coordenada y representa a baseline da primeira linha.",
+                docs: "Draws multiline text using '\\n' as the separator. The y coordinate represents the first line baseline.",
                 returns: ScriptType::Void,
                 params: &[
                     FunctionParam {
                         name: "text",
                         ty: ScriptType::String,
-                        docs: "Conteúdo textual a ser desenhado.",
+                        docs: "Text content to draw.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "position",
                         ty: ScriptType::Custom("oxid/math", "Vector2D"),
-                        docs: "Posição inicial do bloco de texto em coordenadas de tela.",
+                        docs: "Initial text block position in screen coordinates.",
                         optional: false,
                     },
                     FunctionParam {
@@ -298,13 +298,13 @@ impl NativePlugin for TextPlugin {
                     FunctionParam {
                         name: "color",
                         ty: ScriptType::Custom("oxid/color", "Color"),
-                        docs: "Cor usada no texto.",
+                        docs: "Color used for the text.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "lineDistance",
                         ty: ScriptType::Number,
-                        docs: "Multiplicador de distância entre linhas. Use 1.0 para o espaçamento padrão.",
+                        docs: "Line spacing multiplier. Use 1.0 for default spacing.",
                         optional: true,
                     },
                 ],
@@ -312,13 +312,13 @@ impl NativePlugin for TextPlugin {
             FunctionMeta {
                 module: "oxid/text",
                 name: "measureText",
-                docs: "Mede um texto de linha única usando a fonte padrão e retorna largura, altura e offset_y.",
+                docs: "Measures a single line of text using the default font and returns its width, height, and offset_y.",
                 returns: ScriptType::Custom("oxid/text", "TextMetrics"),
                 params: &[
                     FunctionParam {
                         name: "text",
                         ty: ScriptType::String,
-                        docs: "Conteúdo textual a ser medido.",
+                        docs: "Text content to measure.",
                         optional: false,
                     },
                     FunctionParam {

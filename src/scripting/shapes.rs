@@ -41,7 +41,7 @@ fn draw_arc<'js>(
 }
 
 ///
-/// usa o renderizador para desenhar um círculo.
+/// Uses the renderer to draw a circle.
 ///
 fn draw_circle<'js>(x: f32, y: f32, r: f32, color: OwnedBorrow<'js, Color>) {
     let _ = with_active_queue(|queue| {
@@ -90,31 +90,31 @@ impl NativePlugin for ShapesPlugin {
             FunctionMeta {
                 module: "oxid/shapes",
                 name: "drawArc",
-                docs: "Desenha um arco na tela.",
+                docs: "Draws an arc on the screen.",
                 returns: ScriptType::Void,
                 params: &[
                     FunctionParam {
                         name: "position",
                         ty: ScriptType::Custom("oxid/math", "Vector2D"),
-                        docs: "Posição do arco.",
+                        docs: "Arc position.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "sides",
                         ty: ScriptType::Number,
-                        docs: "Resolução usada para aproximar a curva; valores maiores deixam o arco mais suave.",
+                        docs: "Resolution used to approximate the curve; higher values produce a smoother arc.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "radius",
                         ty: ScriptType::Number,
-                        docs: "Raio do arco.",
+                        docs: "Arc radius.",,
                         optional: false,
                     },
                     FunctionParam {
                         name: "rotation",
                         ty: ScriptType::Number,
-                        docs: "Rotação inicial em graus.",
+                        docs: "Initial rotation in degrees.",
                         optional: false,
                     },
                     FunctionParam {
@@ -132,7 +132,7 @@ impl NativePlugin for ShapesPlugin {
                     FunctionParam {
                         name: "color",
                         ty: ScriptType::Custom("oxid/color", "Color"),
-                        docs: "Cor usada no desenho.",
+                        docs: "Color used for drawing.",
                         optional: false,
                     },
                 ],
@@ -140,31 +140,31 @@ impl NativePlugin for ShapesPlugin {
             FunctionMeta {
                 module: "oxid/shapes",
                 name: "drawCircle",
-                docs: "Desenha um círculo na tela.",
+                docs: "Draws a circle on the screen.",
                 returns: ScriptType::Void,
                 params: &[
                     FunctionParam {
                         name: "x",
                         ty: ScriptType::Number,
-                        docs: "Posição horizontal.",
+                        docs: "Horizontal position.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "y",
                         ty: ScriptType::Number,
-                        docs: "Posição vertical.",
+                        docs: "Vertical position.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "radius",
                         ty: ScriptType::Number,
-                        docs: "Raio do círculo.",
+                        docs: "Circle radius.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "color",
                         ty: ScriptType::Custom("oxid/color", "Color"),
-                        docs: "Cor usada no desenho.",
+                        docs: "Color used for drawing.",
                         optional: false,
                     },
                 ],
@@ -172,37 +172,37 @@ impl NativePlugin for ShapesPlugin {
             FunctionMeta {
                 module: "oxid/shapes",
                 name: "drawRectangle",
-                docs: "Desenha um retângulo na tela.",
+                docs: "Draws a rectangle on the screen.",
                 returns: ScriptType::Void,
                 params: &[
                     FunctionParam {
                         name: "x",
                         ty: ScriptType::Number,
-                        docs: "Posição horizontal.",
+                        docs: "Horizontal position.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "y",
                         ty: ScriptType::Number,
-                        docs: "Posição vertical.",
+                        docs: "Vertical position.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "width",
                         ty: ScriptType::Number,
-                        docs: "Largura do retângulo.",
+                        docs: "Rectangle width.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "height",
                         ty: ScriptType::Number,
-                        docs: "Altura do retângulo.",
+                        docs: "Rectangle height.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "color",
                         ty: ScriptType::Custom("oxid/color", "Color"),
-                        docs: "Cor usada no desenho.",
+                        docs: "Color used for drawing.",
                         optional: false,
                     },
                 ],

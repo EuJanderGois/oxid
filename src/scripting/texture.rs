@@ -155,25 +155,25 @@ impl NativePlugin for TexturePlugin {
         static TYPES: [TypeMeta; 1] = [TypeMeta {
             module: "oxid/texture",
             name: "Texture2D",
-            docs: "Textura carregada pelo runtime com dimensões e caminho de origem.",
+            docs: "Texture loaded by the runtime with dimensions and source path.",
             constructors: &[],
             properties: &[
                 TypePropertyMeta {
                     name: "path",
                     ty: ScriptType::String,
-                    docs: "Caminho usado para carregar a textura.",
+                    docs: "Path used to load the texture.",
                     readonly: true,
                 },
                 TypePropertyMeta {
                     name: "width",
                     ty: ScriptType::Number,
-                    docs: "Largura da textura em pixels.",
+                    docs: "Texture width in pixels.",
                     readonly: true,
                 },
                 TypePropertyMeta {
                     name: "height",
                     ty: ScriptType::Number,
-                    docs: "Altura da textura em pixels.",
+                    docs: "Texture height in pixels.",
                     readonly: true,
                 },
             ],
@@ -186,31 +186,31 @@ impl NativePlugin for TexturePlugin {
             FunctionMeta {
                 module: "oxid/texture",
                 name: "loadTexture",
-                docs: "Carrega uma textura do disco e retorna um objeto Texture2D reutilizável.",
+                docs: "Loads a texture from disk and returns a reusable Texture2D object.",
                 returns: ScriptType::Custom("oxid/texture", "Texture2D"),
                 params: &[FunctionParam {
                     name: "path",
                     ty: ScriptType::String,
-                    docs: "Caminho do arquivo de textura. Caminhos relativos usam o diretório de trabalho atual.",
+                    docs: "Texture file path. Relative paths use the current working directory.",
                     optional: false,
                 }],
             },
             FunctionMeta {
                 module: "oxid/texture",
                 name: "drawTexture",
-                docs: "Desenha uma textura usando seu tamanho original.",
+                docs: "Draws a texture using its original size.",
                 returns: ScriptType::Void,
                 params: &[
                     FunctionParam {
                         name: "texture",
                         ty: ScriptType::Custom("oxid/texture", "Texture2D"),
-                        docs: "Textura retornada por loadTexture.",
+                        docs: "Texture returned by loadTexture.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "position",
                         ty: ScriptType::Custom("oxid/math", "Vector2D"),
-                        docs: "Posição do canto superior esquerdo em coordenadas de tela.",
+                        docs: "Top-left position in screen coordinates.",
                         optional: false,
                     },
                 ],
@@ -218,31 +218,31 @@ impl NativePlugin for TexturePlugin {
             FunctionMeta {
                 module: "oxid/texture",
                 name: "drawTextureScaled",
-                docs: "Desenha uma textura redimensionada, com rotação opcional em radianos.",
+                docs: "Draws a resized texture with optional rotation in radians.",
                 returns: ScriptType::Void,
                 params: &[
                     FunctionParam {
                         name: "texture",
                         ty: ScriptType::Custom("oxid/texture", "Texture2D"),
-                        docs: "Textura retornada por loadTexture.",
+                        docs: "Texture returned by loadTexture.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "position",
                         ty: ScriptType::Custom("oxid/math", "Vector2D"),
-                        docs: "Posição do canto superior esquerdo em coordenadas de tela.",
+                        docs: "Top-left position in screen coordinates.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "size",
                         ty: ScriptType::Custom("oxid/math", "Vector2D"),
-                        docs: "Largura e altura de destino da textura.",
+                        docs: "Destination width and height for the texture.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "rotation",
                         ty: ScriptType::Number,
-                        docs: "Rotação em radianos. Quando omitido, usa 0.",
+                        docs: "Rotation in radians. Defaults to 0 when omitted.",
                         optional: true,
                     },
                 ],

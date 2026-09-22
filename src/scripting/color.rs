@@ -6,7 +6,7 @@ use crate::scripting::plugin::{
 };
 
 ///
-/// vetor de x e y.
+/// Represents a two-dimensional vector with x and y components.
 ///
 #[rquickjs::class]
 #[derive(Clone, Trace, JsLifetime)]
@@ -35,7 +35,7 @@ pub fn to_renderer_color(color: &Color) -> RendererColor {
 }
 
 ///
-/// gerencia os métodos e módulos de cores.
+/// Provides color types and module bindings.
 ///
 pub struct ColorPlugin;
 
@@ -55,38 +55,38 @@ impl NativePlugin for ColorPlugin {
     const NAME: &'static str = "oxid/color";
 
     fn docs() -> &'static str {
-        "Tipos para representar cores RGBA."
+        "Types for representing RGBA colors."
     }
 
     fn types() -> &'static [TypeMeta] {
         static TYPES: [TypeMeta; 1] = [TypeMeta {
             module: "oxid/color",
             name: "Color",
-            docs: "Cor RGBA mutável.",
+            docs: "Mutable RGBA color.",
             constructors: &[TypeConstructorMeta {
                 params: &[
                     FunctionParam {
                         name: "r",
                         ty: ScriptType::Number,
-                        docs: "Componente vermelho.",
+                        docs: "Red component.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "g",
                         ty: ScriptType::Number,
-                        docs: "Componente verde.",
+                        docs: "Green component.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "b",
                         ty: ScriptType::Number,
-                        docs: "Componente azul.",
+                        docs: "Blue component.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "a",
                         ty: ScriptType::Number,
-                        docs: "Componente alfa.",
+                        docs: "Alpha component.",
                         optional: false,
                     },
                 ],
@@ -95,25 +95,25 @@ impl NativePlugin for ColorPlugin {
                 TypePropertyMeta {
                     name: "r",
                     ty: ScriptType::Number,
-                    docs: "Componente vermelho.",
+                    docs: "Red component.",
                     readonly: false,
                 },
                 TypePropertyMeta {
                     name: "g",
                     ty: ScriptType::Number,
-                    docs: "Componente verde.",
+                    docs: "Green component.",
                     readonly: false,
                 },
                 TypePropertyMeta {
                     name: "b",
                     ty: ScriptType::Number,
-                    docs: "Componente azul.",
+                    docs: "Blue component.",
                     readonly: false,
                 },
                 TypePropertyMeta {
                     name: "a",
                     ty: ScriptType::Number,
-                    docs: "Componente alfa.",
+                    docs: "Alpha component.",
                     readonly: false,
                 },
             ],

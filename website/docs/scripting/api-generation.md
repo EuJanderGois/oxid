@@ -62,7 +62,7 @@ When extending Oxid itself, keep the runtime implementation and metadata togethe
 2. add its `FunctionMeta` or `TypeMeta`
 3. use `ScriptType` for its parameter, property, and return types
 4. reference custom types with both their module and exported name
-5. register the module in the scripting API registry
+5. add the module to the scripting API registry
 6. update the documentation when the behavior is user-facing
 
 The generator then includes the API in `oxid.d.ts` without a separate hand-written declaration.
