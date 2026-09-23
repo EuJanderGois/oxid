@@ -1,7 +1,6 @@
 #define MyAppName "Oxid"
 #define MyAppPublisher "EuJanderGois"
 #define MyAppURL "https://eujandergois.github.io/oxid"
-#define MyAppExeName "oxid.exe"
 
 #ifndef MyAppVersion
   #define MyAppVersion "0.0.0"
@@ -30,10 +29,4 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
 [Files]
-Source: "..\..\target\release\oxid.exe"; \
-    DestDir: "{app}"; \
-    Flags: ignoreversion
-
-[UninstallDelete]
-Type: filesandordirs
-Name: "{app}"
+Source: "..\..\target\release\oxid.exe"; DestDir: "{app}"; Flags: ignoreversion
