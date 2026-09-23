@@ -34,10 +34,6 @@ Source: "..\..\target\release\oxid.exe"; \
     DestDir: "{app}"; \
     Flags: ignoreversion
 
-[Icons]
-Name: "{group}\Oxid Documentation"
-Filename: "{#MyAppURL}"
-
 [UninstallDelete]
 Type: filesandordirs
 Name: "{app}"
