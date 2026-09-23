@@ -39,97 +39,154 @@ Source: "..\..\target\release\oxid.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 function NormalizePath(const Value: string): string;
 begin
-Result := Value;
+  Result := Trim(Value);
 
-while (Length(Result) > 0) and (Result[Length(Result)] = '') do
-Delete(Result, Length(Result), 1);
+  while (Length(Result) > 0) and
+        (Result[Length(Result)] = '\') do
+    Delete(Result, Length(Result), 1);
+end;
+
+function PathContains(const Path: string; const Target: string): Boolean;
+var
+  Remaining: string;
+  Entry: string;
+  Separator: Integer;
+begin
+  Result := False;
+  Remaining := Path;
+
+  while Remaining <> '' do
+  begin
+    Separator := Pos(';', Remaining);
+
+    if Separator = 0 then
+    begin
+      Entry := Remaining;
+      Remaining := '';
+    end
+    else
+    begin
+      Entry := Copy(Remaining, 1, Separator - 1);
+      Delete(Remaining, 1, Separator);
+    end;
+
+    Entry := NormalizePath(Entry);
+
+    if CompareText(Entry, Target) = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
+function RemovePathEntry(const Path: string; const Target: string): string;
+var
+  Remaining: string;
+  Entry: string;
+  Separator: Integer;
+  NewPath: string;
+begin
+  Remaining := Path;
+  NewPath := '';
+
+  while Remaining <> '' do
+  begin
+    Separator := Pos(';', Remaining);
+
+    if Separator = 0 then
+    begin
+      Entry := Remaining;
+      Remaining := '';
+    end
+    else
+    begin
+      Entry := Copy(Remaining, 1, Separator - 1);
+      Delete(Remaining, 1, Separator);
+    end;
+
+    Entry := Trim(Entry);
+
+    if Entry = '' then
+      Continue;
+
+    if CompareText(NormalizePath(Entry), Target) = 0 then
+      Continue;
+
+    if NewPath = '' then
+      NewPath := Entry
+    else
+      NewPath := NewPath + ';' + Entry;
+  end;
+
+  Result := NewPath;
 end;
 
 procedure AddToUserPath;
 var
-CurrentPath: string;
-OxidPath: string;
+  CurrentPath: string;
+  OxidPath: string;
 begin
-OxidPath := NormalizePath(ExpandConstant('{app}'));
+  OxidPath := NormalizePath(ExpandConstant('{app}'));
 
-if not RegQueryStringValue(
-HKEY_CURRENT_USER,
-'Environment',
-'Path',
-CurrentPath
-) then
-CurrentPath := '';
+  if not RegQueryStringValue(
+    HKEY_CURRENT_USER,
+    'Environment',
+    'Path',
+    CurrentPath
+  ) then
+    CurrentPath := '';
 
-if Pos(';' + LowerCase(OxidPath) + ';', ';' + LowerCase(CurrentPath) + ';') > 0 then
-Exit;
+  if PathContains(CurrentPath, OxidPath) then
+    Exit;
 
-if CurrentPath = '' then
-CurrentPath := OxidPath
-else
-CurrentPath := CurrentPath + ';' + OxidPath;
+  if CurrentPath = '' then
+    CurrentPath := OxidPath
+  else
+    CurrentPath := CurrentPath + ';' + OxidPath;
 
-RegWriteExpandStringValue(
-HKEY_CURRENT_USER,
-'Environment',
-'Path',
-CurrentPath
-);
+  RegWriteExpandStringValue(
+    HKEY_CURRENT_USER,
+    'Environment',
+    'Path',
+    CurrentPath
+  );
 end;
 
 procedure RemoveFromUserPath;
 var
-CurrentPath: string;
-OxidPath: string;
-Parts: TArrayOfString;
-NewPath: string;
-I: Integer;
+  CurrentPath: string;
+  OxidPath: string;
+  NewPath: string;
 begin
-if not RegQueryStringValue(
-HKEY_CURRENT_USER,
-'Environment',
-'Path',
-CurrentPath
-) then
-Exit;
+  if not RegQueryStringValue(
+    HKEY_CURRENT_USER,
+    'Environment',
+    'Path',
+    CurrentPath
+  ) then
+    Exit;
 
-OxidPath := LowerCase(NormalizePath(ExpandConstant('{app}')));
+  OxidPath := NormalizePath(ExpandConstant('{app}'));
 
-Parts := SplitString(CurrentPath, ';');
-NewPath := '';
+  NewPath := RemovePathEntry(CurrentPath, OxidPath);
 
-for I := 0 to GetArrayLength(Parts) - 1 do
-begin
-if NormalizePath(LowerCase(Parts[I])) = OxidPath then
-Continue;
-
-```
-if Parts[I] = '' then
-  Continue;
-
-if NewPath = '' then
-  NewPath := Parts[I]
-else
-  NewPath := NewPath + ';' + Parts[I];
-```
-
-end;
-
-RegWriteExpandStringValue(
-HKEY_CURRENT_USER,
-'Environment',
-'Path',
-NewPath
-);
+  RegWriteExpandStringValue(
+    HKEY_CURRENT_USER,
+    'Environment',
+    'Path',
+    NewPath
+  );
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-if CurStep = ssPostInstall then
-AddToUserPath;
+  if CurStep = ssPostInstall then
+    AddToUserPath;
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
-if CurUninstallStep = usPostUninstall then
-RemoveFromUserPath;
+  if CurUninstallStep = usPostUninstall then
+    RemoveFromUserPath;
 end;
