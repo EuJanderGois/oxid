@@ -116,7 +116,10 @@ jobs:
           $package = "oxid-v$version-windows-x86_64"
 
           New-Item -ItemType Directory -Force -Path "release/$package" | Out-Null
-          Copy-Item "target/release/oxid.exe" "release/$package/oxid.exe"
+
+          Copy-Item `
+            "target/release/oxid.exe" `
+            "release/$package/oxid.exe"
 
           Compress-Archive `
             -Path "release/$package/*" `
@@ -163,3 +166,4 @@ jobs:
           files: |
             release/**/*.zip
             release/**/*.tar.gz
+            release/**/*.exe
