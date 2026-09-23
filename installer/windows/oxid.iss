@@ -17,7 +17,7 @@ AppUpdatesURL={#MyAppURL}
 
 DefaultDirName={autopf}\Oxid
 
-OutputDir=....\release
+OutputDir=..\..\release
 OutputBaseFilename=Oxid-v{#MyAppVersion}-Setup
 
 Compression=lzma
