@@ -17,7 +17,7 @@ That gives you a minimal JavaScript project with the files needed to start scrip
 
 Use this section to:
 
-- install the CLI on Linux
+- install the CLI on your OS
 - generate your first project
 - understand how `oxid run` loads your game
 - learn what the generated files do
