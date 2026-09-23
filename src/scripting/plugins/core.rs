@@ -2,9 +2,9 @@
 
 use rquickjs::{Ctx, Module};
 
-use super::{
+use crate::scripting::{
     error::ScriptEngineError,
-    plugin::{ModuleMeta, TypeConstructorMeta, TypeMeta},
+    plugins::{ModuleMeta, TypeConstructorMeta, TypeMeta},
 };
 
 pub const NAME: &str = "oxid/core";

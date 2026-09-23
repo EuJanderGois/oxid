@@ -1,6 +1,16 @@
 //! Native scripting API metadata and registration helpers.
 
-use core::fmt;
+pub mod color;
+pub mod core;
+pub mod input;
+pub mod math;
+pub mod shapes;
+pub mod text;
+pub mod texture;
+
+pub mod registry;
+
+use ::std::fmt;
 
 use rquickjs::{Ctx, Result, module::ModuleDef};
 

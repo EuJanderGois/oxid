@@ -1,0 +1,10 @@
+{
+  "name": "my-cool-game",
+  "oxid": {
+    "entry": "main.js",
+    "title": "my-cool-game - Oxid Engine",
+    "width": 800,
+    "height": 600,
+    "locale": "pt-BR"
+  }
+}

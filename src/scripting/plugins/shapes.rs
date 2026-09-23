@@ -9,10 +9,10 @@ use crate::{
         context::with_active_queue,
         // color::Color as RendererColor
     },
-    scripting::plugin::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
+    scripting::plugins::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
 };
 
-use crate::scripting::{
+use crate::scripting::plugins::{
     color::{Color, to_renderer_color},
     math::Vector2D,
 };

@@ -11,13 +11,11 @@ use rquickjs::{
 use crate::{
     i18n,
     renderer::context::with_active_queue,
-    scripting::{
+    scripting::plugins::{
+        FunctionMeta, FunctionParam, NativePlugin, ScriptType, TypeConstructorMeta, TypeMeta,
+        TypePropertyMeta,
         color::{Color, to_renderer_color},
         math::Vector2D,
-        plugin::{
-            FunctionMeta, FunctionParam, NativePlugin, ScriptType, TypeConstructorMeta, TypeMeta,
-            TypePropertyMeta,
-        },
     },
 };
 

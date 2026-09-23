@@ -14,8 +14,8 @@ use rquickjs::{
 use crate::{
     i18n,
     scripting::{
-        math::Vector2D,
-        plugin::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
+        plugins::math::Vector2D,
+        plugins::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
     },
 };
 
