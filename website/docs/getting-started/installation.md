@@ -6,7 +6,7 @@ slug: /getting-started/installation
 
 # Install the CLI
 
-The Oxid CLI is distributed through GitHub Releases and can be installed either by downloading a prebuilt binary or by building the CLI from source.
+The Oxid CLI is distributed through [GitHub Releases](https://github.com/EuJanderGois/oxid/releases) and can be installed either by downloading a prebuilt binary or by building the CLI from source.
 
 ## Requirements
 
@@ -17,15 +17,17 @@ Choose the installation method that best fits your workflow:
 
 ## Option 1: Install a prebuilt binary
 
-Prebuilt Oxid binaries are available for supported platforms on the project's GitHub Releases page.
+Prebuilt Oxid binaries are available for supported platforms on the project's [GitHub Releases](https://github.com/EuJanderGois/oxid/releases) page.
 
 Each release provides a platform-specific archive:
 
 ```text
 oxid-vX.Y.Z-windows-x86_64.zip
+Oxid-vX.Y.Z-Setup.exe
 oxid-vX.Y.Z-linux-x86_64.tar.gz
 oxid-vX.Y.Z-macos-x86_64.tar.gz
 ```
+For windows the `zip` is the portable version and `*-Setup.exe` is the installer.
 
 Download the archive corresponding to your operating system and architecture, then extract the `oxid` executable.
 
