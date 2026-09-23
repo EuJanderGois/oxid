@@ -33,7 +33,7 @@ Uninstallable=yes
 UninstallDisplayName=Oxid
 
 [Files]
-Source: "....\target\release\oxid.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\target\release\oxid.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Code]
 
