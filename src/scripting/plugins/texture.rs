@@ -13,11 +13,9 @@ use crate::{
         color::Color as RendererColor, context::with_active_queue,
         texture::load_texture as load_renderer_texture,
     },
-    scripting::{
+    scripting::plugins::{
+        FunctionMeta, FunctionParam, NativePlugin, ScriptType, TypeMeta, TypePropertyMeta,
         math::Vector2D,
-        plugin::{
-            FunctionMeta, FunctionParam, NativePlugin, ScriptType, TypeMeta, TypePropertyMeta,
-        },
     },
 };
 

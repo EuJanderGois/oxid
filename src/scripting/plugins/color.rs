@@ -1,7 +1,7 @@
 use rquickjs::module::{Declarations, Exports, ModuleDef};
 use rquickjs::{Class, Ctx, JsLifetime, Result, class::Trace};
 
-use crate::scripting::plugin::{
+use crate::scripting::plugins::{
     FunctionParam, NativePlugin, ScriptType, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
 };
 

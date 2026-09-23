@@ -2,7 +2,7 @@
 
 use rquickjs::{Ctx, Module, Object};
 
-use super::{core, error::ScriptEngineError, registry};
+use super::{error::ScriptEngineError, plugins::core, plugins::registry};
 
 pub const APP_INSTANCE: &str = "__app_instance";
 pub const MAIN_NAMESPACE: &str = "__main";

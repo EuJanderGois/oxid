@@ -2,14 +2,9 @@
 
 use rquickjs::Ctx;
 
-use super::{
-    color::ColorPlugin,
-    input::InputPlugin,
-    math::MathPlugin,
-    plugin::{ModuleMeta, NativeModule, NativePlugin},
-    shapes::ShapesPlugin,
-    text::TextPlugin,
-    texture::TexturePlugin,
+use crate::scripting::plugins::{
+    ModuleMeta, NativeModule, NativePlugin, color::ColorPlugin, input::InputPlugin,
+    math::MathPlugin, shapes::ShapesPlugin, text::TextPlugin, texture::TexturePlugin,
 };
 
 pub fn native_modules() -> &'static [NativeModule] {
