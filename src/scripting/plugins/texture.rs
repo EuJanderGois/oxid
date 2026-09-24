@@ -14,8 +14,8 @@ use crate::{
         texture::load_texture as load_renderer_texture,
     },
     scripting::plugins::{
-        FunctionMeta, FunctionParam, NativePlugin, ScriptType, TypeMeta, TypePropertyMeta,
-        math::Vector2D,
+        FunctionMeta, FunctionParam, ScriptPlugin, ScriptType, TypeMeta, TypePropertyMeta,
+        math::Vector2D, register_module_def,
     },
 };
 
@@ -142,7 +142,11 @@ impl ModuleDef for TexturePlugin {
     }
 }
 
-impl NativePlugin for TexturePlugin {
+impl ScriptPlugin for TexturePlugin {
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
+        register_module_def::<Self>(ctx, Self::NAME)
+    }
+
     const NAME: &'static str = "oxid/texture";
 
     fn docs() -> &'static str {

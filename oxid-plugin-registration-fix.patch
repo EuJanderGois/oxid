@@ -1,0 +1,173 @@
+--- a/scripting/plugins/mod.rs	2026-09-24 19:51:32.038538393 +0000
++++ b/src/scripting/plugins/mod.rs	2026-09-24 19:51:42.610020848 +0000
+@@ -112,16 +112,17 @@
+         }
+     }
+ 
+-    /// Registers the plugin in the current QuickJS context. Native Rust
+-    /// modules get the default implementation; script-backed plugins may
+-    /// override it when their implementation is JavaScript.
+-    fn register<'js>(ctx: &Ctx<'js>) -> Result<()>
+-    where
+-        Self: ModuleDef,
+-    {
+-        rquickjs::Module::declare_def::<Self, _>(ctx.clone(), Self::NAME)?;
+-        Ok(())
+-    }
++    /// Registers the plugin in the current QuickJS context.
++    fn register<'js>(ctx: &Ctx<'js>) -> Result<()>;
++}
++
++
++pub fn register_module_def<'js, D>(ctx: &Ctx<'js>, name: &str) -> Result<()>
++where
++    D: ModuleDef + Sized,
++{
++    rquickjs::Module::declare_def::<D, _>(ctx.clone(), name)?;
++    Ok(())
+ }
+ 
+ pub struct PluginRegistration {
+--- a/scripting/plugins/color.rs	2026-09-24 19:51:32.038235337 +0000
++++ b/src/scripting/plugins/color.rs	2026-09-24 19:51:42.610150213 +0000
+@@ -2,7 +2,7 @@
+ use rquickjs::{Class, Ctx, JsLifetime, Result, class::Trace};
+ 
+ use crate::scripting::plugins::{
+-    FunctionParam, ScriptPlugin, ScriptType, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
++    FunctionParam, ScriptPlugin, ScriptType, register_module_def, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
+ };
+ 
+ ///
+@@ -52,6 +52,10 @@
+ }
+ 
+ impl ScriptPlugin for ColorPlugin {
++    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
++        register_module_def::<Self>(ctx, Self::NAME)
++    }
++
+     const NAME: &'static str = "oxid/color";
+ 
+     fn docs() -> &'static str {
+--- a/scripting/plugins/input.rs	2026-09-24 19:51:32.038365393 +0000
++++ b/src/scripting/plugins/input.rs	2026-09-24 19:51:42.610228871 +0000
+@@ -15,7 +15,7 @@
+     i18n,
+     scripting::{
+         plugins::math::Vector2D,
+-        plugins::{FunctionMeta, FunctionParam, ScriptPlugin, ScriptType},
++        plugins::{FunctionMeta, FunctionParam, ScriptPlugin, register_module_def, ScriptType},
+     },
+ };
+ 
+@@ -289,6 +289,10 @@
+ }
+ 
+ impl ScriptPlugin for InputPlugin {
++    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
++        register_module_def::<Self>(ctx, Self::NAME)
++    }
++
+     const NAME: &'static str = "oxid/input";
+ 
+     fn functions() -> &'static [FunctionMeta] {
+--- a/scripting/plugins/math.rs	2026-09-24 19:51:32.038429770 +0000
++++ b/src/scripting/plugins/math.rs	2026-09-24 19:51:42.610281951 +0000
+@@ -2,7 +2,7 @@
+ use rquickjs::{Class, Ctx, JsLifetime, Result, class::Trace};
+ 
+ use crate::scripting::plugins::{
+-    FunctionParam, ScriptPlugin, ScriptType, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
++    FunctionParam, ScriptPlugin, ScriptType, register_module_def, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
+ };
+ 
+ ///
+@@ -43,6 +43,10 @@
+ }
+ 
+ impl ScriptPlugin for MathPlugin {
++    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
++        register_module_def::<Self>(ctx, Self::NAME)
++    }
++
+     const NAME: &'static str = "oxid/math";
+ 
+     fn docs() -> &'static str {
+--- a/scripting/plugins/shapes.rs	2026-09-24 19:51:32.038667958 +0000
++++ b/src/scripting/plugins/shapes.rs	2026-09-24 19:51:42.610332928 +0000
+@@ -9,7 +9,7 @@
+         context::with_active_queue,
+         // color::Color as RendererColor
+     },
+-    scripting::plugins::{FunctionMeta, FunctionParam, ScriptPlugin, ScriptType},
++    scripting::plugins::{FunctionMeta, FunctionParam, ScriptPlugin, register_module_def, ScriptType},
+ };
+ 
+ use crate::scripting::plugins::{
+@@ -83,6 +83,10 @@
+ }
+ 
+ impl ScriptPlugin for ShapesPlugin {
++    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
++        register_module_def::<Self>(ctx, Self::NAME)
++    }
++
+     const NAME: &'static str = "oxid/shapes";
+ 
+     fn functions() -> &'static [FunctionMeta] {
+--- a/scripting/plugins/text.rs	2026-09-24 19:51:32.038802792 +0000
++++ b/src/scripting/plugins/text.rs	2026-09-24 19:51:42.610390094 +0000
+@@ -12,7 +12,7 @@
+     i18n,
+     renderer::context::with_active_queue,
+     scripting::plugins::{
+-        FunctionMeta, FunctionParam, ScriptPlugin, ScriptType, TypeConstructorMeta, TypeMeta,
++        FunctionMeta, FunctionParam, ScriptPlugin, register_module_def, ScriptType, TypeConstructorMeta, TypeMeta,
+         TypePropertyMeta,
+         color::{Color, to_renderer_color},
+         math::Vector2D,
+@@ -178,6 +178,10 @@
+ }
+ 
+ impl ScriptPlugin for TextPlugin {
++    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
++        register_module_def::<Self>(ctx, Self::NAME)
++    }
++
+     const NAME: &'static str = "oxid/text";
+ 
+     fn docs() -> &'static str {
+--- a/scripting/plugins/texture.rs	2026-09-24 19:51:32.038899497 +0000
++++ b/src/scripting/plugins/texture.rs	2026-09-24 19:51:42.610525058 +0000
+@@ -14,7 +14,7 @@
+         texture::load_texture as load_renderer_texture,
+     },
+     scripting::plugins::{
+-        FunctionMeta, FunctionParam, ScriptPlugin, ScriptType, TypeMeta, TypePropertyMeta,
++        FunctionMeta, FunctionParam, ScriptPlugin, register_module_def, ScriptType, TypeMeta, TypePropertyMeta,
+         math::Vector2D,
+     },
+ };
+@@ -143,6 +143,10 @@
+ }
+ 
+ impl ScriptPlugin for TexturePlugin {
++    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
++        register_module_def::<Self>(ctx, Self::NAME)
++    }
++
+     const NAME: &'static str = "oxid/texture";
+ 
+     fn docs() -> &'static str {
+--- website/docs/technical-information/native-modules.md	2026-09-24 19:51:32.039007520 +0000
++++ b/website/docs/technical-information/native-modules.md	2026-09-24 19:51:51.060223543 +0000
+@@ -55,7 +55,7 @@
+ 
+ ## Step 1: implement the plugin
+ 
+-For a Rust-backed plugin, implement `ModuleDef` for the plugin and let `ScriptPlugin::register` provide the default QuickJS registration. A script-backed plugin can override `register` when it needs custom registration logic.
++A plugin owns its runtime registration through `ScriptPlugin::register`. Rust-backed plugins should use the shared `register_module_def` helper after implementing `ModuleDef`; script-backed plugins can implement their registration directly when they need custom QuickJS setup.
+ 
+ The `NAME` constant is the JavaScript module path:
+ 

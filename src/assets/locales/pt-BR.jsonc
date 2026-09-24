@@ -186,7 +186,6 @@
       "runtime_init": "Falha na inicialização do script runtime: {source}",
       "context_init": "Falha ao criar contexto do script runtime: {source}",
       "plugin_register": "Falha ao registrar plugin '{plugin}': {source}",
-      "stdlib_register": "Falha ao registrar stdlib: {source}",
       "entry_module_declare": "Falha ao declarar módulo de entrada: {source}",
       "entry_module_eval": "Falha ao processar módulo de entrada: {source}",
       "main_namespace": "Falha ao obter main namespace: {source}",

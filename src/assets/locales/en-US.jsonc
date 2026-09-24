@@ -171,7 +171,6 @@
       "runtime_init": "Failed to initialize script runtime: {source}",
       "context_init": "Failed to create script runtime context: {source}",
       "plugin_register": "Failed to register plugin '{plugin}': {source}",
-      "stdlib_register": "Failed to register stdlib: {source}",
       "entry_module_declare": "Failed to declare entry module: {source}",
       "entry_module_eval": "Failed to evaluate entry module: {source}",
       "main_namespace": "Failed to resolve main namespace: {source}",

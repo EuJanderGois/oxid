@@ -9,7 +9,9 @@ use crate::{
         context::with_active_queue,
         // color::Color as RendererColor
     },
-    scripting::plugins::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
+    scripting::plugins::{
+        FunctionMeta, FunctionParam, ScriptPlugin, ScriptType, register_module_def,
+    },
 };
 
 use crate::scripting::plugins::{
@@ -82,7 +84,11 @@ impl ModuleDef for ShapesPlugin {
     } // exporta ao script
 }
 
-impl NativePlugin for ShapesPlugin {
+impl ScriptPlugin for ShapesPlugin {
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
+        register_module_def::<Self>(ctx, Self::NAME)
+    }
+
     const NAME: &'static str = "oxid/shapes";
 
     fn functions() -> &'static [FunctionMeta] {

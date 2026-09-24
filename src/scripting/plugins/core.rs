@@ -1,11 +1,10 @@
 //! Core scripting module and Entity metadata.
 
-use rquickjs::{Ctx, Module};
+use rquickjs::{Ctx, Module, Result};
 
-use crate::scripting::{
-    error::ScriptEngineError,
-    plugins::{ModuleMeta, TypeConstructorMeta, TypeMeta},
-};
+use crate::scripting::plugins::{ModuleMeta, ScriptPlugin, TypeConstructorMeta, TypeMeta};
+
+pub struct CorePlugin;
 
 pub const NAME: &str = "oxid/core";
 
@@ -22,19 +21,17 @@ const META: ModuleMeta = ModuleMeta {
     functions: &[],
 };
 
-pub fn metadata() -> ModuleMeta {
-    META
-}
+impl ScriptPlugin for CorePlugin {
+    const NAME: &'static str = NAME;
 
-pub fn register(ctx: &Ctx<'_>) -> Result<(), ScriptEngineError> {
-    let source = include_str!("stdlib/Entity.js");
+    fn metadata() -> ModuleMeta {
+        META
+    }
 
-    let module = Module::declare(ctx.clone(), NAME, source)
-        .map_err(|error| ScriptEngineError::StdlibRegister(error.to_string()))?;
-
-    module
-        .eval()
-        .map_err(|error| ScriptEngineError::StdlibRegister(error.to_string()))?;
-
-    Ok(())
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
+        let source = include_str!("stdlib/Entity.js");
+        let module = Module::declare(ctx.clone(), Self::NAME, source)?;
+        module.eval()?;
+        Ok(())
+    }
 }

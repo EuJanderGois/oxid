@@ -12,10 +12,11 @@ use crate::{
     i18n,
     renderer::context::with_active_queue,
     scripting::plugins::{
-        FunctionMeta, FunctionParam, NativePlugin, ScriptType, TypeConstructorMeta, TypeMeta,
+        FunctionMeta, FunctionParam, ScriptPlugin, ScriptType, TypeConstructorMeta, TypeMeta,
         TypePropertyMeta,
         color::{Color, to_renderer_color},
         math::Vector2D,
+        register_module_def,
     },
 };
 
@@ -177,7 +178,11 @@ impl ModuleDef for TextPlugin {
     }
 }
 
-impl NativePlugin for TextPlugin {
+impl ScriptPlugin for TextPlugin {
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
+        register_module_def::<Self>(ctx, Self::NAME)
+    }
+
     const NAME: &'static str = "oxid/text";
 
     fn docs() -> &'static str {
