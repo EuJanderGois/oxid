@@ -10,7 +10,7 @@ use crate::scripting::plugins::{
 /// Represents a two-dimensional vector with x and y components.
 ///
 #[rquickjs::class]
-#[derive(Clone, Trace, JsLifetime)]
+#[derive(Clone, Trace, JsLifetime, Debug)]
 pub struct Vector2D {
     #[qjs(get, set)]
     pub x: f32,

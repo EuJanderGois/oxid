@@ -1,5 +1,5 @@
 // src/renderer/command.rs
-use crate::renderer::color::Color;
+use crate::{renderer::color::Color, scripting::plugins::math::Vector2D};
 
 #[derive(Clone, Debug)]
 pub enum RenderCommand {
@@ -29,6 +29,30 @@ pub enum RenderCommand {
         arc: f32,
         color: Color,
     },
+    DrawLine {
+        start_x: f32,
+        start_y: f32,
+        end_x: f32,
+        end_y: f32,
+        thickness: f32,
+        color: Color,
+    },
+    DrawTriangleLines {
+        v1: Vector2D,
+        v2: Vector2D,
+        v3: Vector2D,
+        thickness: f32,
+        color: Color,
+    },
+    DrawPolygonLines {
+        x: f32,
+        y: f32,
+        sides: u8,
+        radius: f32,
+        rotation: f32,
+        thickness: f32,
+        color: Color,
+    },
     DrawText {
         text: String,
         x: f32,
@@ -53,4 +77,5 @@ pub enum RenderCommand {
         rotation: f32,
         color: Color,
     },
+    
 }

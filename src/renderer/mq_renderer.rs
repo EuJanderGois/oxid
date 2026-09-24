@@ -1,3 +1,5 @@
+use macroquad::{math::Vec2, shapes::{draw_line, draw_poly_lines, draw_triangle_lines}};
+
 use crate::{
     i18n,
     renderer::{
@@ -72,6 +74,45 @@ impl Renderer for MqRenderer {
                 } => {
                     draw_rectangle(x, y, width, height, Self::to_mq_color(color));
                 } // draw_rectangle
+
+                RenderCommand::DrawLine { 
+                    start_x, 
+                    start_y, 
+                    end_x, 
+                    end_y, 
+                    thickness, 
+                    color 
+                } => {
+                    draw_line(start_x, start_y, end_x, end_y, thickness, Self::to_mq_color(color));
+                }
+
+                RenderCommand::DrawTriangleLines { 
+                    v1, 
+                    v2, 
+                    v3, 
+                    thickness, 
+                    color 
+                } => {
+                    draw_triangle_lines(
+                        Vec2::new(v1.x, v1.y), 
+                        Vec2::new(v2.x, v2.y), 
+                        Vec2::new(v3.x, v3.y), 
+                        thickness, 
+                        Self::to_mq_color(color)
+                    );
+                }
+
+                RenderCommand::DrawPolygonLines { 
+                    x, 
+                    y,
+                    sides, 
+                    radius, 
+                    rotation, 
+                    thickness, 
+                    color 
+                } => {
+                    draw_poly_lines(x, y, sides, radius, rotation, thickness, Self::to_mq_color(color));
+                }
 
                 RenderCommand::DrawText {
                     text,

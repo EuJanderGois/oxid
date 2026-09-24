@@ -76,6 +76,36 @@ declare module "oxid/shapes" {
    */
   export function drawRectangle(x: number, y: number, width: number, height: number, color: Color): void;
 
+  /**
+   * Draws a line between two points.
+   * @param start Starting point of the line.
+   * @param end Ending point of the line.
+   * @param thickness Line thickness.
+   * @param color Color used for drawing.
+   */
+  export function drawLine(start: Vector2D, end: Vector2D, thickness: number, color: Color): void;
+
+  /**
+   * Draws the outline of a triangle.
+   * @param v1 First vertex.
+   * @param v2 Second vertex.
+   * @param v3 Third vertex.
+   * @param thickness Line thickness.
+   * @param color Color used for drawing.
+   */
+  export function drawTriangleLines(v1: Vector2D, v2: Vector2D, v3: Vector2D, thickness: number, color: Color): void;
+
+  /**
+   * Draws the outline of a regular polygon.
+   * @param position Center position of the polygon.
+   * @param sides Number of polygon sides.
+   * @param radius Distance from the center to each vertex.
+   * @param rotation Polygon rotation in degrees.
+   * @param thickness Line thickness.
+   * @param color Color used for drawing.
+   */
+  export function drawPolygonLines(position: Vector2D, sides: number, radius: number, rotation: number, thickness: number, color: Color): void;
+
 }
 
 declare module "oxid/input" {
