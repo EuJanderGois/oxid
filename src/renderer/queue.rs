@@ -1,5 +1,8 @@
 // src/renderer/queue.rs
-use crate::{renderer::{color::Color, command::RenderCommand}, scripting::plugins::math::Vector2D};
+use crate::{
+    renderer::{color::Color, command::RenderCommand},
+    scripting::plugins::math::Vector2D,
+};
 
 #[derive(Default, Debug)]
 pub struct RenderQueue {
@@ -185,5 +188,4 @@ impl RenderQueue {
             color,
         });
     }
-
 }

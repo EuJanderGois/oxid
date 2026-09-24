@@ -77,5 +77,4 @@ pub enum RenderCommand {
         rotation: f32,
         color: Color,
     },
-    
 }

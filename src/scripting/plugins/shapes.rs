@@ -86,13 +86,7 @@ fn draw_triangle_lines<'js>(
     color: OwnedBorrow<'js, Color>,
 ) {
     let _ = with_active_queue(|queue| {
-        queue.draw_triangle_lines(
-            v1,
-            v2,
-            v3,
-            thickness,
-            to_renderer_color(&color),
-        );
+        queue.draw_triangle_lines(v1, v2, v3, thickness, to_renderer_color(&color));
     });
 }
 
