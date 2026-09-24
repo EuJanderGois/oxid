@@ -2,7 +2,8 @@ use rquickjs::module::{Declarations, Exports, ModuleDef};
 use rquickjs::{Class, Ctx, JsLifetime, Result, class::Trace};
 
 use crate::scripting::plugins::{
-    FunctionParam, NativePlugin, ScriptType, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
+    FunctionParam, ScriptPlugin, ScriptType, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
+    register_module_def,
 };
 
 ///
@@ -51,7 +52,11 @@ impl ModuleDef for ColorPlugin {
     } // exporta ao script
 }
 
-impl NativePlugin for ColorPlugin {
+impl ScriptPlugin for ColorPlugin {
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
+        register_module_def::<Self>(ctx, Self::NAME)
+    }
+
     const NAME: &'static str = "oxid/color";
 
     fn docs() -> &'static str {

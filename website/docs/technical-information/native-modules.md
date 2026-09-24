@@ -1,24 +1,24 @@
 ---
-title: Creating native scripting modules
+title: Creating scripting plugins
 slug: /technical-information/native-modules
 ---
 
-# Creating native scripting modules
+# Creating scripting plugins
 
-Native scripting modules are Rust modules exposed to JavaScript through QuickJS. A module has two responsibilities that must stay aligned:
+Scripting plugins are the unit used to expose Oxid APIs to JavaScript through QuickJS. A plugin has two responsibilities that must stay aligned:
 
-- **runtime registration** — makes the native API available to JavaScript;
+- **runtime registration** — makes the plugin API available to JavaScript;
 - **API metadata** — describes the public API to tooling and the generated `oxid.d.ts`.
 
-Oxid keeps those responsibilities connected through `NativePlugin` and the scripting module registry.
+Oxid keeps those responsibilities connected through `ScriptPlugin` and the central plugin registry.
 
 ## Module structure
 
-A native module normally lives in `src/scripting/` and contains:
+A scripting plugin normally lives in `src/scripting/plugins/` and contains:
 
-1. the Rust implementation;
-2. the `ModuleDef` binding;
-3. a `NativePlugin` implementation;
+1. the plugin implementation;
+2. the runtime registration;
+3. a `ScriptPlugin` implementation;
 4. metadata for exported types and functions.
 
 A simplified module looks like this:
@@ -30,7 +30,7 @@ impl ModuleDef for TimePlugin {
     // QuickJS declarations and exports.
 }
 
-impl NativePlugin for TimePlugin {
+impl ScriptPlugin for TimePlugin {
     const NAME: &'static str = "oxid/time";
 
     fn docs() -> &'static str {
@@ -53,9 +53,9 @@ impl NativePlugin for TimePlugin {
 
 The metadata is intentionally declared next to the implementation. This avoids maintaining a second API description elsewhere in the engine.
 
-## Step 1: implement the QuickJS module
+## Step 1: implement the plugin
 
-Implement `ModuleDef` using the existing native modules as examples.
+A plugin owns its runtime registration through `ScriptPlugin::register`. Rust-backed plugins should use the shared `register_module_def` helper after implementing `ModuleDef`; script-backed plugins can implement their registration directly when they need custom QuickJS setup.
 
 The `NAME` constant is the JavaScript module path:
 
@@ -130,14 +130,18 @@ The module information allows the generator to automatically produce the require
 import type { Vector2D } from "oxid/math";
 ```
 
-## Step 5: register the module
+## Step 5: register the plugin
 
-Native modules are collected by `src/scripting/registry.rs`.
+Plugins are collected by `src/scripting/plugins/registry.rs`.
 
-Add the plugin to `native_modules()`:
+Add the plugin to `plugins()` in the central registry. Each entry supplies the same three pieces of information: name, metadata, and registration function.
 
 ```rust
-TimePlugin::registration(),
+PluginRegistration {
+    name: TimePlugin::NAME,
+    metadata: TimePlugin::metadata,
+    register: TimePlugin::register,
+},
 ```
 
 The registry uses the same registration object for runtime binding and metadata discovery. This is important: adding a module should not require maintaining two unrelated lists.
@@ -171,40 +175,38 @@ If the API is missing, check:
 
 ## Runtime and metadata are separate layers
 
-The registry connects the layers, but the generator does not execute the QuickJS runtime.
+The registry connects the layers, but the generator does not execute the QuickJS runtime. Every plugin follows the same registration and metadata contract, regardless of whether its implementation is Rust or JavaScript.
 
 ```text
-Native module
+Scripting plugin
     │
-    ├── ModuleDef ──────────→ QuickJS runtime
+    ├── register ───────────→ QuickJS runtime
     │
-    └── NativePlugin
-             │
-             └── metadata ──→ TypeScript generator
+    └── metadata ───────────→ TypeScript generator
                                   │
                                   └── oxid.d.ts
 ```
 
 This separation makes the generator testable without starting QuickJS and keeps runtime code independent from TypeScript formatting.
 
-## Adding a module checklist
+## Adding a plugin checklist
 
-Before submitting a new native module, verify:
+Before submitting a new scripting plugin, verify:
 
 - [ ] `ModuleDef` exposes the intended runtime API.
-- [ ] `NativePlugin::NAME` is correct.
+- [ ] `ScriptPlugin::NAME` is correct.
 - [ ] exported types have `TypeMeta`.
 - [ ] exported functions have `FunctionMeta`.
 - [ ] parameters and return values use the correct `ScriptType`.
 - [ ] custom types include their module path.
 - [ ] public metadata documentation is in English.
-- [ ] the module is added to `native_modules()`.
+- [ ] the module is added to `plugins()`.
 - [ ] `oxid.d.ts` contains the expected declarations.
 - [ ] tests cover non-trivial metadata or generator behavior.
 - [ ] user-facing behavior is documented.
 
 ## Design rule
 
-A native module should own the description of its public scripting API. The central registry should only compose modules; it should not duplicate their metadata.
+A scripting plugin owns the description and registration of its public scripting API. The central registry should only compose plugins; it should not duplicate their metadata or implementation details.
 
 That rule keeps new modules local, makes `oxid.d.ts` deterministic, and prevents the scripting engine from becoming a single point of coupling.

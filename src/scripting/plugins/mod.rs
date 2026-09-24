@@ -1,4 +1,4 @@
-//! Native scripting API metadata and registration helpers.
+//! Scripting plugin metadata and registration helpers.
 
 pub mod color;
 pub mod core;
@@ -61,10 +61,6 @@ pub struct ModuleMeta {
     pub functions: &'static [FunctionMeta],
 }
 
-pub trait NativeFunction {
-    fn meta() -> &'static FunctionMeta;
-}
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ScriptType {
     Number,
@@ -76,7 +72,7 @@ pub enum ScriptType {
 }
 
 impl fmt::Display for ScriptType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ScriptType::Number => write!(f, "number"),
             ScriptType::String => write!(f, "string"),
@@ -88,7 +84,11 @@ impl fmt::Display for ScriptType {
     }
 }
 
-pub trait NativePlugin: ModuleDef + Sized {
+pub trait NativeFunction {
+    fn meta() -> &'static FunctionMeta;
+}
+
+pub trait ScriptPlugin {
     const NAME: &'static str;
 
     fn functions() -> &'static [FunctionMeta] {
@@ -112,13 +112,19 @@ pub trait NativePlugin: ModuleDef + Sized {
         }
     }
 
-    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
-        rquickjs::Module::declare_def::<Self, _>(ctx.clone(), Self::NAME)?;
-        Ok(())
-    }
+    /// Registers the plugin in the current QuickJS context.
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()>;
 }
 
-pub struct NativeModule {
+pub fn register_module_def<'js, D>(ctx: &Ctx<'js>, name: &str) -> Result<()>
+where
+    D: ModuleDef + Sized,
+{
+    rquickjs::Module::declare_def::<D, _>(ctx.clone(), name)?;
+    Ok(())
+}
+
+pub struct PluginRegistration {
     pub name: &'static str,
     pub metadata: fn() -> ModuleMeta,
     pub register: for<'js> fn(&Ctx<'js>) -> Result<()>,

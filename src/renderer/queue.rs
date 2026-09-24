@@ -1,5 +1,8 @@
 // src/renderer/queue.rs
-use crate::renderer::{color::Color, command::RenderCommand};
+use crate::{
+    renderer::{color::Color, command::RenderCommand},
+    scripting::plugins::math::Vector2D,
+};
 
 #[derive(Default, Debug)]
 pub struct RenderQueue {
@@ -125,6 +128,63 @@ impl RenderQueue {
             width,
             height,
             rotation,
+            color,
+        });
+    }
+
+    pub fn draw_line(
+        &mut self,
+        start_x: f32,
+        start_y: f32,
+        end_x: f32,
+        end_y: f32,
+        thickness: f32,
+        color: Color,
+    ) {
+        self.push(RenderCommand::DrawLine {
+            start_x,
+            start_y,
+            end_x,
+            end_y,
+            thickness,
+            color,
+        });
+    }
+
+    pub fn draw_triangle_lines(
+        &mut self,
+        v1: Vector2D,
+        v2: Vector2D,
+        v3: Vector2D,
+        thickness: f32,
+        color: Color,
+    ) {
+        self.push(RenderCommand::DrawTriangleLines {
+            v1,
+            v2,
+            v3,
+            thickness,
+            color,
+        });
+    }
+
+    pub fn draw_polygon_lines(
+        &mut self,
+        x: f32,
+        y: f32,
+        sides: u8,
+        radius: f32,
+        rotation: f32,
+        thickness: f32,
+        color: Color,
+    ) {
+        self.push(RenderCommand::DrawPolygonLines {
+            x,
+            y,
+            sides,
+            radius,
+            rotation,
+            thickness,
             color,
         });
     }

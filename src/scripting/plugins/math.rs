@@ -2,14 +2,15 @@ use rquickjs::module::{Declarations, Exports, ModuleDef};
 use rquickjs::{Class, Ctx, JsLifetime, Result, class::Trace};
 
 use crate::scripting::plugins::{
-    FunctionParam, NativePlugin, ScriptType, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
+    FunctionParam, ScriptPlugin, ScriptType, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
+    register_module_def,
 };
 
 ///
 /// Represents a two-dimensional vector with x and y components.
 ///
 #[rquickjs::class]
-#[derive(Clone, Trace, JsLifetime)]
+#[derive(Clone, Trace, JsLifetime, Debug)]
 pub struct Vector2D {
     #[qjs(get, set)]
     pub x: f32,
@@ -42,7 +43,11 @@ impl ModuleDef for MathPlugin {
     } // exporta ao script
 }
 
-impl NativePlugin for MathPlugin {
+impl ScriptPlugin for MathPlugin {
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
+        register_module_def::<Self>(ctx, Self::NAME)
+    }
+
     const NAME: &'static str = "oxid/math";
 
     fn docs() -> &'static str {

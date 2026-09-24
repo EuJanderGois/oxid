@@ -15,7 +15,7 @@ use crate::{
     i18n,
     scripting::{
         plugins::math::Vector2D,
-        plugins::{FunctionMeta, FunctionParam, NativePlugin, ScriptType},
+        plugins::{FunctionMeta, FunctionParam, ScriptPlugin, ScriptType, register_module_def},
     },
 };
 
@@ -288,7 +288,11 @@ impl ModuleDef for InputPlugin {
     }
 }
 
-impl NativePlugin for InputPlugin {
+impl ScriptPlugin for InputPlugin {
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
+        register_module_def::<Self>(ctx, Self::NAME)
+    }
+
     const NAME: &'static str = "oxid/input";
 
     fn functions() -> &'static [FunctionMeta] {

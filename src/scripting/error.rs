@@ -7,7 +7,6 @@ pub enum ScriptEngineError {
     RuntimeInit(String),
     ContextInit(String),
     PluginRegister { plugin: String, source: String },
-    StdlibRegister(String),
     EntryModuleDeclare(String),
     EntryModuleEval(String),
     MainNamespace(String),
@@ -36,11 +35,6 @@ impl fmt::Display for ScriptEngineError {
                     "scripting.error.plugin_register",
                     &[("plugin", plugin), ("source", source)],
                 )
-            ),
-            ScriptEngineError::StdlibRegister(source) => write!(
-                f,
-                "{}",
-                i18n::text_with("scripting.error.stdlib_register", &[("source", source)])
             ),
             ScriptEngineError::EntryModuleDeclare(source) => write!(
                 f,
