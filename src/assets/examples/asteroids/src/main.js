@@ -40,9 +40,9 @@ import {
 
 let bestScore = 0;
 
-import { Ship } from "./entity/Ship";
-import { Bullet } from "./entity/Bullet";
-import { Asteroid } from "./entity/Asteroid";
+import { Ship } from "./entities/Ship";
+import { Bullet } from "./entities/Bullet";
+import { Asteroid } from "./entities/Asteroid";
 
 export class MyApp extends Entity {
     ship;
