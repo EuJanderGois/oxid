@@ -1,5 +1,7 @@
 //! QuickJS scripting engine lifecycle.
 
+use std::path::Path;
+
 use rquickjs::{Context, Runtime};
 
 use crate::{
@@ -10,7 +12,12 @@ use crate::{
     },
 };
 
-use super::{bootstrap, error::ScriptEngineError, hooks};
+use super::{
+    bootstrap,
+    error::ScriptEngineError,
+    hooks,
+    loader::{FsLoader, FsResolver},
+};
 
 pub struct ScriptEngine {
     _rt: Runtime,
@@ -18,8 +25,25 @@ pub struct ScriptEngine {
 }
 
 impl ScriptEngine {
-    pub fn new(script_code: &str) -> Result<Self, ScriptEngineError> {
+    /// `project_root` is the directory containing the project's `package.json`;
+    /// `entry_path` is the path to the entry script (e.g. `<project_root>/main.js`).
+    /// Both are used to scope and resolve `import`s between the project's own
+    /// script files (see `super::loader`).
+    pub fn new(
+        script_code: &str,
+        project_root: &Path,
+        entry_path: &Path,
+    ) -> Result<Self, ScriptEngineError> {
+        let project_root = project_root
+            .canonicalize()
+            .map_err(|e| ScriptEngineError::ModuleRootInit(e.to_string()))?;
+        let entry_path = entry_path
+            .canonicalize()
+            .map_err(|e| ScriptEngineError::ModuleRootInit(e.to_string()))?;
+
         let rt = Runtime::new().map_err(|e| ScriptEngineError::RuntimeInit(e.to_string()))?;
+
+        rt.set_loader(FsResolver::new(project_root), FsLoader);
 
         let ctx = Context::full(&rt).map_err(|e| ScriptEngineError::ContextInit(e.to_string()))?;
 
@@ -28,7 +52,7 @@ impl ScriptEngine {
 
             let globals = ctx.globals();
 
-            bootstrap::bootstrap_entry_module(&ctx, script_code, &globals)?;
+            bootstrap::bootstrap_entry_module(&ctx, script_code, &entry_path, &globals)?;
             hooks::compile_hooks(&ctx, &globals)?;
 
             Ok(())

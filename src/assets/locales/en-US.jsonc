@@ -168,6 +168,7 @@
           "{source}"
         ]
       },
+      "module_root_init": "Failed to resolve project directory for module imports: {source}",
       "runtime_init": "Failed to initialize script runtime: {source}",
       "context_init": "Failed to create script runtime context: {source}",
       "plugin_register": "Failed to register plugin '{plugin}': {source}",

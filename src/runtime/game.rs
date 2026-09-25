@@ -11,13 +11,13 @@ pub fn launch(project: LoadedProject) {
 
     let config = project.window_config();
 
-    macroquad::Window::from_config(config, run_game(project.script));
+    macroquad::Window::from_config(config, run_game(project));
 }
 
-async fn run_game(script: String) {
+async fn run_game(project: LoadedProject) {
     let mut renderer = MqRenderer;
 
-    let engine = match ScriptEngine::new(&script) {
+    let engine = match ScriptEngine::new(&project.script, &project.root, &project.entry_path) {
         Ok(engine) => engine,
         Err(err) => {
             let source = err.to_string();

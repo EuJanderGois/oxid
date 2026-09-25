@@ -14,307 +14,35 @@ import {
 } from "oxid/text";
 
 import {
-    isKeyDown,
     isKeyPressed,
     isMouseButtonDown,
-    mousePosition,
 } from "oxid/input";
 
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
+import {
+    ASTEROID_COUNT,
+    ASTEROID_MAX_SIZE,
+    ASTEROID_MIN_SIZE,
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    SHIP_HEIGHT,
+    SHOOT_INTERVAL,
+    STAR_COUNT
+} from "./helpers/config";
 
-const SHIP_HEIGHT = 25;
-const SHIP_BASE = 22;
+import { COLORS } from "./helpers/colors";
 
-const SHIP_SPEED = 180;
-
-const BULLET_SPEED = 420;
-const BULLET_LIFETIME = 1.5;
-const SHOOT_INTERVAL = 0.15;
-
-const ASTEROID_COUNT = 10;
-const ASTEROID_MIN_SIZE = 12;
-const ASTEROID_MAX_SIZE = 45;
-
-const STAR_COUNT = 80;
-
-const COLORS = {
-    background: new Color(0.008, 0.012, 0.025, 1),
-
-    white: new Color(0.9, 0.93, 1, 1),
-    gray: new Color(0.55, 0.6, 0.7, 1),
-
-    bullet: new Color(0.85, 0.9, 1, 1),
-
-    red: new Color(1, 0.25, 0.25, 1),
-    green: new Color(0.35, 1, 0.55, 1),
-
-    star: new Color(0.7, 0.8, 1, 0.65),
-};
+import {
+    distanceSquared,
+    randomDirection,
+    randomInt,
+    randomRange,
+} from "./helpers/utils";
 
 let bestScore = 0;
 
-function randomRange(min, max) {
-    return min + Math.random() * (max - min);
-}
-
-function randomInt(min, max) {
-    return Math.floor(randomRange(min, max + 1));
-}
-
-function randomDirection() {
-    const angle = randomRange(0, Math.PI * 2);
-
-    return new Vector2D(
-        Math.cos(angle),
-        Math.sin(angle)
-    );
-}
-
-function distanceSquared(a, b) {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-
-    return dx * dx + dy * dy;
-}
-
-function wrapAround(position) {
-    if (position.x < 0)
-        position.x = CANVAS_WIDTH;
-
-    if (position.x > CANVAS_WIDTH)
-        position.x = 0;
-
-    if (position.y < 0)
-        position.y = CANVAS_HEIGHT;
-
-    if (position.y > CANVAS_HEIGHT)
-        position.y = 0;
-}
-
-function isOutsideCanvas(position, margin = 0) {
-    return (
-        position.x < -margin ||
-        position.x > CANVAS_WIDTH + margin ||
-        position.y < -margin ||
-        position.y > CANVAS_HEIGHT + margin
-    );
-}
-
-class Ship {
-    constructor() {
-        this.position = new Vector2D(
-            CANVAS_WIDTH / 2,
-            CANVAS_HEIGHT / 2
-        );
-
-        this.rotation = 0;
-    }
-
-    update(dt) {
-        const step = SHIP_SPEED * dt;
-
-        if (
-            isKeyDown("ArrowRight") ||
-            isKeyDown("D")
-        ) {
-            this.position.x += step;
-        }
-
-        if (
-            isKeyDown("ArrowLeft") ||
-            isKeyDown("A")
-        ) {
-            this.position.x -= step;
-        }
-
-        if (
-            isKeyDown("ArrowDown") ||
-            isKeyDown("S")
-        ) {
-            this.position.y += step;
-        }
-
-        if (
-            isKeyDown("ArrowUp") ||
-            isKeyDown("W")
-        ) {
-            this.position.y -= step;
-        }
-
-        const mouse = mousePosition();
-
-        const dx = mouse.x - this.position.x;
-        const dy = mouse.y - this.position.y;
-
-        if (dx !== 0 || dy !== 0) {
-            this.rotation =
-                Math.atan2(dy, dx) + Math.PI / 2;
-        }
-
-        wrapAround(this.position);
-    }
-
-    getDirection() {
-        return new Vector2D(
-            Math.sin(this.rotation),
-            -Math.cos(this.rotation)
-        );
-    }
-
-    getNosePosition() {
-        const direction = this.getDirection();
-
-        return new Vector2D(
-            this.position.x +
-                direction.x * SHIP_HEIGHT,
-
-            this.position.y +
-                direction.y * SHIP_HEIGHT
-        );
-    }
-
-    draw() {
-        const direction = this.getDirection();
-
-        const right = new Vector2D(
-            Math.cos(this.rotation),
-            Math.sin(this.rotation)
-        );
-
-        const nose = new Vector2D(
-            this.position.x +
-                direction.x * SHIP_HEIGHT,
-
-            this.position.y +
-                direction.y * SHIP_HEIGHT
-        );
-
-        const left = new Vector2D(
-            this.position.x -
-                direction.x * (SHIP_HEIGHT * 0.5) -
-                right.x * (SHIP_BASE * 0.5),
-
-            this.position.y -
-                direction.y * (SHIP_HEIGHT * 0.5) -
-                right.y * (SHIP_BASE * 0.5)
-        );
-
-        const rightVertex = new Vector2D(
-            this.position.x -
-                direction.x * (SHIP_HEIGHT * 0.5) +
-                right.x * (SHIP_BASE * 0.5),
-
-            this.position.y -
-                direction.y * (SHIP_HEIGHT * 0.5) +
-                right.y * (SHIP_BASE * 0.5)
-        );
-
-        drawTriangleLines(
-            nose,
-            left,
-            rightVertex,
-            2,
-            COLORS.white
-        );
-    }
-}
-
-class Bullet {
-    constructor(position, direction) {
-        this.position = new Vector2D(
-            position.x,
-            position.y
-        );
-
-        this.direction = new Vector2D(
-            direction.x,
-            direction.y
-        );
-
-        this.life = 0;
-        this.collided = false;
-    }
-
-    update(dt) {
-        this.position.x +=
-            this.direction.x *
-            BULLET_SPEED *
-            dt;
-
-        this.position.y +=
-            this.direction.y *
-            BULLET_SPEED *
-            dt;
-
-        this.life += dt;
-    }
-
-    isExpired() {
-        return (
-            this.life >= BULLET_LIFETIME ||
-            isOutsideCanvas(this.position, 4)
-        );
-    }
-
-    draw() {
-        drawCircle(
-            this.position.x,
-            this.position.y,
-            2.5,
-            COLORS.bullet
-        );
-    }
-}
-
-class Asteroid {
-    constructor(position, velocity, size, sides) {
-        this.position = new Vector2D(
-            position.x,
-            position.y
-        );
-
-        this.velocity = new Vector2D(
-            velocity.x,
-            velocity.y
-        );
-
-        this.size = size;
-        this.sides = sides;
-
-        this.rotation = 0;
-        this.rotationSpeed = randomRange(-2, 2);
-
-        this.collided = false;
-    }
-
-    update(dt) {
-        this.position.x +=
-            this.velocity.x * dt;
-
-        this.position.y +=
-            this.velocity.y * dt;
-
-        this.rotation +=
-            this.rotationSpeed * dt;
-
-        wrapAround(this.position);
-    }
-
-    draw() {
-        const rotationDegrees =
-            this.rotation * 180 / Math.PI;
-
-        drawPolygonLines(
-            this.position,
-            this.sides,
-            this.size,
-            rotationDegrees,
-            2,
-            COLORS.white
-        );
-    }
-}
+import { Ship } from "./entity/Ship";
+import { Bullet } from "./entity/Bullet";
+import { Asteroid } from "./entity/Asteroid";
 
 export class MyApp extends Entity {
     ship;

@@ -3,6 +3,7 @@ pub mod engine;
 pub mod error;
 pub mod generator;
 pub mod hooks;
+pub mod loader;
 
 pub mod plugins;
 

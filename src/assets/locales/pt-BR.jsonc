@@ -183,6 +183,7 @@
           "{source}"
         ]
       },
+      "module_root_init": "Falha ao resolver o diretório do projeto para importação de módulos: {source}",
       "runtime_init": "Falha na inicialização do script runtime: {source}",
       "context_init": "Falha ao criar contexto do script runtime: {source}",
       "plugin_register": "Falha ao registrar plugin '{plugin}': {source}",

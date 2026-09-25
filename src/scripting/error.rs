@@ -4,6 +4,7 @@ use crate::i18n;
 
 #[derive(Debug)]
 pub enum ScriptEngineError {
+    ModuleRootInit(String),
     RuntimeInit(String),
     ContextInit(String),
     PluginRegister { plugin: String, source: String },
@@ -18,6 +19,11 @@ pub enum ScriptEngineError {
 impl fmt::Display for ScriptEngineError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            ScriptEngineError::ModuleRootInit(source) => write!(
+                f,
+                "{}",
+                i18n::text_with("scripting.error.module_root_init", &[("source", source)])
+            ),
             ScriptEngineError::RuntimeInit(source) => write!(
                 f,
                 "{}",
