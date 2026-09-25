@@ -4,6 +4,7 @@ import { Color } from "oxid/color";
 
 import {
     drawCircle,
+    drawRectangle,
     drawTriangleLines,
     drawPolygonLines,
 } from "oxid/shapes";
@@ -35,13 +36,23 @@ const ASTEROID_COUNT = 10;
 const ASTEROID_MIN_SIZE = 12;
 const ASTEROID_MAX_SIZE = 45;
 
+const STAR_COUNT = 80;
+
 const COLORS = {
-    white: new Color(1, 1, 1, 1),
-    gray: new Color(0.65, 0.65, 0.65, 1),
-    yellow: new Color(1, 1, 0.2, 1),
+    background: new Color(0.008, 0.012, 0.025, 1),
+
+    white: new Color(0.9, 0.93, 1, 1),
+    gray: new Color(0.55, 0.6, 0.7, 1),
+
+    bullet: new Color(0.85, 0.9, 1, 1),
+
     red: new Color(1, 0.25, 0.25, 1),
-    green: new Color(0.3, 1, 0.4, 1),
+    green: new Color(0.35, 1, 0.55, 1),
+
+    star: new Color(0.7, 0.8, 1, 0.65),
 };
+
+let bestScore = 0;
 
 function randomRange(min, max) {
     return min + Math.random() * (max - min);
@@ -79,6 +90,15 @@ function wrapAround(position) {
 
     if (position.y > CANVAS_HEIGHT)
         position.y = 0;
+}
+
+function isOutsideCanvas(position, margin = 0) {
+    return (
+        position.x < -margin ||
+        position.x > CANVAS_WIDTH + margin ||
+        position.y < -margin ||
+        position.y > CANVAS_HEIGHT + margin
+    );
 }
 
 class Ship {
@@ -228,20 +248,21 @@ class Bullet {
             dt;
 
         this.life += dt;
-
-        wrapAround(this.position);
     }
 
     isExpired() {
-        return this.life >= BULLET_LIFETIME;
+        return (
+            this.life >= BULLET_LIFETIME ||
+            isOutsideCanvas(this.position, 4)
+        );
     }
 
     draw() {
         drawCircle(
             this.position.x,
             this.position.y,
-            3,
-            COLORS.yellow
+            2.5,
+            COLORS.bullet
         );
     }
 }
@@ -300,16 +321,21 @@ export class MyApp extends Entity {
 
     bullets = [];
     asteroids = [];
+    stars = [];
 
     shootTimer = 0;
 
+    score = 0;
+
     gameOver = false;
+    gameWon = false;
 
     constructor() {
         super();
 
         this.ship = new Ship();
 
+        this.createStars();
         this.createAsteroids();
     }
 
@@ -317,7 +343,7 @@ export class MyApp extends Entity {
     }
 
     onUpdate(dt) {
-        if (this.gameOver) {
+        if (this.gameOver || this.gameWon) {
             if (isKeyPressed("Enter")) {
                 this.restart();
             }
@@ -334,9 +360,19 @@ export class MyApp extends Entity {
 
         this.handleCollisions();
         this.handleShooting();
+
+        if (this.asteroids.length === 0) {
+            this.gameWon = true;
+
+            if (this.score > bestScore) {
+                bestScore = this.score;
+            }
+        }
     }
 
     onDraw() {
+        this.drawBackground();
+
         this.ship.draw();
 
         for (const bullet of this.bullets) {
@@ -354,8 +390,52 @@ export class MyApp extends Entity {
             return;
         }
 
-        if (this.asteroids.length === 0) {
+        if (this.gameWon) {
             this.drawVictory();
+        }
+    }
+
+    drawBackground() {
+        drawRectangle(
+            0,
+            0,
+            CANVAS_WIDTH,
+            CANVAS_HEIGHT,
+            COLORS.background
+        );
+
+        for (const star of this.stars) {
+            drawCircle(
+                star.position.x,
+                star.position.y,
+                star.size,
+                star.color
+            );
+        }
+    }
+
+    createStars() {
+        this.stars = [];
+
+        for (let i = 0; i < STAR_COUNT; i++) {
+            const alpha =
+                randomRange(0.25, 0.8);
+
+            this.stars.push({
+                position: new Vector2D(
+                    randomRange(0, CANVAS_WIDTH),
+                    randomRange(0, CANVAS_HEIGHT)
+                ),
+
+                size: randomRange(0.5, 1.5),
+
+                color: new Color(
+                    0.7,
+                    0.8,
+                    1,
+                    alpha
+                ),
+            });
         }
     }
 
@@ -489,6 +569,11 @@ export class MyApp extends Entity {
                     bullet.collided = true;
                     asteroid.collided = true;
 
+                    this.score +=
+                        this.getAsteroidScore(
+                            asteroid.size
+                        );
+
                     this.splitAsteroid(asteroid);
 
                     break;
@@ -497,6 +582,16 @@ export class MyApp extends Entity {
         }
 
         this.removeDestroyedAsteroids();
+    }
+
+    getAsteroidScore(size) {
+        if (size >= 30)
+            return 100;
+
+        if (size >= 18)
+            return 50;
+
+        return 25;
     }
 
     handleShipCollisions() {
@@ -512,6 +607,11 @@ export class MyApp extends Entity {
                 ) <= radius * radius
             ) {
                 this.gameOver = true;
+
+                if (this.score > bestScore) {
+                    bestScore = this.score;
+                }
+
                 return;
             }
         }
@@ -618,6 +718,26 @@ export class MyApp extends Entity {
         );
 
         drawText(
+            "Score: " + this.score,
+            new Vector2D(
+                CANVAS_WIDTH - 150,
+                30
+            ),
+            20,
+            COLORS.white
+        );
+
+        drawText(
+            "Best: " + bestScore,
+            new Vector2D(
+                CANVAS_WIDTH - 150,
+                55
+            ),
+            16,
+            COLORS.gray
+        );
+
+        drawText(
             "Asteroids: " +
                 this.asteroids.length,
             new Vector2D(
@@ -637,30 +757,40 @@ export class MyApp extends Entity {
             "GAME OVER",
             new Vector2D(
                 centerX - 70,
-                CANVAS_HEIGHT / 2 - 20
+                CANVAS_HEIGHT / 2 - 45
             ),
             32,
             COLORS.red
         );
 
         drawText(
-            "Your ship was destroyed.",
+            "Score: " + this.score,
             new Vector2D(
-                centerX - 105,
-                CANVAS_HEIGHT / 2 + 15
+                centerX - 45,
+                CANVAS_HEIGHT / 2
             ),
-            18,
+            20,
             COLORS.white
         );
 
         drawText(
-            "Press ENTER to restart.",
+            "Best: " + bestScore,
             new Vector2D(
-                centerX - 105,
-                CANVAS_HEIGHT / 2 + 45
+                centerX - 35,
+                CANVAS_HEIGHT / 2 + 30
             ),
             18,
             COLORS.gray
+        );
+
+        drawText(
+            "Press ENTER to try again.",
+            new Vector2D(
+                centerX - 105,
+                CANVAS_HEIGHT / 2 + 70
+            ),
+            18,
+            COLORS.white
         );
     }
 
@@ -672,30 +802,40 @@ export class MyApp extends Entity {
             "YOU WIN!",
             new Vector2D(
                 centerX - 65,
-                CANVAS_HEIGHT / 2 - 20
+                CANVAS_HEIGHT / 2 - 55
             ),
             32,
             COLORS.green
         );
 
         drawText(
-            "All asteroids were destroyed.",
+            "Final score: " + this.score,
             new Vector2D(
-                centerX - 125,
-                CANVAS_HEIGHT / 2 + 15
+                centerX - 70,
+                CANVAS_HEIGHT / 2 - 10
+            ),
+            20,
+            COLORS.white
+        );
+
+        drawText(
+            "Best score: " + bestScore,
+            new Vector2D(
+                centerX - 70,
+                CANVAS_HEIGHT / 2 + 20
             ),
             18,
-            COLORS.white
+            COLORS.gray
         );
 
         drawText(
             "Press ENTER to play again.",
             new Vector2D(
-                centerX - 115,
-                CANVAS_HEIGHT / 2 + 45
+                centerX - 110,
+                CANVAS_HEIGHT / 2 + 65
             ),
             18,
-            COLORS.gray
+            COLORS.white
         );
     }
 
@@ -706,7 +846,10 @@ export class MyApp extends Entity {
 
         this.shootTimer = 0;
 
+        this.score = 0;
+
         this.gameOver = false;
+        this.gameWon = false;
 
         this.createAsteroids();
     }

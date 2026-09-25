@@ -1,8 +1,8 @@
 {
-  "name": "my-asteroids",
+  "name": "asteroids",
   "oxid": {
     "entry": "main.js",
-    "title": "my-asteroids - Oxid Engine",
+    "title": "asteroids - Oxid Engine",
     "width": 800,
     "height": 600,
     "locale": "pt-BR"
