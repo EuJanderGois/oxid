@@ -4,6 +4,7 @@ import { Color } from "oxid/color";
 
 import {
     drawCircle,
+    drawRectangle,
     drawTriangleLines,
     drawPolygonLines,
 } from "oxid/shapes";
@@ -13,303 +14,56 @@ import {
 } from "oxid/text";
 
 import {
-    isKeyDown,
     isKeyPressed,
     isMouseButtonDown,
-    mousePosition,
 } from "oxid/input";
 
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
+import {
+    ASTEROID_COUNT,
+    ASTEROID_MAX_SIZE,
+    ASTEROID_MIN_SIZE,
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    SHIP_HEIGHT,
+    SHOOT_INTERVAL,
+    STAR_COUNT
+} from "./helpers/config";
 
-const SHIP_HEIGHT = 25;
-const SHIP_BASE = 22;
+import { COLORS } from "./helpers/colors";
 
-const SHIP_SPEED = 180;
+import {
+    distanceSquared,
+    randomDirection,
+    randomInt,
+    randomRange,
+} from "./helpers/utils";
 
-const BULLET_SPEED = 420;
-const BULLET_LIFETIME = 1.5;
-const SHOOT_INTERVAL = 0.15;
+let bestScore = 0;
 
-const ASTEROID_COUNT = 10;
-const ASTEROID_MIN_SIZE = 12;
-const ASTEROID_MAX_SIZE = 45;
-
-const COLORS = {
-    white: new Color(1, 1, 1, 1),
-    gray: new Color(0.65, 0.65, 0.65, 1),
-    yellow: new Color(1, 1, 0.2, 1),
-    red: new Color(1, 0.25, 0.25, 1),
-    green: new Color(0.3, 1, 0.4, 1),
-};
-
-function randomRange(min, max) {
-    return min + Math.random() * (max - min);
-}
-
-function randomInt(min, max) {
-    return Math.floor(randomRange(min, max + 1));
-}
-
-function randomDirection() {
-    const angle = randomRange(0, Math.PI * 2);
-
-    return new Vector2D(
-        Math.cos(angle),
-        Math.sin(angle)
-    );
-}
-
-function distanceSquared(a, b) {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-
-    return dx * dx + dy * dy;
-}
-
-function wrapAround(position) {
-    if (position.x < 0)
-        position.x = CANVAS_WIDTH;
-
-    if (position.x > CANVAS_WIDTH)
-        position.x = 0;
-
-    if (position.y < 0)
-        position.y = CANVAS_HEIGHT;
-
-    if (position.y > CANVAS_HEIGHT)
-        position.y = 0;
-}
-
-class Ship {
-    constructor() {
-        this.position = new Vector2D(
-            CANVAS_WIDTH / 2,
-            CANVAS_HEIGHT / 2
-        );
-
-        this.rotation = 0;
-    }
-
-    update(dt) {
-        const step = SHIP_SPEED * dt;
-
-        if (
-            isKeyDown("ArrowRight") ||
-            isKeyDown("D")
-        ) {
-            this.position.x += step;
-        }
-
-        if (
-            isKeyDown("ArrowLeft") ||
-            isKeyDown("A")
-        ) {
-            this.position.x -= step;
-        }
-
-        if (
-            isKeyDown("ArrowDown") ||
-            isKeyDown("S")
-        ) {
-            this.position.y += step;
-        }
-
-        if (
-            isKeyDown("ArrowUp") ||
-            isKeyDown("W")
-        ) {
-            this.position.y -= step;
-        }
-
-        const mouse = mousePosition();
-
-        const dx = mouse.x - this.position.x;
-        const dy = mouse.y - this.position.y;
-
-        if (dx !== 0 || dy !== 0) {
-            this.rotation =
-                Math.atan2(dy, dx) + Math.PI / 2;
-        }
-
-        wrapAround(this.position);
-    }
-
-    getDirection() {
-        return new Vector2D(
-            Math.sin(this.rotation),
-            -Math.cos(this.rotation)
-        );
-    }
-
-    getNosePosition() {
-        const direction = this.getDirection();
-
-        return new Vector2D(
-            this.position.x +
-                direction.x * SHIP_HEIGHT,
-
-            this.position.y +
-                direction.y * SHIP_HEIGHT
-        );
-    }
-
-    draw() {
-        const direction = this.getDirection();
-
-        const right = new Vector2D(
-            Math.cos(this.rotation),
-            Math.sin(this.rotation)
-        );
-
-        const nose = new Vector2D(
-            this.position.x +
-                direction.x * SHIP_HEIGHT,
-
-            this.position.y +
-                direction.y * SHIP_HEIGHT
-        );
-
-        const left = new Vector2D(
-            this.position.x -
-                direction.x * (SHIP_HEIGHT * 0.5) -
-                right.x * (SHIP_BASE * 0.5),
-
-            this.position.y -
-                direction.y * (SHIP_HEIGHT * 0.5) -
-                right.y * (SHIP_BASE * 0.5)
-        );
-
-        const rightVertex = new Vector2D(
-            this.position.x -
-                direction.x * (SHIP_HEIGHT * 0.5) +
-                right.x * (SHIP_BASE * 0.5),
-
-            this.position.y -
-                direction.y * (SHIP_HEIGHT * 0.5) +
-                right.y * (SHIP_BASE * 0.5)
-        );
-
-        drawTriangleLines(
-            nose,
-            left,
-            rightVertex,
-            2,
-            COLORS.white
-        );
-    }
-}
-
-class Bullet {
-    constructor(position, direction) {
-        this.position = new Vector2D(
-            position.x,
-            position.y
-        );
-
-        this.direction = new Vector2D(
-            direction.x,
-            direction.y
-        );
-
-        this.life = 0;
-        this.collided = false;
-    }
-
-    update(dt) {
-        this.position.x +=
-            this.direction.x *
-            BULLET_SPEED *
-            dt;
-
-        this.position.y +=
-            this.direction.y *
-            BULLET_SPEED *
-            dt;
-
-        this.life += dt;
-
-        wrapAround(this.position);
-    }
-
-    isExpired() {
-        return this.life >= BULLET_LIFETIME;
-    }
-
-    draw() {
-        drawCircle(
-            this.position.x,
-            this.position.y,
-            3,
-            COLORS.yellow
-        );
-    }
-}
-
-class Asteroid {
-    constructor(position, velocity, size, sides) {
-        this.position = new Vector2D(
-            position.x,
-            position.y
-        );
-
-        this.velocity = new Vector2D(
-            velocity.x,
-            velocity.y
-        );
-
-        this.size = size;
-        this.sides = sides;
-
-        this.rotation = 0;
-        this.rotationSpeed = randomRange(-2, 2);
-
-        this.collided = false;
-    }
-
-    update(dt) {
-        this.position.x +=
-            this.velocity.x * dt;
-
-        this.position.y +=
-            this.velocity.y * dt;
-
-        this.rotation +=
-            this.rotationSpeed * dt;
-
-        wrapAround(this.position);
-    }
-
-    draw() {
-        const rotationDegrees =
-            this.rotation * 180 / Math.PI;
-
-        drawPolygonLines(
-            this.position,
-            this.sides,
-            this.size,
-            rotationDegrees,
-            2,
-            COLORS.white
-        );
-    }
-}
+import { Ship } from "./entity/Ship";
+import { Bullet } from "./entity/Bullet";
+import { Asteroid } from "./entity/Asteroid";
 
 export class MyApp extends Entity {
     ship;
 
     bullets = [];
     asteroids = [];
+    stars = [];
 
     shootTimer = 0;
 
+    score = 0;
+
     gameOver = false;
+    gameWon = false;
 
     constructor() {
         super();
 
         this.ship = new Ship();
 
+        this.createStars();
         this.createAsteroids();
     }
 
@@ -317,7 +71,7 @@ export class MyApp extends Entity {
     }
 
     onUpdate(dt) {
-        if (this.gameOver) {
+        if (this.gameOver || this.gameWon) {
             if (isKeyPressed("Enter")) {
                 this.restart();
             }
@@ -334,9 +88,19 @@ export class MyApp extends Entity {
 
         this.handleCollisions();
         this.handleShooting();
+
+        if (this.asteroids.length === 0) {
+            this.gameWon = true;
+
+            if (this.score > bestScore) {
+                bestScore = this.score;
+            }
+        }
     }
 
     onDraw() {
+        this.drawBackground();
+
         this.ship.draw();
 
         for (const bullet of this.bullets) {
@@ -354,8 +118,52 @@ export class MyApp extends Entity {
             return;
         }
 
-        if (this.asteroids.length === 0) {
+        if (this.gameWon) {
             this.drawVictory();
+        }
+    }
+
+    drawBackground() {
+        drawRectangle(
+            0,
+            0,
+            CANVAS_WIDTH,
+            CANVAS_HEIGHT,
+            COLORS.background
+        );
+
+        for (const star of this.stars) {
+            drawCircle(
+                star.position.x,
+                star.position.y,
+                star.size,
+                star.color
+            );
+        }
+    }
+
+    createStars() {
+        this.stars = [];
+
+        for (let i = 0; i < STAR_COUNT; i++) {
+            const alpha =
+                randomRange(0.25, 0.8);
+
+            this.stars.push({
+                position: new Vector2D(
+                    randomRange(0, CANVAS_WIDTH),
+                    randomRange(0, CANVAS_HEIGHT)
+                ),
+
+                size: randomRange(0.5, 1.5),
+
+                color: new Color(
+                    0.7,
+                    0.8,
+                    1,
+                    alpha
+                ),
+            });
         }
     }
 
@@ -489,6 +297,11 @@ export class MyApp extends Entity {
                     bullet.collided = true;
                     asteroid.collided = true;
 
+                    this.score +=
+                        this.getAsteroidScore(
+                            asteroid.size
+                        );
+
                     this.splitAsteroid(asteroid);
 
                     break;
@@ -497,6 +310,16 @@ export class MyApp extends Entity {
         }
 
         this.removeDestroyedAsteroids();
+    }
+
+    getAsteroidScore(size) {
+        if (size >= 30)
+            return 100;
+
+        if (size >= 18)
+            return 50;
+
+        return 25;
     }
 
     handleShipCollisions() {
@@ -512,6 +335,11 @@ export class MyApp extends Entity {
                 ) <= radius * radius
             ) {
                 this.gameOver = true;
+
+                if (this.score > bestScore) {
+                    bestScore = this.score;
+                }
+
                 return;
             }
         }
@@ -618,6 +446,26 @@ export class MyApp extends Entity {
         );
 
         drawText(
+            "Score: " + this.score,
+            new Vector2D(
+                CANVAS_WIDTH - 150,
+                30
+            ),
+            20,
+            COLORS.white
+        );
+
+        drawText(
+            "Best: " + bestScore,
+            new Vector2D(
+                CANVAS_WIDTH - 150,
+                55
+            ),
+            16,
+            COLORS.gray
+        );
+
+        drawText(
             "Asteroids: " +
                 this.asteroids.length,
             new Vector2D(
@@ -637,30 +485,40 @@ export class MyApp extends Entity {
             "GAME OVER",
             new Vector2D(
                 centerX - 70,
-                CANVAS_HEIGHT / 2 - 20
+                CANVAS_HEIGHT / 2 - 45
             ),
             32,
             COLORS.red
         );
 
         drawText(
-            "Your ship was destroyed.",
+            "Score: " + this.score,
             new Vector2D(
-                centerX - 105,
-                CANVAS_HEIGHT / 2 + 15
+                centerX - 45,
+                CANVAS_HEIGHT / 2
             ),
-            18,
+            20,
             COLORS.white
         );
 
         drawText(
-            "Press ENTER to restart.",
+            "Best: " + bestScore,
             new Vector2D(
-                centerX - 105,
-                CANVAS_HEIGHT / 2 + 45
+                centerX - 35,
+                CANVAS_HEIGHT / 2 + 30
             ),
             18,
             COLORS.gray
+        );
+
+        drawText(
+            "Press ENTER to try again.",
+            new Vector2D(
+                centerX - 105,
+                CANVAS_HEIGHT / 2 + 70
+            ),
+            18,
+            COLORS.white
         );
     }
 
@@ -672,30 +530,40 @@ export class MyApp extends Entity {
             "YOU WIN!",
             new Vector2D(
                 centerX - 65,
-                CANVAS_HEIGHT / 2 - 20
+                CANVAS_HEIGHT / 2 - 55
             ),
             32,
             COLORS.green
         );
 
         drawText(
-            "All asteroids were destroyed.",
+            "Final score: " + this.score,
             new Vector2D(
-                centerX - 125,
-                CANVAS_HEIGHT / 2 + 15
+                centerX - 70,
+                CANVAS_HEIGHT / 2 - 10
+            ),
+            20,
+            COLORS.white
+        );
+
+        drawText(
+            "Best score: " + bestScore,
+            new Vector2D(
+                centerX - 70,
+                CANVAS_HEIGHT / 2 + 20
             ),
             18,
-            COLORS.white
+            COLORS.gray
         );
 
         drawText(
             "Press ENTER to play again.",
             new Vector2D(
-                centerX - 115,
-                CANVAS_HEIGHT / 2 + 45
+                centerX - 110,
+                CANVAS_HEIGHT / 2 + 65
             ),
             18,
-            COLORS.gray
+            COLORS.white
         );
     }
 
@@ -706,7 +574,10 @@ export class MyApp extends Entity {
 
         this.shootTimer = 0;
 
+        this.score = 0;
+
         this.gameOver = false;
+        this.gameWon = false;
 
         this.createAsteroids();
     }

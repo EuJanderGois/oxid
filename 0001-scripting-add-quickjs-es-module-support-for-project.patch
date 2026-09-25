@@ -1,0 +1,372 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index fbebde0..ad8daaa 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -8,6 +8,6 @@ clap = { version = "4.6.0", features = ["derive"] }
+ console = "0.16.2"
+ jsonc-parser = { version = "0.29.0", features = ["serde"] }
+ macroquad = "=0.4.14"
+-rquickjs = {version="0.11.0",features=["classes", "macro"]}
++rquickjs = {version="0.11.0",features=["classes", "macro", "loader"]}
+ serde = { version = "1.0.228", features = ["derive"] }
+ serde_json = "1.0.149"
+diff --git a/src/assets/locales/en-US.jsonc b/src/assets/locales/en-US.jsonc
+index bc4c46d..eba0d60 100644
+--- a/src/assets/locales/en-US.jsonc
++++ b/src/assets/locales/en-US.jsonc
+@@ -168,6 +168,7 @@
+           "{source}"
+         ]
+       },
++      "module_root_init": "Failed to resolve project directory for module imports: {source}",
+       "runtime_init": "Failed to initialize script runtime: {source}",
+       "context_init": "Failed to create script runtime context: {source}",
+       "plugin_register": "Failed to register plugin '{plugin}': {source}",
+diff --git a/src/assets/locales/pt-BR.jsonc b/src/assets/locales/pt-BR.jsonc
+index e6b369a..701720a 100644
+--- a/src/assets/locales/pt-BR.jsonc
++++ b/src/assets/locales/pt-BR.jsonc
+@@ -183,6 +183,7 @@
+           "{source}"
+         ]
+       },
++      "module_root_init": "Falha ao resolver o diretório do projeto para importação de módulos: {source}",
+       "runtime_init": "Falha na inicialização do script runtime: {source}",
+       "context_init": "Falha ao criar contexto do script runtime: {source}",
+       "plugin_register": "Falha ao registrar plugin '{plugin}': {source}",
+diff --git a/src/runtime/game.rs b/src/runtime/game.rs
+index 809bc6e..1e8544f 100644
+--- a/src/runtime/game.rs
++++ b/src/runtime/game.rs
+@@ -11,13 +11,13 @@ pub fn launch(project: LoadedProject) {
+ 
+     let config = project.window_config();
+ 
+-    macroquad::Window::from_config(config, run_game(project.script));
++    macroquad::Window::from_config(config, run_game(project));
+ }
+ 
+-async fn run_game(script: String) {
++async fn run_game(project: LoadedProject) {
+     let mut renderer = MqRenderer;
+ 
+-    let engine = match ScriptEngine::new(&script) {
++    let engine = match ScriptEngine::new(&project.script, &project.root, &project.entry_path) {
+         Ok(engine) => engine,
+         Err(err) => {
+             let source = err.to_string();
+diff --git a/src/runtime/project.rs b/src/runtime/project.rs
+index 5b12bf2..a9c9e73 100644
+--- a/src/runtime/project.rs
++++ b/src/runtime/project.rs
+@@ -32,6 +32,7 @@ impl PackageJson {
+ pub struct LoadedProject {
+     pub script: String,
+     pub root: PathBuf,
++    pub entry_path: PathBuf,
+     title: String,
+     width: i32,
+     height: i32,
+@@ -130,6 +131,7 @@ pub fn load(path: &Path) -> Result<LoadedProject, String> {
+     Ok(LoadedProject {
+         script,
+         root: path.to_path_buf(),
++        entry_path,
+         title: package.oxid.title,
+         width: package.oxid.width,
+         height: package.oxid.height,
+diff --git a/src/scripting/bootstrap.rs b/src/scripting/bootstrap.rs
+index 9310f4d..02c9a5a 100644
+--- a/src/scripting/bootstrap.rs
++++ b/src/scripting/bootstrap.rs
+@@ -1,5 +1,7 @@
+ //! Script runtime bootstrap and entry-module initialization.
+ 
++use std::path::Path;
++
+ use rquickjs::{Ctx, Module, Object};
+ 
+ use super::{error::ScriptEngineError, plugins::registry};
+@@ -15,9 +17,15 @@ pub fn register_modules(ctx: &Ctx<'_>) -> Result<(), ScriptEngineError> {
+ pub fn bootstrap_entry_module<'a>(
+     ctx: &Ctx<'a>,
+     script_code: &str,
++    entry_path: &Path,
+     globals: &Object<'a>,
+ ) -> Result<(), ScriptEngineError> {
+-    let module = Module::declare(ctx.clone(), "main.js", script_code)
++    // The entry module is declared under its real, absolute path (rather than
++    // a fixed placeholder name) so that relative `import`s inside it resolve
++    // against the project's actual directory structure. See `super::loader`.
++    let entry_name = entry_path.to_string_lossy().into_owned();
++
++    let module = Module::declare(ctx.clone(), entry_name, script_code)
+         .map_err(|e| ScriptEngineError::EntryModuleDeclare(e.to_string()))?;
+ 
+     module
+diff --git a/src/scripting/engine.rs b/src/scripting/engine.rs
+index 6840b90..aa6e006 100644
+--- a/src/scripting/engine.rs
++++ b/src/scripting/engine.rs
+@@ -1,5 +1,7 @@
+ //! QuickJS scripting engine lifecycle.
+ 
++use std::path::Path;
++
+ use rquickjs::{Context, Runtime};
+ 
+ use crate::{
+@@ -10,7 +12,12 @@ use crate::{
+     },
+ };
+ 
+-use super::{bootstrap, error::ScriptEngineError, hooks};
++use super::{
++    bootstrap,
++    error::ScriptEngineError,
++    hooks,
++    loader::{FsLoader, FsResolver},
++};
+ 
+ pub struct ScriptEngine {
+     _rt: Runtime,
+@@ -18,9 +25,26 @@ pub struct ScriptEngine {
+ }
+ 
+ impl ScriptEngine {
+-    pub fn new(script_code: &str) -> Result<Self, ScriptEngineError> {
++    /// `project_root` is the directory containing the project's `package.json`;
++    /// `entry_path` is the path to the entry script (e.g. `<project_root>/main.js`).
++    /// Both are used to scope and resolve `import`s between the project's own
++    /// script files (see `super::loader`).
++    pub fn new(
++        script_code: &str,
++        project_root: &Path,
++        entry_path: &Path,
++    ) -> Result<Self, ScriptEngineError> {
++        let project_root = project_root
++            .canonicalize()
++            .map_err(|e| ScriptEngineError::ModuleRootInit(e.to_string()))?;
++        let entry_path = entry_path
++            .canonicalize()
++            .map_err(|e| ScriptEngineError::ModuleRootInit(e.to_string()))?;
++
+         let rt = Runtime::new().map_err(|e| ScriptEngineError::RuntimeInit(e.to_string()))?;
+ 
++        rt.set_loader(FsResolver::new(project_root), FsLoader);
++
+         let ctx = Context::full(&rt).map_err(|e| ScriptEngineError::ContextInit(e.to_string()))?;
+ 
+         ctx.with(|ctx| -> Result<(), ScriptEngineError> {
+@@ -28,7 +52,7 @@ impl ScriptEngine {
+ 
+             let globals = ctx.globals();
+ 
+-            bootstrap::bootstrap_entry_module(&ctx, script_code, &globals)?;
++            bootstrap::bootstrap_entry_module(&ctx, script_code, &entry_path, &globals)?;
+             hooks::compile_hooks(&ctx, &globals)?;
+ 
+             Ok(())
+diff --git a/src/scripting/error.rs b/src/scripting/error.rs
+index d052488..bbbffbf 100644
+--- a/src/scripting/error.rs
++++ b/src/scripting/error.rs
+@@ -4,6 +4,7 @@ use crate::i18n;
+ 
+ #[derive(Debug)]
+ pub enum ScriptEngineError {
++    ModuleRootInit(String),
+     RuntimeInit(String),
+     ContextInit(String),
+     PluginRegister { plugin: String, source: String },
+@@ -18,6 +19,11 @@ pub enum ScriptEngineError {
+ impl fmt::Display for ScriptEngineError {
+     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+         match self {
++            ScriptEngineError::ModuleRootInit(source) => write!(
++                f,
++                "{}",
++                i18n::text_with("scripting.error.module_root_init", &[("source", source)])
++            ),
+             ScriptEngineError::RuntimeInit(source) => write!(
+                 f,
+                 "{}",
+diff --git a/src/scripting/loader.rs b/src/scripting/loader.rs
+new file mode 100644
+index 0000000..adf848a
+--- /dev/null
++++ b/src/scripting/loader.rs
+@@ -0,0 +1,118 @@
++//! Filesystem-backed module resolver and loader.
++//!
++//! Native `oxid/*` modules are declared and evaluated ahead of time (see
++//! [`super::bootstrap::register_modules`]), which means QuickJS already has them
++//! cached under their exact name before any user script runs. Because of that,
++//! [`FsResolver`] only needs to recognize those names and echo them back
++//! unchanged for QuickJS to find them in its module cache; [`FsLoader`] never
++//! actually gets called for them. Every other import specifier is treated as a
++//! path to one of the project's own `.js` files, resolved relative to the
++//! importing file (for `./`/`../` specifiers) or to the project root (for
++//! bare/absolute specifiers), and constrained to stay inside the project
++//! directory.
++
++use std::{
++    collections::HashSet,
++    fs,
++    path::{Path, PathBuf},
++};
++
++use rquickjs::{
++    Ctx, Error as JsError, Module, Result as JsResult,
++    loader::{Loader, Resolver},
++    module::Declared,
++};
++
++use super::plugins::registry;
++
++/// Resolves `import`/`export ... from` specifiers to a stable module key: the
++/// untouched name of a built-in `oxid/*` module, or the canonicalized,
++/// absolute path of a project script file.
++pub struct FsResolver {
++    builtins: HashSet<&'static str>,
++    root: PathBuf,
++}
++
++impl FsResolver {
++    /// `root` must already be canonicalized; every resolved file path is
++    /// required to stay inside it.
++    pub fn new(root: PathBuf) -> Self {
++        Self {
++            builtins: registry::plugins().iter().map(|plugin| plugin.name).collect(),
++            root,
++        }
++    }
++
++    /// Candidate file paths to try, in order, for an extension-less or
++    /// directory-style import specifier.
++    fn candidates(path: &Path) -> [PathBuf; 3] {
++        [
++            path.to_path_buf(),
++            path.with_extension("js"),
++            path.join("index.js"),
++        ]
++    }
++
++    fn find_existing_file(path: &Path) -> Option<PathBuf> {
++        Self::candidates(path)
++            .into_iter()
++            .find(|candidate| candidate.is_file())
++    }
++}
++
++impl Resolver for FsResolver {
++    fn resolve<'js>(&mut self, _ctx: &Ctx<'js>, base: &str, name: &str) -> JsResult<String> {
++        // Built-in modules are already loaded under their bare name; nothing
++        // to touch on disk for those.
++        if self.builtins.contains(name) {
++            return Ok(name.to_string());
++        }
++
++        let target = if let Some(from_root) = name.strip_prefix('/') {
++            self.root.join(from_root)
++        } else if name.starts_with('.') {
++            Path::new(base).parent().unwrap_or(&self.root).join(name)
++        } else {
++            // Bare specifier: treat it as a path relative to the project root
++            // (e.g. `import "entities/player.js"`).
++            self.root.join(name)
++        };
++
++        let resolved = Self::find_existing_file(&target).ok_or_else(|| {
++            JsError::new_resolving_message(
++                base,
++                name,
++                format!("no such module file: '{}'", target.display()),
++            )
++        })?;
++
++        let resolved = resolved
++            .canonicalize()
++            .map_err(|err| JsError::new_resolving_message(base, name, err.to_string()))?;
++
++        if !resolved.starts_with(&self.root) {
++            return Err(JsError::new_resolving_message(
++                base,
++                name,
++                "modules can only be imported from inside the project directory".to_string(),
++            ));
++        }
++
++        Ok(resolved.to_string_lossy().into_owned())
++    }
++}
++
++/// Loads a module by the key produced by [`FsResolver`]. Built-in modules are
++/// already registered before any user script evaluates, so QuickJS resolves
++/// them straight from its module cache and this loader is only ever invoked
++/// for project script files.
++pub struct FsLoader;
++
++impl Loader for FsLoader {
++    fn load<'js>(&mut self, ctx: &Ctx<'js>, path: &str) -> JsResult<Module<'js, Declared>> {
++        let source = fs::read_to_string(path)
++            .map_err(|err| JsError::new_loading_message(path, err.to_string()))?;
++
++        Module::declare(ctx.clone(), path, source)
++    }
++}
+diff --git a/src/scripting/mod.rs b/src/scripting/mod.rs
+index bd184eb..ba5b0ae 100644
+--- a/src/scripting/mod.rs
++++ b/src/scripting/mod.rs
+@@ -3,6 +3,7 @@ pub mod engine;
+ pub mod error;
+ pub mod generator;
+ pub mod hooks;
++pub mod loader;
+ 
+ pub mod plugins;
+ 
+diff --git a/website/docs/scripting/modules.md b/website/docs/scripting/modules.md
+index 37196e5..b5c7271 100644
+--- a/website/docs/scripting/modules.md
++++ b/website/docs/scripting/modules.md
+@@ -45,6 +45,38 @@ Keyboard and mouse queries backed by the native runtime.
+ 
+ Texture loading and textured drawing helpers.
+ 
++## Importing your own files
++
++Besides the built-in modules above, scripts can `import`/`export` from other
++`.js` files inside the project:
++
++```js title="entities/player.js"
++import { Entity } from "oxid/core";
++
++export class Player extends Entity {
++  onUpdate(dt) {}
++}
++```
++
++```js title="main.js"
++import { Player } from "./entities/player.js";
++
++export function main() {
++  return new Player();
++}
++```
++
++- Relative specifiers (`./`, `../`) resolve relative to the file doing the
++  importing.
++- Bare specifiers without a leading `.` (e.g. `"entities/player.js"`) resolve
++  relative to the project root (the folder containing `package.json`).
++- The `.js` extension can be omitted; `./entities/player` and
++  `./entities/player.js` both resolve to `entities/player.js`. A directory
++  import (`./entities`) resolves to `entities/index.js` if present.
++- Imports can only reach files inside the project directory — a specifier that
++  would resolve outside of it (e.g. via `../../..`) fails to load.
++- Each file is evaluated once, no matter how many other files import it.
++
+ ## API metadata
+ 
+ Each native module also describes its public types and functions through metadata. That metadata is used to generate `oxid.d.ts`, so the runtime API and editor declarations share the same source of truth.

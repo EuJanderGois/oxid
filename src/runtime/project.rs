@@ -32,6 +32,7 @@ impl PackageJson {
 pub struct LoadedProject {
     pub script: String,
     pub root: PathBuf,
+    pub entry_path: PathBuf,
     title: String,
     width: i32,
     height: i32,
@@ -130,6 +131,7 @@ pub fn load(path: &Path) -> Result<LoadedProject, String> {
     Ok(LoadedProject {
         script,
         root: path.to_path_buf(),
+        entry_path,
         title: package.oxid.title,
         width: package.oxid.width,
         height: package.oxid.height,
