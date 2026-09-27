@@ -98,11 +98,7 @@ pub fn call_f32_hook(
     })
 }
 
-pub fn hook_error(
-    ctx: &Ctx<'_>,
-    hook_name: &'static str,
-    error: rquickjs::Error,
-) -> ScriptError {
+pub fn hook_error(ctx: &Ctx<'_>, hook_name: &'static str, error: rquickjs::Error) -> ScriptError {
     let source = CaughtError::from_error(ctx, error).to_string();
 
     ScriptError::HookExecution {

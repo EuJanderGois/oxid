@@ -176,7 +176,10 @@ mod tests {
             .resolve(&entry.to_string_lossy(), "./entities/player.js")
             .unwrap();
 
-        assert_eq!(resolved, ResolvedModule::File(player.canonicalize().unwrap()));
+        assert_eq!(
+            resolved,
+            ResolvedModule::File(player.canonicalize().unwrap())
+        );
     }
 
     #[test]
@@ -191,7 +194,10 @@ mod tests {
             .resolve(&entry.to_string_lossy(), "utils.js")
             .unwrap();
 
-        assert_eq!(resolved, ResolvedModule::File(utils.canonicalize().unwrap()));
+        assert_eq!(
+            resolved,
+            ResolvedModule::File(utils.canonicalize().unwrap())
+        );
     }
 
     #[test]
@@ -206,7 +212,10 @@ mod tests {
             .resolve(&entry.to_string_lossy(), "./entities")
             .unwrap();
 
-        assert_eq!(resolved, ResolvedModule::File(index.canonicalize().unwrap()));
+        assert_eq!(
+            resolved,
+            ResolvedModule::File(index.canonicalize().unwrap())
+        );
     }
 
     #[test]
