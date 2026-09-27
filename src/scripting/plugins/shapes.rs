@@ -16,7 +16,7 @@ use crate::{
 
 use crate::scripting::plugins::{
     color::{Color, to_renderer_color},
-    math::Vector2D,
+    math::{Vector2D, to_renderer_vec2},
 };
 
 fn draw_arc<'js>(
@@ -86,7 +86,13 @@ fn draw_triangle_lines<'js>(
     color: OwnedBorrow<'js, Color>,
 ) {
     let _ = with_active_queue(|queue| {
-        queue.draw_triangle_lines(v1, v2, v3, thickness, to_renderer_color(&color));
+        queue.draw_triangle_lines(
+            to_renderer_vec2(&v1),
+            to_renderer_vec2(&v2),
+            to_renderer_vec2(&v3),
+            thickness,
+            to_renderer_color(&color),
+        );
     });
 }
 

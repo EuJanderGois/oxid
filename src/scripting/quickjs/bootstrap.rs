@@ -4,14 +4,14 @@ use std::path::Path;
 
 use rquickjs::{Ctx, Module, Object};
 
-use super::{error::ScriptEngineError, plugins::registry};
+use crate::scripting::{error::ScriptError, plugins::registry};
 
 pub const APP_INSTANCE: &str = "__app_instance";
 pub const MAIN_NAMESPACE: &str = "__main";
 
-pub fn register_modules(ctx: &Ctx<'_>) -> Result<(), ScriptEngineError> {
+pub fn register_modules(ctx: &Ctx<'_>) -> Result<(), ScriptError> {
     registry::register_plugins(ctx)
-        .map_err(|(plugin, source)| ScriptEngineError::PluginRegister { plugin, source })
+        .map_err(|(plugin, source)| ScriptError::PluginRegister { plugin, source })
 }
 
 pub fn bootstrap_entry_module<'a>(
@@ -19,32 +19,32 @@ pub fn bootstrap_entry_module<'a>(
     script_code: &str,
     entry_path: &Path,
     globals: &Object<'a>,
-) -> Result<(), ScriptEngineError> {
+) -> Result<(), ScriptError> {
     // The entry module is declared under its real, absolute path (rather than
     // a fixed placeholder name) so that relative `import`s inside it resolve
     // against the project's actual directory structure. See `super::loader`.
     let entry_name = entry_path.to_string_lossy().into_owned();
 
     let module = Module::declare(ctx.clone(), entry_name, script_code)
-        .map_err(|e| ScriptEngineError::EntryModuleDeclare(e.to_string()))?;
+        .map_err(|e| ScriptError::EntryModuleDeclare(e.to_string()))?;
 
     module
         .clone()
         .eval()
-        .map_err(|e| ScriptEngineError::EntryModuleEval(e.to_string()))?;
+        .map_err(|e| ScriptError::EntryModuleEval(e.to_string()))?;
 
     let namespace = module
         .namespace()
-        .map_err(|e| ScriptEngineError::MainNamespace(e.to_string()))?;
+        .map_err(|e| ScriptError::MainNamespace(e.to_string()))?;
 
     globals
         .set(MAIN_NAMESPACE, namespace)
-        .map_err(|e| ScriptEngineError::MainNamespace(e.to_string()))?;
+        .map_err(|e| ScriptError::MainNamespace(e.to_string()))?;
 
     ctx.eval::<(), _>(format!(
         "globalThis.{APP_INSTANCE} = {MAIN_NAMESPACE}.main();"
     ))
-    .map_err(|e| ScriptEngineError::AppInstance(e.to_string()))?;
+    .map_err(|e| ScriptError::AppInstance(e.to_string()))?;
 
     Ok(())
 }

@@ -26,6 +26,16 @@ impl Vector2D {
     }
 }
 
+use crate::renderer::command::Vec2 as RendererVec2;
+
+/// Converts the script-facing `Vector2D` into the renderer's own, QuickJS-free
+/// `Vec2`. Mirrors `scripting::plugins::color::to_renderer_color`; plugins
+/// that hand a position or vertex to the render queue should always convert
+/// at this boundary rather than passing `Vector2D` straight through.
+pub fn to_renderer_vec2(vector: &Vector2D) -> RendererVec2 {
+    RendererVec2::new(vector.x, vector.y)
+}
+
 ///
 /// Provides mathematical types and module bindings.
 ///

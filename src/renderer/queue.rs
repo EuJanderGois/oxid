@@ -1,7 +1,7 @@
 // src/renderer/queue.rs
-use crate::{
-    renderer::{color::Color, command::RenderCommand},
-    scripting::plugins::math::Vector2D,
+use crate::renderer::{
+    color::Color,
+    command::{RenderCommand, Vec2},
 };
 
 #[derive(Default, Debug)]
@@ -153,9 +153,9 @@ impl RenderQueue {
 
     pub fn draw_triangle_lines(
         &mut self,
-        v1: Vector2D,
-        v2: Vector2D,
-        v3: Vector2D,
+        v1: Vec2,
+        v2: Vec2,
+        v3: Vec2,
         thickness: f32,
         color: Color,
     ) {

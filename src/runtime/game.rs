@@ -1,7 +1,7 @@
 use oxid::{
     i18n,
     renderer::{MqRenderer, Renderer, queue::RenderQueue},
-    scripting::ScriptEngine,
+    scripting::{QuickJsRuntime, ScriptRuntime},
 };
 
 use super::LoadedProject;
@@ -17,7 +17,7 @@ pub fn launch(project: LoadedProject) {
 async fn run_game(project: LoadedProject) {
     let mut renderer = MqRenderer;
 
-    let engine = match ScriptEngine::new(&project.script, &project.root, &project.entry_path) {
+    let engine = match QuickJsRuntime::new(&project.script, &project.root, &project.entry_path) {
         Ok(engine) => engine,
         Err(err) => {
             let source = err.to_string();
