@@ -150,7 +150,7 @@ impl ScriptPlugin for TexturePlugin {
     const NAME: &'static str = "oxid/texture";
 
     fn docs() -> &'static str {
-        "Carregamento e desenho de texturas 2D."
+        "Loading and drawing of 2D textures."
     }
 
     fn types() -> &'static [TypeMeta] {

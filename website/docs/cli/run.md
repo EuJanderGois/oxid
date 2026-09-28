@@ -5,19 +5,33 @@ slug: /cli/run
 
 # `oxid run`
 
-Run the current project with:
+Run a project with:
 
 ```bash
 oxid run
+oxid run <path>
 ```
+
+## Arguments
+
+- `path` (optional) — path to the project directory to run. When omitted, Oxid uses the **current working directory**.
+
+```bash
+# runs the project in the current directory
+oxid run
+
+# runs a project located elsewhere, without cd'ing into it first
+oxid run ./games/my-game
+oxid run /absolute/path/to/my-game
+```
+
+`path` also affects locale resolution (see below): when it is given, Oxid reads `oxid.locale` from *that* project's `package.json`, not from the current directory's.
 
 ## Requirements
 
-- you must be inside a project directory
-- that directory must contain a valid `package.json`
+- the target directory (current directory, or `path` if given) must contain a valid `package.json`
 - the manifest must contain an `oxid` object
 - the configured entry file must exist
-- does not yet support arguments
 
 ## What it loads
 
@@ -35,6 +49,10 @@ Oxid reads:
 ```
 
 The runtime then reads the entry file from `oxid.entry`, evaluates the JavaScript module, calls its exported `main()` function, and drives the lifecycle hooks of the returned object.
+
+## Asset paths and `path`
+
+Once the runtime starts, relative asset paths used by the game (for example, the `path` argument to [`loadTexture`](/api/texture)) resolve against the **project's own root directory** — the directory containing its `package.json` — not against whatever directory you happened to run `oxid run` from. This matters specifically when you use `oxid run <path>` from outside the project: asset paths in the game's code still work the same way as if you had `cd`'d into the project first.
 
 ## Legacy compatibility
 

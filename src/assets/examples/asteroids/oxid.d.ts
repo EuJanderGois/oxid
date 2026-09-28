@@ -51,8 +51,8 @@ declare module "oxid/shapes" {
    * @param sides Resolution used to approximate the curve; higher values produce a smoother arc.
    * @param radius Arc radius.
    * @param rotation Initial rotation in degrees.
-   * @param thickness Espessura do arco.
-   * @param arc Abertura do arco em graus.
+   * @param thickness Arc line thickness.
+   * @param arc Arc opening in degrees.
    * @param color Color used for drawing.
    */
   export function drawArc(position: Vector2D, sides: number, radius: number, rotation: number, thickness: number, arc: number, color: Color): void;
@@ -172,7 +172,7 @@ declare module "oxid/text" {
    * Draws 2D text on the screen. The y coordinate represents the text baseline.
    * @param text Text content to draw.
    * @param position Text position in screen coordinates.
-   * @param fontSize Tamanho da fonte em pixels. Deve ser maior que zero.
+   * @param fontSize Font size in pixels. Must be greater than zero.
    * @param color Color used for the text.
    */
   export function drawText(text: string, position: Vector2D, fontSize: number, color: Color): void;
@@ -181,7 +181,7 @@ declare module "oxid/text" {
    * Draws multiline text using '\n' as the separator. The y coordinate represents the first line baseline.
    * @param text Text content to draw.
    * @param position Initial text block position in screen coordinates.
-   * @param fontSize Tamanho da fonte em pixels. Deve ser maior que zero.
+   * @param fontSize Font size in pixels. Must be greater than zero.
    * @param color Color used for the text.
    * @param lineDistance Line spacing multiplier. Use 1.0 for default spacing.
    */
@@ -190,14 +190,14 @@ declare module "oxid/text" {
   /**
    * Measures a single line of text using the default font and returns its width, height, and offset_y.
    * @param text Text content to measure.
-   * @param fontSize Tamanho da fonte em pixels. Deve ser maior que zero.
+   * @param fontSize Font size in pixels. Must be greater than zero.
    */
   export function measureText(text: string, fontSize: number): TextMetrics;
 
 }
 
 declare module "oxid/texture" {
-  /** Carregamento e desenho de texturas 2D. */
+  /** Loading and drawing of 2D textures. */
   import type { Vector2D } from "oxid/math";
 
   /**

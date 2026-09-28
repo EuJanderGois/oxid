@@ -1,9 +1,19 @@
+//! Oxid's own scripting-layer error type.
+//!
+//! Every variant here is a string-based, backend-agnostic description of
+//! what went wrong (e.g. "the runtime failed to initialize", "a hook failed
+//! to compile"); no `rquickjs` type appears anywhere in this file. Backends
+//! (currently only [`super::quickjs`]) are responsible for converting their
+//! own error types to a `String` at the point they construct one of these
+//! variants, so this error can flow through the rest of the engine without
+//! dragging QuickJS-specific types along with it.
+
 use std::fmt;
 
 use crate::i18n;
 
 #[derive(Debug)]
-pub enum ScriptEngineError {
+pub enum ScriptError {
     ModuleRootInit(String),
     RuntimeInit(String),
     ContextInit(String),
@@ -16,25 +26,25 @@ pub enum ScriptEngineError {
     HookExecution { hook: &'static str, source: String },
 }
 
-impl fmt::Display for ScriptEngineError {
+impl fmt::Display for ScriptError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ScriptEngineError::ModuleRootInit(source) => write!(
+            ScriptError::ModuleRootInit(source) => write!(
                 f,
                 "{}",
                 i18n::text_with("scripting.error.module_root_init", &[("source", source)])
             ),
-            ScriptEngineError::RuntimeInit(source) => write!(
+            ScriptError::RuntimeInit(source) => write!(
                 f,
                 "{}",
                 i18n::text_with("scripting.error.runtime_init", &[("source", source)])
             ),
-            ScriptEngineError::ContextInit(source) => write!(
+            ScriptError::ContextInit(source) => write!(
                 f,
                 "{}",
                 i18n::text_with("scripting.error.context_init", &[("source", source)])
             ),
-            ScriptEngineError::PluginRegister { plugin, source } => write!(
+            ScriptError::PluginRegister { plugin, source } => write!(
                 f,
                 "{}",
                 i18n::text_with(
@@ -42,7 +52,7 @@ impl fmt::Display for ScriptEngineError {
                     &[("plugin", plugin), ("source", source)],
                 )
             ),
-            ScriptEngineError::EntryModuleDeclare(source) => write!(
+            ScriptError::EntryModuleDeclare(source) => write!(
                 f,
                 "{}",
                 i18n::text_with(
@@ -50,22 +60,22 @@ impl fmt::Display for ScriptEngineError {
                     &[("source", source)]
                 )
             ),
-            ScriptEngineError::EntryModuleEval(source) => write!(
+            ScriptError::EntryModuleEval(source) => write!(
                 f,
                 "{}",
                 i18n::text_with("scripting.error.entry_module_eval", &[("source", source)])
             ),
-            ScriptEngineError::MainNamespace(source) => write!(
+            ScriptError::MainNamespace(source) => write!(
                 f,
                 "{}",
                 i18n::text_with("scripting.error.main_namespace", &[("source", source)])
             ),
-            ScriptEngineError::AppInstance(source) => write!(
+            ScriptError::AppInstance(source) => write!(
                 f,
                 "{}",
                 i18n::text_with("scripting.error.app_instance", &[("source", source)])
             ),
-            ScriptEngineError::HookCompile { hook, source } => write!(
+            ScriptError::HookCompile { hook, source } => write!(
                 f,
                 "{}",
                 i18n::text_with(
@@ -73,7 +83,7 @@ impl fmt::Display for ScriptEngineError {
                     &[("hook", hook), ("source", source)],
                 )
             ),
-            ScriptEngineError::HookExecution { hook, source } => write!(
+            ScriptError::HookExecution { hook, source } => write!(
                 f,
                 "{}",
                 i18n::text_with(
@@ -85,4 +95,4 @@ impl fmt::Display for ScriptEngineError {
     }
 }
 
-impl std::error::Error for ScriptEngineError {}
+impl std::error::Error for ScriptError {}

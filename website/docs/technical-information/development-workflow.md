@@ -60,7 +60,7 @@ CI must pass before changes are merged into `main`.
 
 ## Commit Convention
 
-Oxid uses short, descriptive commit prefixes to make the project's history easier to understand.
+Oxid uses short, descriptive commit prefixes to make the project's history easier to understand. This page lists the prefixes used day to day; for the full git/PR workflow (branch naming, atomic commits, opening a Pull Request), see [`COMMITING.md`](https://github.com/EuJanderGois/oxid/blob/main/COMMITING.md) in the repository root — that document is the canonical source for the complete list of types and the process around them.
 
 ### `feat`
 
@@ -86,12 +86,36 @@ Changes documentation only.
 docs: document CLI commands
 ```
 
+### `style`
+
+Formatting changes with no logical change (e.g. `cargo fmt`, indentation).
+
+```text
+style: adjust mod.ts indentation
+```
+
 ### `refactor`
 
 Changes the internal implementation without intentionally changing its behavior.
 
 ```text
 refactor: simplify project configuration
+```
+
+### `perf`
+
+Improves performance without changing observable behavior.
+
+```text
+perf: optimize ffi calls
+```
+
+### `build`
+
+Changes to the build system or dependencies.
+
+```text
+build: update deno tasks
 ```
 
 ### `test`

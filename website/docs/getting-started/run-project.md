@@ -12,13 +12,19 @@ cd my-game
 oxid run
 ```
 
-`oxid run` expects to find a `package.json` in the **current working directory** and does not yet support paths as arguments.
+`oxid run` expects to find a `package.json` in the **current working directory** by default. You can also point it at a project elsewhere without changing directories, by passing a path:
+
+```bash
+oxid run path/to/my-game
+```
+
+See [`oxid run`](/cli/run) for the full argument reference.
 
 ## How the runtime resolves your project
 
 When you run the command, Oxid:
 
-1. reads `package.json`
+1. reads `package.json` from the current directory, or from the given path
 2. loads the `oxid` configuration object
 3. resolves the JavaScript entrypoint from `oxid.entry`
 4. reads that file and boots the runtime

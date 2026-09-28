@@ -1,5 +1,25 @@
 // src/renderer/command.rs
-use crate::{renderer::color::Color, scripting::plugins::math::Vector2D};
+use crate::renderer::color::Color;
+
+/// A plain 2D point used by render commands.
+///
+/// Render commands are a pure description of what to draw and must not
+/// depend on how the scripting layer happens to represent vectors today
+/// (see `scripting::plugins::math::Vector2D`, which is an `rquickjs`-bound
+/// class). Scripting plugins convert their own vector type into this one at
+/// the boundary, the same way they already convert their `Color` type via
+/// `scripting::plugins::color::to_renderer_color`.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Vec2 {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl Vec2 {
+    pub const fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
+}
 
 #[derive(Clone, Debug)]
 pub enum RenderCommand {
@@ -38,9 +58,9 @@ pub enum RenderCommand {
         color: Color,
     },
     DrawTriangleLines {
-        v1: Vector2D,
-        v2: Vector2D,
-        v3: Vector2D,
+        v1: Vec2,
+        v2: Vec2,
+        v3: Vec2,
         thickness: f32,
         color: Color,
     },

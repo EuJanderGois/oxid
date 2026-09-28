@@ -1,3 +1,8 @@
+> **Nota:** uma versão em inglês, expandida e mantida como parte da documentação oficial, vive em
+> [`website/docs/architecture/rendering.md`](../../website/docs/architecture/rendering.md#adding-a-new-rendercommand).
+> Este arquivo é mantido pelo valor histórico/local do tutorial original; ao atualizar o processo de
+> adicionar um `RenderCommand`, atualize os dois.
+
 # Como adicionar tarefa de renderização
 
 Tarefas de renderização são a maneira que os scripts se comunicam com o renderizador dizendo a ele o que, quando e como renderizar.

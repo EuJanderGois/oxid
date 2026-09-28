@@ -73,6 +73,7 @@ const config: Config = {
         {to: '/cli', label: 'CLI', position: 'left'},
         {to: '/scripting', label: 'Scripting', position: 'left'},
         {to: '/api', label: 'API', position: 'left'},
+        {to: '/architecture', label: 'Architecture', position: 'left'},
         {to: '/roadmap', label: 'Roadmap', position: 'left'},
         {
           href: 'https://github.com/EuJanderGois/oxid',
@@ -118,12 +119,16 @@ const config: Config = {
           title: 'Architecture',
           items: [
             {
-              label: 'CLI',
-              to: '/cli/overview',
+              label: 'Overview',
+              to: '/architecture',
             },
             {
-              label: 'Scripting Modules',
-              to: '/scripting/modules',
+              label: 'Rendering',
+              to: '/architecture/rendering',
+            },
+            {
+              label: 'Architecture Decisions',
+              to: '/architecture/decisions',
             },
           ],
         },

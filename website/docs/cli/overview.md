@@ -23,6 +23,8 @@ Creates a new project directory and writes the initial scaffold.
 
 Loads `package.json`, resolves `oxid.entry`, starts the runtime and opens the game window.
 
+By default it looks for `package.json` in the current working directory. An optional `path` argument points it at a different project directory instead: `oxid run path/to/project`.
+
 ## Global locale option
 
 The CLI also accepts:

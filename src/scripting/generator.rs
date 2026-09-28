@@ -216,8 +216,31 @@ mod tests {
         assert!(!output.contains("Retorna"));
         assert!(!output.contains("Posição"));
         assert!(!output.contains("Vetor"));
+        assert!(!output.contains("Espessura"));
+        assert!(!output.contains("Abertura"));
+        assert!(!output.contains("Tamanho da fonte"));
+        assert!(!output.contains("Carregamento"));
+        assert!(!output.contains("Deve ser maior"));
         assert!(output.contains("Draws"));
         assert!(output.contains("Returns"));
+    }
+
+    #[test]
+    fn generated_metadata_has_no_stray_diacritics() {
+        // A cheap, broader net than the specific-word checks above: none of
+        // the strings that reach `oxid.d.ts` should contain characters that
+        // never appear in English technical prose. This is what should have
+        // caught the pt-BR strings that leaked into shipped `oxid.d.ts`
+        // files before this test existed.
+        let output = crate::scripting::generate_api_d_ts();
+
+        for ch in ['ã', 'õ', 'ç', 'á', 'é', 'í', 'ó', 'ú', 'â', 'ê'] {
+            assert!(
+                !output.contains(ch),
+                "generated oxid.d.ts contains non-English character '{ch}'; \
+                 public API metadata docs must be written in English"
+            );
+        }
     }
 
     #[test]

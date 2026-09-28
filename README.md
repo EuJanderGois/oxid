@@ -105,8 +105,8 @@ Documentation is organized into:
 * **CLI** — Command reference and usage.
 * **Scripting** — JavaScript development with Oxid.
 * **API Reference** — Engine modules and APIs.
-* **Templates** — Project templates and project generation.
-* **Technical Information** — Development workflow, versioning, CI/CD, and project architecture.
+* **Architecture** — How the engine works internally: the runtime loop, the scripting/QuickJS boundary, the rendering pipeline, and the reasoning behind key design decisions.
+* **Technical Information** — Development workflow, versioning, and CI/CD.
 * **Roadmap** — Planned improvements and future direction.
 
 Start with the [Getting Started](https://eujandergois.github.io/oxid/getting-started/installation) section.
