@@ -23,3 +23,5 @@ The current architecture is intentionally simple:
 Oxid is **JavaScript-first** today. Type definitions exist to improve autocomplete and editor integration, but that is not the same thing as full official TypeScript runtime support.
 
 The engine is also still evolving. The docs in this site focus on what is already present in the codebase today: `oxid new`, `oxid run`, the current lifecycle hooks, and the modules exposed by the runtime.
+
+If you want to understand *how* the pieces above fit together internally — not just how to use them — see [Architecture](/architecture).

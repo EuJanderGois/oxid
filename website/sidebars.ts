@@ -60,6 +60,20 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Architecture',
+      link: {
+        type: 'doc',
+        id: 'architecture/index',
+      },
+      items: [
+        'architecture/runtime',
+        'architecture/scripting-runtime',
+        'architecture/rendering',
+        'architecture/decisions',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Roadmap',
       link: {
         type: 'doc',

@@ -198,13 +198,13 @@ impl ScriptPlugin for ShapesPlugin {
                     FunctionParam {
                         name: "thickness",
                         ty: ScriptType::Number,
-                        docs: "Espessura do arco.",
+                        docs: "Arc line thickness.",
                         optional: false,
                     },
                     FunctionParam {
                         name: "arc",
                         ty: ScriptType::Number,
-                        docs: "Abertura do arco em graus.",
+                        docs: "Arc opening in degrees.",
                         optional: false,
                     },
                     FunctionParam {

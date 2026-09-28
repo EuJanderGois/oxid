@@ -16,7 +16,7 @@ It is responsible for:
 The command surface is intentionally small at the moment:
 
 - `oxid new <project-name>`
-- `oxid run`
+- `oxid run [path]`
 - `--lang <locale>`
 
 That small surface is deliberate. Oxid is still growing, and the current focus is the create-run-edit loop rather than a large command set.

@@ -263,7 +263,7 @@ impl ScriptPlugin for TextPlugin {
                     FunctionParam {
                         name: "fontSize",
                         ty: ScriptType::Number,
-                        docs: "Tamanho da fonte em pixels. Deve ser maior que zero.",
+                        docs: "Font size in pixels. Must be greater than zero.",
                         optional: false,
                     },
                     FunctionParam {
@@ -295,7 +295,7 @@ impl ScriptPlugin for TextPlugin {
                     FunctionParam {
                         name: "fontSize",
                         ty: ScriptType::Number,
-                        docs: "Tamanho da fonte em pixels. Deve ser maior que zero.",
+                        docs: "Font size in pixels. Must be greater than zero.",
                         optional: false,
                     },
                     FunctionParam {
@@ -327,7 +327,7 @@ impl ScriptPlugin for TextPlugin {
                     FunctionParam {
                         name: "fontSize",
                         ty: ScriptType::Number,
-                        docs: "Tamanho da fonte em pixels. Deve ser maior que zero.",
+                        docs: "Font size in pixels. Must be greater than zero.",
                         optional: false,
                     },
                 ],
