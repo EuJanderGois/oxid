@@ -3,12 +3,11 @@
 use rquickjs::Ctx;
 
 use crate::scripting::plugins::{
-    PluginRegistration, ScriptPlugin, color::ColorPlugin, core::CorePlugin, input::InputPlugin,
-    math::MathPlugin, shapes::ShapesPlugin, text::TextPlugin, texture::TexturePlugin,
+    PluginRegistration, ScriptPlugin, color::ColorPlugin, core::CorePlugin, input::InputPlugin, math::MathPlugin, shapes::ShapesPlugin, text::TextPlugin, texture::TexturePlugin, window::WindowPlugin,
 };
 
 pub fn plugins() -> &'static [PluginRegistration] {
-    static PLUGINS: [PluginRegistration; 7] = [
+    static PLUGINS: [PluginRegistration; 8] = [
         PluginRegistration {
             name: CorePlugin::NAME,
             metadata: CorePlugin::metadata,
@@ -43,6 +42,11 @@ pub fn plugins() -> &'static [PluginRegistration] {
             name: TexturePlugin::NAME,
             metadata: TexturePlugin::metadata,
             register: TexturePlugin::register,
+        },
+        PluginRegistration {
+            name: WindowPlugin::NAME,
+            metadata: WindowPlugin::metadata,
+            register: WindowPlugin::register,
         },
     ];
 

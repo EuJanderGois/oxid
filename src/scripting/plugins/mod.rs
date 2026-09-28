@@ -7,6 +7,7 @@ pub mod math;
 pub mod shapes;
 pub mod text;
 pub mod texture;
+pub mod window;
 
 pub mod registry;
 
