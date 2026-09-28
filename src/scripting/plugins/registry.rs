@@ -3,7 +3,9 @@
 use rquickjs::Ctx;
 
 use crate::scripting::plugins::{
-    PluginRegistration, ScriptPlugin, color::ColorPlugin, core::CorePlugin, input::InputPlugin, math::MathPlugin, shapes::ShapesPlugin, text::TextPlugin, texture::TexturePlugin, window::WindowPlugin,
+    PluginRegistration, ScriptPlugin, color::ColorPlugin, core::CorePlugin, input::InputPlugin,
+    math::MathPlugin, shapes::ShapesPlugin, text::TextPlugin, texture::TexturePlugin,
+    window::WindowPlugin,
 };
 
 pub fn plugins() -> &'static [PluginRegistration] {

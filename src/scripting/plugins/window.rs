@@ -1,16 +1,12 @@
-
-
-use macroquad::prelude::{
-    screen_width as mq_screen_width,
-    screen_height as mq_screen_height
-};
+use macroquad::prelude::{screen_height as mq_screen_height, screen_width as mq_screen_width};
 use rquickjs::{
-    Result, Function, Ctx,
-    module::{Declarations, Exports, ModuleDef}
+    Ctx, Function, Result,
+    module::{Declarations, Exports, ModuleDef},
 };
 
-use crate::scripting::plugins::{FunctionMeta, ScriptPlugin, ScriptType, math::Vector2D, register_module_def};
-
+use crate::scripting::plugins::{
+    FunctionMeta, ScriptPlugin, ScriptType, math::Vector2D, register_module_def,
+};
 
 // classes
 
@@ -24,7 +20,10 @@ fn get_canvas_height<'js>() -> Result<f32> {
 }
 
 fn get_canvas_size<'js>() -> Result<Vector2D> {
-    Ok(Vector2D { x: mq_screen_width(), y: mq_screen_height() })
+    Ok(Vector2D {
+        x: mq_screen_width(),
+        y: mq_screen_height(),
+    })
 }
 
 pub struct WindowPlugin;
@@ -38,9 +37,18 @@ impl ModuleDef for WindowPlugin {
     }
 
     fn evaluate<'js>(ctx: &Ctx<'js>, exports: &Exports<'js>) -> Result<()> {
-        exports.export("getCanvasWidth", Function::new(ctx.clone(), get_canvas_width)?)?;
-        exports.export("getCanvasHeight", Function::new(ctx.clone(), get_canvas_height)?)?;
-        exports.export("getCanvasSize", Function::new(ctx.clone(), get_canvas_size)?)?;
+        exports.export(
+            "getCanvasWidth",
+            Function::new(ctx.clone(), get_canvas_width)?,
+        )?;
+        exports.export(
+            "getCanvasHeight",
+            Function::new(ctx.clone(), get_canvas_height)?,
+        )?;
+        exports.export(
+            "getCanvasSize",
+            Function::new(ctx.clone(), get_canvas_size)?,
+        )?;
         Ok(())
     }
 }
