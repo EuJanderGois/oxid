@@ -1,7 +1,6 @@
 use macroquad::prelude::{
-    screen_height as mq_screen_height, 
+    request_new_screen_size as mq_set_window_size, screen_height as mq_screen_height,
     screen_width as mq_screen_width,
-    request_new_screen_size as mq_set_window_size
 };
 use rquickjs::{
     Ctx, Function, Result,
@@ -69,16 +68,16 @@ impl ModuleDef for WindowPlugin {
             Function::new(ctx.clone(), get_window_size)?,
         )?;
         exports.export(
-            "setWindowWidth", 
+            "setWindowWidth",
             Function::new(ctx.clone(), set_window_width)?,
         )?;
         exports.export(
-            "setWindowHeight", 
-            Function::new(ctx.clone(), set_window_height)?
+            "setWindowHeight",
+            Function::new(ctx.clone(), set_window_height)?,
         )?;
         exports.export(
-            "setWindowSize", 
-            Function::new(ctx.clone(), set_window_size)?
+            "setWindowSize",
+            Function::new(ctx.clone(), set_window_size)?,
         )?;
 
         Ok(())
@@ -122,7 +121,7 @@ impl ScriptPlugin for WindowPlugin {
                     ty: ScriptType::Number,
                     docs: "The new window width",
                     optional: false,
-                }]
+                }],
             },
             FunctionMeta {
                 module: "oxid/window",
@@ -134,7 +133,7 @@ impl ScriptPlugin for WindowPlugin {
                     ty: ScriptType::Number,
                     docs: "The new window height",
                     optional: false,
-                }]
+                }],
             },
             FunctionMeta {
                 module: "oxid/window",
@@ -153,7 +152,7 @@ impl ScriptPlugin for WindowPlugin {
                     ty: ScriptType::Custom("oxid/math", "Vector2D"),
                     docs: "The new window size",
                     optional: false,
-                }]
+                }],
             },
         ]
     }
