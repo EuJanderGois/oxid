@@ -14,6 +14,11 @@ pub fn register_modules(ctx: &Ctx<'_>) -> Result<(), ScriptError> {
         .map_err(|(plugin, source)| ScriptError::PluginRegister { plugin, source })
 }
 
+pub fn register_globals(ctx: &Ctx<'_>) -> Result<(), ScriptError> {
+    registry::register_globals(ctx)
+        .map_err(|(plugin, source)| ScriptError::PluginRegister { plugin, source })
+}
+
 pub fn bootstrap_entry_module<'a>(
     ctx: &Ctx<'a>,
     script_code: &str,

@@ -60,6 +60,7 @@ impl QuickJsRuntime {
 
         context.with(|ctx| -> Result<(), ScriptError> {
             bootstrap::register_modules(&ctx)?;
+            bootstrap::register_globals(&ctx)?;
 
             let globals = ctx.globals();
 

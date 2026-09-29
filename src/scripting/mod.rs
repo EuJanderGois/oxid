@@ -30,5 +30,5 @@ pub fn api_metadata() -> Vec<plugins::ModuleMeta> {
 }
 
 pub fn generate_api_d_ts() -> String {
-    generator::generate_d_ts(&api_metadata())
+    generator::generate_d_ts_with_globals(&api_metadata(), &plugins::registry::global_metadata())
 }

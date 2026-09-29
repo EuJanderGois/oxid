@@ -3,7 +3,8 @@
 use rquickjs::Ctx;
 
 use crate::scripting::plugins::{
-    PluginRegistration, ScriptPlugin, color::ColorPlugin, core::CorePlugin, input::InputPlugin,
+    GlobalMeta, GlobalPlugin, GlobalPluginRegistration, PluginRegistration, ScriptPlugin,
+    color::ColorPlugin, core::CorePlugin, global::ConsolePlugin, input::InputPlugin,
     math::MathPlugin, shapes::ShapesPlugin, text::TextPlugin, texture::TexturePlugin,
     window::WindowPlugin,
 };
@@ -59,6 +60,31 @@ pub fn api_metadata() -> Vec<crate::scripting::plugins::ModuleMeta> {
     plugins().iter().map(|plugin| (plugin.metadata)()).collect()
 }
 
+pub fn global_plugins() -> &'static [GlobalPluginRegistration] {
+    static PLUGINS: [GlobalPluginRegistration; 1] = [GlobalPluginRegistration {
+        name: ConsolePlugin::NAME,
+        metadata: ConsolePlugin::metadata,
+        register: ConsolePlugin::register,
+    }];
+
+    &PLUGINS
+}
+
+pub fn global_metadata() -> Vec<GlobalMeta> {
+    global_plugins()
+        .iter()
+        .map(|plugin| (plugin.metadata)())
+        .collect()
+}
+
+pub fn register_globals(ctx: &Ctx<'_>) -> Result<(), (String, String)> {
+    for plugin in global_plugins() {
+        (plugin.register)(ctx).map_err(|error| (plugin.name.to_string(), error.to_string()))?;
+    }
+
+    Ok(())
+}
+
 pub fn register_plugins(ctx: &Ctx<'_>) -> Result<(), (String, String)> {
     for plugin in plugins() {
         (plugin.register)(ctx).map_err(|error| (plugin.name.to_string(), error.to_string()))?;
@@ -70,6 +96,56 @@ pub fn register_plugins(ctx: &Ctx<'_>) -> Result<(), (String, String)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn global_registry_metadata_matches_plugin_names() {
+        let registered = global_plugins();
+        let names: Vec<_> = registered.iter().map(|plugin| plugin.name).collect();
+
+        for plugin in registered {
+            let metadata = (plugin.metadata)();
+
+            assert_eq!(metadata.name, plugin.name);
+            assert_eq!(
+                names.iter().filter(|name| **name == plugin.name).count(),
+                1,
+                "global plugin '{}' is registered more than once",
+                plugin.name
+            );
+
+            for function in metadata.functions {
+                assert_eq!(function.module, "global");
+            }
+        }
+    }
+
+    #[test]
+    fn global_plugins_are_available_without_imports() {
+        fn add_one(value: i32) -> rquickjs::Result<i32> {
+            Ok(value + 1)
+        }
+
+        let runtime = rquickjs::Runtime::new().unwrap();
+        let context = rquickjs::Context::full(&runtime).unwrap();
+
+        context.with(|ctx| {
+            register_globals(&ctx).unwrap();
+            crate::scripting::plugins::register_global_function(&ctx, "__oxid_test_add_one", add_one)
+                .unwrap();
+            crate::scripting::plugins::register_global_constant(&ctx, "__oxid_test_value", 41_i32)
+                .unwrap();
+
+            let result = ctx
+                .eval::<i32, _>("__oxid_test_add_one(__oxid_test_value)")
+                .unwrap();
+            let console_log_type = ctx
+                .eval::<String, _>("typeof console.log")
+                .unwrap();
+
+            assert_eq!(result, 42);
+            assert_eq!(console_log_type, "function");
+        });
+    }
 
     #[test]
     fn registry_metadata_matches_plugin_names() {

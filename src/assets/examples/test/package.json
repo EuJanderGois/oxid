@@ -1,0 +1,10 @@
+{
+  "name": "test",
+  "oxid": {
+    "entry": "main.js",
+    "title": "test - Oxid Engine",
+    "width": 800,
+    "height": 600,
+    "locale": "pt-BR"
+  }
+}

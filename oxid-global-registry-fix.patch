@@ -1,0 +1,25 @@
+diff --git a/src/scripting/plugins/mod.rs b/src/scripting/plugins/mod.rs
+--- a/src/scripting/plugins/mod.rs
++++ b/src/scripting/plugins/mod.rs
+@@ -126,7 +126,7 @@ pub fn register_global_function<'js, F, P>(
+     name: &str,
+     function: F,
+ ) -> Result<()>
+ where
+-    F: rquickjs::function::IntoJsFunc<'js, P>,
++    F: rquickjs::function::IntoJsFunc<'js, P> + 'js,
+ {
+     let function = rquickjs::Function::new(ctx.clone(), function)?;
+     ctx.globals().set(name, function)?;
+diff --git a/src/scripting/plugins/registry.rs b/src/scripting/plugins/registry.rs
+--- a/src/scripting/plugins/registry.rs
++++ b/src/scripting/plugins/registry.rs
+@@ -3,7 +3,7 @@
+ use rquickjs::Ctx;
+ 
+ use crate::scripting::plugins::{
+-    GlobalMeta, GlobalPluginRegistration, PluginRegistration, ScriptPlugin,
++    GlobalMeta, GlobalPlugin, GlobalPluginRegistration, PluginRegistration, ScriptPlugin,
+     color::ColorPlugin, core::CorePlugin, global::ConsolePlugin, input::InputPlugin,
+     math::MathPlugin, shapes::ShapesPlugin, text::TextPlugin, texture::TexturePlugin,
+     window::WindowPlugin,
