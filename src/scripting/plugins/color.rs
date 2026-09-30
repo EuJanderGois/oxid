@@ -2,8 +2,8 @@ use rquickjs::module::{Declarations, Exports, ModuleDef};
 use rquickjs::{Class, Ctx, JsLifetime, Result, class::Trace};
 
 use crate::scripting::plugins::{
-    FunctionParam, ScriptPlugin, ScriptType, TypeConstructorMeta, TypeMeta, TypePropertyMeta,
-    register_module_def,
+    FunctionParam, GlobalConstantMeta, GlobalMeta, GlobalPlugin, ScriptPlugin, ScriptType,
+    TypeConstructorMeta, TypeMeta, TypePropertyMeta, register_module_def,
 };
 
 ///
@@ -30,9 +30,145 @@ impl Color {
     }
 }
 
-use crate::renderer::color::Color as RendererColor;
+use crate::renderer::color::{self as renderer_color, Color as RendererColor};
 pub fn to_renderer_color(color: &Color) -> RendererColor {
     RendererColor::new(color.r, color.g, color.b, color.a)
+}
+
+const GLOBAL_CONSTANTS: &[GlobalConstantMeta] = &[
+    GlobalConstantMeta {
+        name: "LIGHTGRAY",
+        docs: "Light gray color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "GRAY",
+        docs: "Gray color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "DARKGRAY",
+        docs: "Dark gray color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "YELLOW",
+        docs: "Yellow color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "GOLD",
+        docs: "Gold color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "ORANGE",
+        docs: "Orange color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "PINK",
+        docs: "Pink color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "RED",
+        docs: "Red color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "MAROON",
+        docs: "Maroon color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "GREEN",
+        docs: "Green color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "LIME",
+        docs: "Lime color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "DARKGREEN",
+        docs: "Dark green color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "SKYBLUE",
+        docs: "Sky blue color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "BLUE",
+        docs: "Blue color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "DARKBLUE",
+        docs: "Dark blue color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "PURPLE",
+        docs: "Purple color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "VIOLET",
+        docs: "Violet color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "DARKPURPLE",
+        docs: "Dark purple color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "BEIGE",
+        docs: "Beige color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "BROWN",
+        docs: "Brown color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "DARKBROWN",
+        docs: "Dark brown color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "WHITE",
+        docs: "White color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "BLACK",
+        docs: "Black color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "BLANK",
+        docs: "Fully transparent color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+    GlobalConstantMeta {
+        name: "MAGENTA",
+        docs: "Magenta color.",
+        ty: ScriptType::Custom("oxid/color", "Color"),
+    },
+];
+
+fn register_global_color<'js>(ctx: &Ctx<'js>, name: &str, color: RendererColor) -> Result<()> {
+    ctx.globals().set(
+        name,
+        Class::instance(ctx.clone(), Color::new(color.r, color.g, color.b, color.a))?,
+    )?;
+    Ok(())
 }
 
 ///
@@ -52,9 +188,51 @@ impl ModuleDef for ColorPlugin {
     } // exporta ao script
 }
 
+impl GlobalPlugin for ColorPlugin {
+    const NAME: &'static str = "colors";
+
+    fn metadata() -> GlobalMeta {
+        GlobalMeta {
+            name: <ColorPlugin as GlobalPlugin>::NAME,
+            docs: "Standard colors available globally.",
+            constants: GLOBAL_CONSTANTS,
+            functions: &[],
+        }
+    }
+
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
+        register_global_color(ctx, "LIGHTGRAY", renderer_color::LIGHTGRAY)?;
+        register_global_color(ctx, "GRAY", renderer_color::GRAY)?;
+        register_global_color(ctx, "DARKGRAY", renderer_color::DARKGRAY)?;
+        register_global_color(ctx, "YELLOW", renderer_color::YELLOW)?;
+        register_global_color(ctx, "GOLD", renderer_color::GOLD)?;
+        register_global_color(ctx, "ORANGE", renderer_color::ORANGE)?;
+        register_global_color(ctx, "PINK", renderer_color::PINK)?;
+        register_global_color(ctx, "RED", renderer_color::RED)?;
+        register_global_color(ctx, "MAROON", renderer_color::MAROON)?;
+        register_global_color(ctx, "GREEN", renderer_color::GREEN)?;
+        register_global_color(ctx, "LIME", renderer_color::LIME)?;
+        register_global_color(ctx, "DARKGREEN", renderer_color::DARKGREEN)?;
+        register_global_color(ctx, "SKYBLUE", renderer_color::SKYBLUE)?;
+        register_global_color(ctx, "BLUE", renderer_color::BLUE)?;
+        register_global_color(ctx, "DARKBLUE", renderer_color::DARKBLUE)?;
+        register_global_color(ctx, "PURPLE", renderer_color::PURPLE)?;
+        register_global_color(ctx, "VIOLET", renderer_color::VIOLET)?;
+        register_global_color(ctx, "DARKPURPLE", renderer_color::DARKPURPLE)?;
+        register_global_color(ctx, "BEIGE", renderer_color::BEIGE)?;
+        register_global_color(ctx, "BROWN", renderer_color::BROWN)?;
+        register_global_color(ctx, "DARKBROWN", renderer_color::DARKBROWN)?;
+        register_global_color(ctx, "WHITE", renderer_color::WHITE)?;
+        register_global_color(ctx, "BLACK", renderer_color::BLACK)?;
+        register_global_color(ctx, "BLANK", renderer_color::BLANK)?;
+        register_global_color(ctx, "MAGENTA", renderer_color::MAGENTA)?;
+        Ok(())
+    }
+}
+
 impl ScriptPlugin for ColorPlugin {
     fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
-        register_module_def::<Self>(ctx, Self::NAME)
+        register_module_def::<Self>(ctx, <ColorPlugin as ScriptPlugin>::NAME)
     }
 
     const NAME: &'static str = "oxid/color";

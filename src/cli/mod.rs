@@ -1,4 +1,5 @@
 mod args;
+mod docs;
 mod new;
 mod run;
 mod templates;
@@ -19,6 +20,8 @@ pub fn run() {
         } => new::create_project(&project_name, &destination, &active_locale),
 
         Commands::Run { path } => run::run_project(path),
+
+        Commands::Docs { output } => docs::generate_api_docs(&output),
     };
 
     if let Err(err) = result {

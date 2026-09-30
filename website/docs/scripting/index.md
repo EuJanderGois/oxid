@@ -3,21 +3,51 @@ title: Scripting
 slug: /scripting
 ---
 
-# JavaScript scripting
+# Scripting
 
-Oxid runs game logic through a native JavaScript runtime embedded in the engine.
+Oxid uses JavaScript for gameplay code and exposes native engine functionality through standard ES module imports. The goal is to make the scripting boundary feel like ordinary JavaScript while keeping the native engine responsible for platform, rendering and runtime work.
 
-The current model is simple:
+## The execution model
 
-- your project exports a `main()` function
-- `main()` returns the application object
-- Oxid calls lifecycle hooks on that object when they exist
-- native functionality is imported from `oxid/*` modules
+```text
+main.js
+  │
+  ▼
+project loader
+  │
+  ▼
+QuickJS module graph
+  │
+  ├── project modules
+  └── oxid/* native modules
+          │
+          ▼
+      Entity lifecycle
+      ├─ onInit()
+      ├─ onUpdate(dt)
+      └─ onDraw()
+             │
+             ▼
+       render command queue
+             │
+             ▼
+          renderer
+```
 
-Today, JavaScript is the official scripting language. Type definitions are included for better tooling, but the runtime model is still JavaScript-first.
+## Learn in this order
 
-## Current scripting model
+1. [Lifecycle](/scripting/lifecycle) — when `onInit`, `onUpdate` and `onDraw` execute.
+2. [Modules](/scripting/modules) — how project files and native `oxid/*` modules are resolved.
+3. [Entity](/scripting/entity) — the object model used by the default script entrypoint.
+4. [Types](/scripting/types) — the values shared by modules, such as `Vector2D` and `Color`.
+5. [API metadata](/scripting/api-generation) — how the runtime API becomes `oxid.d.ts` and web reference pages.
 
-The default application object is an [`Entity`](./scripting/entity). The built-in 2D value type is [`Vector2D`](./api/math), while native modules expose drawing, input, text, color, and texture APIs.
+## A useful distinction
 
-API declarations are generated from native module metadata; see [API metadata and generated typings](./scripting/api-generation).
+There are three different things that are easy to confuse:
+
+- **JavaScript source** — your game's behavior.
+- **Native module binding** — Rust code that makes an API callable from JavaScript.
+- **Metadata** — a static description of that public API used by tooling and documentation.
+
+Keeping these concepts separate is important when extending Oxid. See [Creating scripting plugins](/technical-information/native-modules).

@@ -24,7 +24,11 @@ const config: Config = {
   },
   i18n: {
     defaultLocale: 'en',
-    locales: ['en'],
+    locales: ['en', 'pt-BR'],
+    localeConfigs: {
+      en: {label: 'English'},
+      'pt-BR': {label: 'Português (Brasil)'},
+    },
   },
 
   presets: [
@@ -69,12 +73,14 @@ const config: Config = {
         src: 'img/oxid.svg',
       },
       items: [
-        {to: '/getting-started', label: 'Getting Started', position: 'left'},
+        {to: '/getting-started', label: 'Learn', position: 'left'},
         {to: '/cli', label: 'CLI', position: 'left'},
         {to: '/scripting', label: 'Scripting', position: 'left'},
-        {to: '/api', label: 'API', position: 'left'},
+        {to: '/api', label: 'API Reference', position: 'left'},
+        {to: '/architecture', label: 'Architecture', position: 'left'},
         {to: '/architecture', label: 'Architecture', position: 'left'},
         {to: '/roadmap', label: 'Roadmap', position: 'left'},
+        {type: 'localeDropdown', position: 'right'},
         {
           href: 'https://github.com/EuJanderGois/oxid',
           label: 'GitHub',

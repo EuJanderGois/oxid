@@ -177,3 +177,14 @@ A typical Oxid development cycle looks like this:
 ```
 
 Stable releases are handled separately through the versioning and release process.
+
+
+## Documentation API generation
+
+When a native scripting API changes, regenerate the reference before committing:
+
+```bash
+oxid docs
+```
+
+This updates `website/docs/api/generated/` from the same metadata used to produce `oxid.d.ts`. The generated files should be committed with the API change.

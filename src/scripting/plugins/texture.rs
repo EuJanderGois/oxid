@@ -193,7 +193,7 @@ impl ScriptPlugin for TexturePlugin {
                 params: &[FunctionParam {
                     name: "path",
                     ty: ScriptType::String,
-                    docs: "Texture file path. Relative paths use the current working directory.",
+                    docs: "Texture file path. Relative paths are resolved from the project root.",
                     optional: false,
                 }],
             },

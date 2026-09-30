@@ -1,0 +1,7 @@
+{
+  "theme.docs.sidebar.expandButtonTitle": {"message": "Expandir seção"},
+  "theme.docs.sidebar.collapseButtonTitle": {"message": "Recolher seção"},
+  "theme.docs.breadcrumbs.home": {"message": "Início"},
+  "theme.docs.tag.DocListPaginator.next": {"message": "Mais antigas"},
+  "theme.docs.tag.DocListPaginator.previous": {"message": "Mais recentes"}
+}

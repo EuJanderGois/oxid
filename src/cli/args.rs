@@ -26,4 +26,10 @@ pub enum Commands {
     Run {
         path: Option<PathBuf>,
     },
+
+    /// Generates the web API reference from the scripting metadata.
+    Docs {
+        #[arg(long, default_value = "website/docs/api/generated")]
+        output: PathBuf,
+    },
 }

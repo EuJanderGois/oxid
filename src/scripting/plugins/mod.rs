@@ -2,6 +2,7 @@
 
 pub mod color;
 pub mod core;
+pub mod global;
 pub mod input;
 pub mod math;
 pub mod shapes;
@@ -83,6 +84,60 @@ impl fmt::Display for ScriptType {
             ScriptType::Custom(_, name) => write!(f, "{name}"),
         }
     }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct GlobalConstantMeta {
+    pub name: &'static str,
+    pub docs: &'static str,
+    pub ty: ScriptType,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct GlobalMeta {
+    pub name: &'static str,
+    pub docs: &'static str,
+    pub constants: &'static [GlobalConstantMeta],
+    pub functions: &'static [FunctionMeta],
+}
+
+pub trait GlobalPlugin {
+    const NAME: &'static str;
+
+    fn metadata() -> GlobalMeta {
+        GlobalMeta {
+            name: Self::NAME,
+            docs: "",
+            constants: &[],
+            functions: &[],
+        }
+    }
+
+    /// Registers this plugin directly on the QuickJS global object.
+    fn register<'js>(ctx: &Ctx<'js>) -> Result<()>;
+}
+
+pub struct GlobalPluginRegistration {
+    pub name: &'static str,
+    pub metadata: fn() -> GlobalMeta,
+    pub register: for<'js> fn(&Ctx<'js>) -> Result<()>,
+}
+
+pub fn register_global_function<'js, F, P>(ctx: &Ctx<'js>, name: &str, function: F) -> Result<()>
+where
+    F: rquickjs::function::IntoJsFunc<'js, P> + 'js,
+{
+    let function = rquickjs::Function::new(ctx.clone(), function)?;
+    ctx.globals().set(name, function)?;
+    Ok(())
+}
+
+pub fn register_global_constant<'js, T>(ctx: &Ctx<'js>, name: &str, value: T) -> Result<()>
+where
+    T: rquickjs::IntoJs<'js>,
+{
+    ctx.globals().set(name, value)?;
+    Ok(())
 }
 
 pub trait NativeFunction {

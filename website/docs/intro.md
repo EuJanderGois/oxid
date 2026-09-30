@@ -1,27 +1,51 @@
 ---
-title: Overview
+title: Oxid
 slug: /intro
 ---
 
-# Overview
+# Oxid
 
-Oxid is a zero-setup game engine built around a small, direct workflow:
+**A small Rust game engine with JavaScript gameplay scripting.**
 
-1. Create a project with the CLI.
-2. Write game logic in JavaScript.
-3. Run it through a native Rust runtime.
+Oxid is built around a short feedback loop: create a project, write JavaScript, run it. The native side owns the window, runtime, rendering boundary and built-in modules; your project owns the game logic.
 
-The current architecture is intentionally simple:
+## The mental model
 
-- The CLI is the main entrypoint.
-- Projects are described through `package.json`.
-- Runtime configuration lives under the `oxid` field.
-- The JavaScript entry file is resolved from `oxid.entry`.
-- Game scripts run against a set of built-in native modules.
-- Editor types are provided through `oxid.d.ts`.
+```text
+Your game
+  ├─ package.json       project configuration
+  ├─ main.js            entry point
+  ├─ src/...            your modules
+  └─ assets/...         your resources
+          │
+          ▼
+      Oxid runtime
+  ┌───────────────────┐
+  │ project loader    │
+  │ JS runtime        │
+  │ native modules    │
+  │ frame lifecycle   │
+  │ render queue      │
+  │ renderer          │
+  └───────────────────┘
+```
 
-Oxid is **JavaScript-first** today. Type definitions exist to improve autocomplete and editor integration, but that is not the same thing as full official TypeScript runtime support.
+The important boundary is that **game code talks to Oxid through the scripting API**. You do not need to know QuickJS or Macroquad to use the engine. You only need those internals when you are debugging or extending Oxid itself.
 
-The engine is also still evolving. The docs in this site focus on what is already present in the codebase today: `oxid new`, `oxid run`, the current lifecycle hooks, and the modules exposed by the runtime.
+## Start here
 
-If you want to understand *how* the pieces above fit together internally — not just how to use them — see [Architecture](/architecture).
+[**Learn Oxid →**](./learn)
+
+If this is your first project, follow [Installation](./getting-started/installation), then [Create a project](./getting-started/create-project).
+
+## Documentation layers
+
+| Layer | Question it answers |
+| --- | --- |
+| **Learn** | What do I do next? |
+| **Scripting** | How does game code execute and communicate with the engine? |
+| **API Reference** | Which functions, types and globals exist? |
+| **Architecture** | What happens inside Oxid? |
+| **Technical Information** | How do I contribute or add native functionality? |
+
+Oxid is still evolving, so the documentation intentionally distinguishes the public behavior that exists today from architectural directions that are only planned.

@@ -1,6 +1,6 @@
 //! TypeScript declaration generation from scripting API metadata.
 
-use super::plugins::{FunctionMeta, FunctionParam, ModuleMeta, ScriptType, TypeMeta};
+use super::plugins::{FunctionMeta, FunctionParam, GlobalMeta, ModuleMeta, ScriptType, TypeMeta};
 
 fn type_imports(
     ty: ScriptType,
@@ -154,10 +154,251 @@ pub fn generate_module_d_ts(meta: &ModuleMeta) -> String {
     output
 }
 
+fn generate_global_type_d_ts(ty: ScriptType) -> String {
+    match ty {
+        ScriptType::Custom(module, name) => format!("import(\"{module}\").{name}"),
+        _ => ty.to_string(),
+    }
+}
+
+fn generate_global_constant_d_ts(name: &str, docs: &str, ty: ScriptType) -> String {
+    let mut output = String::new();
+    output.push_str(&generate_jsdoc(docs, &[]));
+    output.push_str(&format!(
+        "declare const {name}: {};\n",
+        generate_global_type_d_ts(ty)
+    ));
+    output
+}
+
+fn generate_global_function_d_ts(meta: &FunctionMeta) -> String {
+    let (namespace, name) = meta
+        .name
+        .split_once('.')
+        .map_or((None, meta.name), |(namespace, name)| {
+            (Some(namespace), name)
+        });
+
+    let declaration = format!(
+        "{}declare function {}({}): {};\n",
+        generate_jsdoc(meta.docs, meta.params),
+        name,
+        generate_params(meta.params),
+        meta.returns
+    );
+
+    match namespace {
+        Some(namespace) => {
+            let indented = declaration
+                .lines()
+                .map(|line| format!("  {line}\n"))
+                .collect::<String>();
+            format!("declare namespace {namespace} {{\n{indented}}}\n")
+        }
+        None => declaration,
+    }
+}
+
+pub fn generate_globals_d_ts(globals: &[GlobalMeta]) -> String {
+    let mut output = String::new();
+
+    for global in globals {
+        if !global.docs.is_empty() {
+            output.push_str("/** ");
+            output.push_str(global.docs);
+            output.push_str(" */\n");
+        }
+
+        for constant in global.constants {
+            output.push_str(&generate_global_constant_d_ts(
+                constant.name,
+                constant.docs,
+                constant.ty,
+            ));
+            output.push('\n');
+        }
+
+        for function in global.functions {
+            output.push_str(&generate_global_function_d_ts(function));
+            output.push('\n');
+        }
+    }
+
+    output
+}
+
+fn markdown_type(ty: ScriptType) -> String {
+    ty.to_string()
+}
+
+fn markdown_params(params: &[FunctionParam]) -> String {
+    params
+        .iter()
+        .map(|param| {
+            if param.optional {
+                format!("{}?: {}", param.name, markdown_type(param.ty))
+            } else {
+                format!("{}: {}", param.name, markdown_type(param.ty))
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+fn write_param_table(output: &mut String, params: &[FunctionParam]) {
+    if params.is_empty() {
+        return;
+    }
+
+    output.push_str("\n| Parameter | Type | Optional | Description |\n| --- | --- | --- | --- |\n");
+    for param in params {
+        output.push_str(&format!(
+            "| `{}` | `{}` | {} | {} |\n",
+            param.name,
+            markdown_type(param.ty),
+            if param.optional { "Yes" } else { "No" },
+            param.docs
+        ));
+    }
+}
+
+pub fn generate_module_docs_md(meta: &ModuleMeta) -> String {
+    let mut output = String::new();
+    output.push_str("---\n");
+    output.push_str(&format!("title: {}\n", meta.name));
+    output.push_str(&format!(
+        "slug: /api/generated/{}\n",
+        meta.name.replace("/", "-")
+    ));
+    output.push_str("sidebar_label: Reference\n---\n\n");
+    output.push_str(&format!("# `{}`\n\n", meta.name));
+    if !meta.docs.is_empty() {
+        output.push_str(meta.docs);
+        output.push_str("\n\n");
+    }
+    output.push_str(
+        "> This page is generated from the Rust scripting metadata. Do not edit it manually.\n\n",
+    );
+    output.push_str(&format!(
+        "**Import:** `import {{ ... }} from \"{}\";`\n\n",
+        meta.name
+    ));
+
+    if !meta.types.is_empty() {
+        output.push_str("## Types\n\n");
+        for ty in meta.types {
+            output.push_str(&format!("### `{}`\n\n", ty.name));
+            if !ty.docs.is_empty() {
+                output.push_str(ty.docs);
+                output.push_str("\n\n");
+            }
+            for constructor in ty.constructors {
+                output.push_str(&format!(
+                    "#### Constructor\n\n`new {}({})`\n",
+                    ty.name,
+                    markdown_params(constructor.params)
+                ));
+                write_param_table(&mut output, constructor.params);
+                output.push('\n');
+            }
+            if !ty.properties.is_empty() {
+                output.push_str("#### Properties\n\n| Property | Type | Mutable | Description |\n| --- | --- | --- | --- |\n");
+                for property in ty.properties {
+                    output.push_str(&format!(
+                        "| `{}` | `{}` | {} | {} |\n",
+                        property.name,
+                        markdown_type(property.ty),
+                        if property.readonly { "No" } else { "Yes" },
+                        property.docs
+                    ));
+                }
+                output.push('\n');
+            }
+        }
+    }
+
+    if !meta.functions.is_empty() {
+        output.push_str("## Functions\n\n");
+        for function in meta.functions {
+            output.push_str(&format!("### `{}`\n\n", function.name));
+            if !function.docs.is_empty() {
+                output.push_str(function.docs);
+                output.push_str("\n\n");
+            }
+            output.push_str(&format!(
+                "```ts\n{}({}): {};\n```\n",
+                function.name,
+                markdown_params(function.params),
+                function.returns
+            ));
+            write_param_table(&mut output, function.params);
+            output.push_str(&format!("\n**Returns:** `{}`\n\n", function.returns));
+        }
+    }
+
+    output
+}
+
+pub fn generate_globals_docs_md(globals: &[GlobalMeta]) -> String {
+    let mut output =
+        String::from("---\ntitle: Globals\nslug: /api/generated/globals\n---\n\n# Global API\n\n");
+    output.push_str("> This page is generated from the Rust scripting metadata. Global APIs are available without an `import`.\n\n");
+
+    for global in globals {
+        output.push_str(&format!("## `{}`\n\n", global.name));
+        if !global.docs.is_empty() {
+            output.push_str(global.docs);
+            output.push_str("\n\n");
+        }
+        for constant in global.constants {
+            output.push_str(&format!(
+                "### `{}`\n\n{}\n\n**Type:** `{}`\n\n",
+                constant.name, constant.docs, constant.ty
+            ));
+        }
+        for function in global.functions {
+            let (_, name) = function
+                .name
+                .split_once('.')
+                .unwrap_or(("global", function.name));
+            output.push_str(&format!(
+                "### `{}`\n\n{}\n\n```ts\n{}({}): {};\n```\n",
+                function.name,
+                function.docs,
+                name,
+                markdown_params(function.params),
+                function.returns
+            ));
+            write_param_table(&mut output, function.params);
+            output.push('\n');
+        }
+    }
+    output
+}
+
 pub fn generate_d_ts(modules: &[ModuleMeta]) -> String {
     let mut output = String::from(
         "/**\n * Type definitions generated from the Oxid scripting API metadata.\n * Do not edit this file manually.\n */\n\n",
     );
+
+    for module in modules {
+        output.push_str(&generate_module_d_ts(module));
+        output.push('\n');
+    }
+
+    output
+}
+
+pub fn generate_d_ts_with_globals(modules: &[ModuleMeta], globals: &[GlobalMeta]) -> String {
+    let mut output = String::from(
+        "/**\n * Type definitions generated from the Oxid scripting API metadata.\n * Do not edit this file manually.\n */\n\n",
+    );
+
+    let global_output = generate_globals_d_ts(globals);
+    if !global_output.is_empty() {
+        output.push_str(&global_output);
+        output.push('\n');
+    }
 
     for module in modules {
         output.push_str(&generate_module_d_ts(module));
@@ -198,6 +439,51 @@ mod tests {
 
         assert!(output.contains("import type { Vector2D } from \"oxid/math\";"));
         assert!(output.contains("draw(position: Vector2D): void;"));
+    }
+
+    #[test]
+    fn generates_global_declarations() {
+        static FUNCTIONS: [FunctionMeta; 1] = [FunctionMeta {
+            module: "global",
+            name: "console.log",
+            docs: "Writes a message.",
+            returns: ScriptType::Void,
+            params: &[FunctionParam {
+                name: "message",
+                ty: ScriptType::String,
+                docs: "Message to print.",
+                optional: false,
+            }],
+        }];
+        static GLOBALS: [GlobalMeta; 1] = [GlobalMeta {
+            name: "console",
+            docs: "Console utilities.",
+            constants: &[],
+            functions: &FUNCTIONS,
+        }];
+
+        let output = generate_globals_d_ts(&GLOBALS);
+
+        assert!(output.contains("declare namespace console"));
+        assert!(output.contains("function log(message: string): void;"));
+    }
+
+    #[test]
+    fn generates_import_type_expression_for_global_constants() {
+        static GLOBALS: [GlobalMeta; 1] = [GlobalMeta {
+            name: "colors",
+            docs: "Standard colors.",
+            constants: &[crate::scripting::plugins::GlobalConstantMeta {
+                name: "RED",
+                docs: "Red color.",
+                ty: ScriptType::Custom("oxid/color", "Color"),
+            }],
+            functions: &[],
+        }];
+
+        let output = generate_globals_d_ts(&GLOBALS);
+
+        assert!(output.contains("declare const RED: import(\"oxid/color\").Color;"));
     }
 
     #[test]
