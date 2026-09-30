@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkwebsite=globalThis.webpackChunkwebsite||[]).push([[237],{260(e){e.exports=JSON.parse('{"authors":[{"name":"Oxid Team","title":"Engine and documentation updates","url":"https://github.com/EuJanderGois/oxid","key":"oxid","page":null,"count":0}]}')}}]);
