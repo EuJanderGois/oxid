@@ -16,4 +16,4 @@ main.js → módulos JavaScript → Entity
                               └─ onDraw() → fila de render → renderer
 ```
 
-Leia nesta ordem: [Ciclo de vida](./lifecycle), [Módulos](./modules), [Entity](./entity), [Tipos](./types) e [Metadados da API](./api-generation).
+Leia nesta ordem: [Ciclo de vida](/scripting/lifecycle), [Módulos](/scripting/modules), [Entity](/scripting/entity), [Tipos](/scripting/types) e [Metadados da API](/scripting/api-generation).

@@ -9,12 +9,12 @@ This section is for people who want to change Oxid itself rather than only build
 
 ## Where to look
 
-- [Creating scripting plugins](./native-modules) — add a native JavaScript API and its metadata.
-- [API metadata](../scripting/api-generation) — understand the single description used by typings and web reference generation.
-- [Architecture](../architecture) — understand the boundaries between runtime, scripting and rendering.
-- [Development workflow](./development-workflow) — branch, validation and contribution flow.
-- [CI/CD](./ci-cd) — what automation validates and deploys.
-- [Versioning and releases](./versioning-and-releases) — how a change becomes a release.
+- [Creating scripting plugins](/technical-information/native-modules) — add a native JavaScript API and its metadata.
+- [API metadata](/scripting/api-generation) — understand the single description used by typings and web reference generation.
+- [Architecture](/architecture) — understand the boundaries between runtime, scripting and rendering.
+- [Development workflow](/technical-information/development-workflow) — branch, validation and contribution flow.
+- [CI/CD](/technical-information/ci-cd) — what automation validates and deploys.
+- [Versioning and releases](/technical-information/versioning-and-releases) — how a change becomes a release.
 
 ## The extension loop
 

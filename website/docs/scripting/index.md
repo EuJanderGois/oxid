@@ -36,11 +36,11 @@ QuickJS module graph
 
 ## Learn in this order
 
-1. [Lifecycle](./lifecycle) — when `onInit`, `onUpdate` and `onDraw` execute.
-2. [Modules](./modules) — how project files and native `oxid/*` modules are resolved.
-3. [Entity](./entity) — the object model used by the default script entrypoint.
-4. [Types](./types) — the values shared by modules, such as `Vector2D` and `Color`.
-5. [API metadata](./api-generation) — how the runtime API becomes `oxid.d.ts` and web reference pages.
+1. [Lifecycle](/scripting/lifecycle) — when `onInit`, `onUpdate` and `onDraw` execute.
+2. [Modules](/scripting/modules) — how project files and native `oxid/*` modules are resolved.
+3. [Entity](/scripting/entity) — the object model used by the default script entrypoint.
+4. [Types](/scripting/types) — the values shared by modules, such as `Vector2D` and `Color`.
+5. [API metadata](/scripting/api-generation) — how the runtime API becomes `oxid.d.ts` and web reference pages.
 
 ## A useful distinction
 
@@ -50,4 +50,4 @@ There are three different things that are easy to confuse:
 - **Native module binding** — Rust code that makes an API callable from JavaScript.
 - **Metadata** — a static description of that public API used by tooling and documentation.
 
-Keeping these concepts separate is important when extending Oxid. See [Creating scripting plugins](../technical-information/native-modules).
+Keeping these concepts separate is important when extending Oxid. See [Creating scripting plugins](/technical-information/native-modules).

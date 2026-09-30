@@ -33,13 +33,13 @@ This gives us one structural source of truth without pretending that signatures 
 
 ## Module guides
 
-- [`oxid/core`](./core) — `Entity` and the script lifecycle.
-- [`oxid/math`](./math) — `Vector2D` and coordinate values.
-- [`oxid/color`](./color) — `Color` and global color constants.
-- [`oxid/shapes`](./shapes) — immediate-mode shape drawing and render commands.
-- [`oxid/input`](./input) — keyboard and mouse state.
-- [`oxid/text`](./text) — text drawing and measurement.
-- [`oxid/texture`](./texture) — texture loading, caching and drawing.
+- [`oxid/core`](/api/core) — `Entity` and the script lifecycle.
+- [`oxid/math`](/api/math) — `Vector2D` and coordinate values.
+- [`oxid/color`](/api/color) — `Color` and global color constants.
+- [`oxid/shapes`](/api/shapes) — immediate-mode shape drawing and render commands.
+- [`oxid/input`](/api/input) — keyboard and mouse state.
+- [`oxid/text`](/api/text) — text drawing and measurement.
+- [`oxid/texture`](/api/texture) — texture loading, caching and drawing.
 
 ## Generated reference
 
@@ -55,6 +55,6 @@ The documentation CI runs this command before building the site, so a metadata c
 
 - **Coordinates:** screen space, origin `(0, 0)` at the top-left, `x` right and `y` down.
 - **Colors:** `Color` components normally use the `0.0`–`1.0` range.
-- **Drawing:** shape, text and texture calls enqueue render commands during `onDraw()`. See [Rendering](../architecture/rendering).
+- **Drawing:** shape, text and texture calls enqueue render commands during `onDraw()`. See [Rendering](/architecture/rendering).
 - **Rotation:** check the individual API. Shapes currently use degrees for arc/polygon rotation, while `drawTextureScaled` uses radians.
 - **Types:** `Vector2D` is a coordinate value, not a transform object.
