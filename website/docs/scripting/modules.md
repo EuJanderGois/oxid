@@ -3,82 +3,49 @@ title: Modules
 slug: /scripting/modules
 ---
 
-# Built-in modules
+# Modules
 
-The runtime currently registers these modules:
+Oxid uses standard ES module syntax. There is no special `oxid.import(...)` API. Native engine modules use the `oxid/*` namespace and project code uses file paths.
 
-- `oxid/core`
-- `oxid/math`
-- `oxid/color`
-- `oxid/shapes`
-- `oxid/input`
-- `oxid/text`
-- `oxid/texture`
+## Native modules
 
-## What each module is for
-
-### `oxid/core`
-
-Base `Entity` class used by the default scripting pattern.
-
-### `oxid/math`
-
-2D utility types such as `Vector2D`.
-
-### `oxid/color`
-
-Color values used by the drawing APIs.
-
-### `oxid/shapes`
-
-Immediate drawing helpers for arcs, circles and rectangles.
-
-### `oxid/input`
-
-Keyboard and mouse queries backed by the native runtime.
-
-### `oxid/text`
-
-2D text rendering and text measurement.
-
-### `oxid/texture`
-
-Texture loading and textured drawing helpers.
-
-## Importing your own files
-
-Besides the built-in modules above, scripts can `import`/`export` from other
-`.js` files inside the project:
-
-```js title="entities/player.js"
-import { Entity } from "oxid/core";
-
-export class Player extends Entity {
-  onUpdate(dt) {}
-}
+```js
+import { Vector2D } from "oxid/math";
+import { drawCircle } from "oxid/shapes";
+import { WHITE } from "oxid/color";
 ```
 
-```js title="main.js"
-import { Player } from "./entities/player.js";
+The built-in modules are registered by the scripting plugin registry and resolved by name. Their declarations are also emitted into `oxid.d.ts`.
 
-export function main() {
-  return new Player();
-}
+## Project modules
+
+Project code can use relative imports like ordinary JavaScript:
+
+```js
+// src/main.js
+import { Ship } from "./entities/Ship.js";
+import { CONFIG } from "./helpers/config.js";
 ```
 
-- Relative specifiers (`./`, `../`) resolve relative to the file doing the
-  importing.
-- Bare specifiers without a leading `.` (e.g. `"entities/player.js"`) resolve
-  relative to the project root (the folder containing `package.json`).
-- The `.js` extension can be omitted; `./entities/player` and
-  `./entities/player.js` both resolve to `entities/player.js`. A directory
-  import (`./entities`) resolves to `entities/index.js` if present.
-- Imports can only reach files inside the project directory — a specifier that
-  would resolve outside of it (e.g. via `../../..`) fails to load.
-- Each file is evaluated once, no matter how many other files import it.
+The resolver anchors project paths to the project root and rejects imports that escape that root. This is an intentional sandbox boundary, not merely a path convenience.
 
-## API metadata
+## Resolution model
 
-Each native module also describes its public types and functions through metadata. That metadata is used to generate `oxid.d.ts`, so the runtime API and editor declarations share the same source of truth.
+```text
+import specifier
+       │
+       ├── oxid/... ───────► registered native module
+       │
+       └── relative/path ──► project root
+                                  │
+                                  ├─ .js module
+                                  └─ reject outside root
+```
 
-When adding an API to Oxid itself, update the module metadata alongside the implementation instead of editing a generated declaration file.
+## Native modules vs globals
+
+Most engine APIs are explicit imports. A small set of APIs is intentionally global, such as `console` and the standard color constants. The distinction is visible in the generated [global API reference](../api/generated/globals).
+
+## Type information
+
+The generated `oxid.d.ts` describes native module exports, so editors can understand imports without changing the runtime language from JavaScript. See [API metadata](./api-generation) for the generation pipeline.

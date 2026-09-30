@@ -3,9 +3,10 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   tutorialSidebar: [
     'intro',
+    'learn',
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Learn Oxid',
       link: {
         type: 'doc',
         id: 'getting-started/index',
@@ -56,6 +57,21 @@ const sidebars: SidebarsConfig = {
         'api/input',
         'api/text',
         'api/texture',
+        {
+          type: 'category',
+          label: 'Generated reference',
+          items: [
+            'api/generated/core',
+            'api/generated/math',
+            'api/generated/color',
+            'api/generated/shapes',
+            'api/generated/input',
+            'api/generated/text',
+            'api/generated/texture',
+            'api/generated/window',
+            'api/generated/globals',
+          ],
+        },
       ],
     },
     {

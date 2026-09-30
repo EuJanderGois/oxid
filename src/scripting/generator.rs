@@ -227,6 +227,125 @@ pub fn generate_globals_d_ts(globals: &[GlobalMeta]) -> String {
     output
 }
 
+
+fn markdown_type(ty: ScriptType) -> String {
+    ty.to_string()
+}
+
+fn markdown_params(params: &[FunctionParam]) -> String {
+    params
+        .iter()
+        .map(|param| {
+            if param.optional {
+                format!("{}?: {}", param.name, markdown_type(param.ty))
+            } else {
+                format!("{}: {}", param.name, markdown_type(param.ty))
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+fn write_param_table(output: &mut String, params: &[FunctionParam]) {
+    if params.is_empty() {
+        return;
+    }
+
+    output.push_str("\n| Parameter | Type | Optional | Description |\n| --- | --- | --- | --- |\n");
+    for param in params {
+        output.push_str(&format!(
+            "| `{}` | `{}` | {} | {} |\n",
+            param.name,
+            markdown_type(param.ty),
+            if param.optional { "Yes" } else { "No" },
+            param.docs
+        ));
+    }
+}
+
+pub fn generate_module_docs_md(meta: &ModuleMeta) -> String {
+    let mut output = String::new();
+    output.push_str("---\n");
+    output.push_str(&format!("title: {}\n", meta.name));
+    output.push_str(&format!("slug: /api/generated/{}\n", meta.name.replace("/", "-")));
+    output.push_str("sidebar_label: Reference\n---\n\n");
+    output.push_str(&format!("# `{}`\n\n", meta.name));
+    if !meta.docs.is_empty() {
+        output.push_str(meta.docs);
+        output.push_str("\n\n");
+    }
+    output.push_str("> This page is generated from the Rust scripting metadata. Do not edit it manually.\n\n");
+    output.push_str(&format!("**Import:** `import {{ ... }} from \"{}\";`\n\n", meta.name));
+
+    if !meta.types.is_empty() {
+        output.push_str("## Types\n\n");
+        for ty in meta.types {
+            output.push_str(&format!("### `{}`\n\n", ty.name));
+            if !ty.docs.is_empty() {
+                output.push_str(ty.docs);
+                output.push_str("\n\n");
+            }
+            for constructor in ty.constructors {
+                output.push_str(&format!("#### Constructor\n\n`new {}({})`\n", ty.name, markdown_params(constructor.params)));
+                write_param_table(&mut output, constructor.params);
+                output.push('\n');
+            }
+            if !ty.properties.is_empty() {
+                output.push_str("#### Properties\n\n| Property | Type | Mutable | Description |\n| --- | --- | --- | --- |\n");
+                for property in ty.properties {
+                    output.push_str(&format!(
+                        "| `{}` | `{}` | {} | {} |\n",
+                        property.name,
+                        markdown_type(property.ty),
+                        if property.readonly { "No" } else { "Yes" },
+                        property.docs
+                    ));
+                }
+                output.push('\n');
+            }
+        }
+    }
+
+    if !meta.functions.is_empty() {
+        output.push_str("## Functions\n\n");
+        for function in meta.functions {
+            output.push_str(&format!("### `{}`\n\n", function.name));
+            if !function.docs.is_empty() {
+                output.push_str(function.docs);
+                output.push_str("\n\n");
+            }
+            output.push_str(&format!("```ts\n{}({}): {};\n```\n", function.name, markdown_params(function.params), function.returns));
+            write_param_table(&mut output, function.params);
+            output.push_str(&format!("\n**Returns:** `{}`\n\n", function.returns));
+        }
+    }
+
+    output
+}
+
+pub fn generate_globals_docs_md(globals: &[GlobalMeta]) -> String {
+    let mut output = String::from("---\ntitle: Globals\nslug: /api/generated/globals\n---\n\n# Global API\n\n");
+    output.push_str("> This page is generated from the Rust scripting metadata. Global APIs are available without an `import`.\n\n");
+
+    for global in globals {
+        output.push_str(&format!("## `{}`\n\n", global.name));
+        if !global.docs.is_empty() {
+            output.push_str(global.docs);
+            output.push_str("\n\n");
+        }
+        for constant in global.constants {
+            output.push_str(&format!("### `{}`\n\n{}\n\n**Type:** `{}`\n\n", constant.name, constant.docs, constant.ty));
+        }
+        for function in global.functions {
+            let (_, name) = function.name.split_once('.').unwrap_or(("global", function.name));
+            output.push_str(&format!("### `{}`\n\n{}\n\n```ts\n{}({}): {};\n```\n", function.name, function.docs, name, markdown_params(function.params), function.returns));
+            write_param_table(&mut output, function.params);
+            output.push('\n');
+        }
+    }
+    output
+}
+
 pub fn generate_d_ts(modules: &[ModuleMeta]) -> String {
     let mut output = String::from(
         "/**\n * Type definitions generated from the Oxid scripting API metadata.\n * Do not edit this file manually.\n */\n\n",

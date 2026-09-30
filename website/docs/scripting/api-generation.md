@@ -1,72 +1,79 @@
 ---
-title: API metadata and generated typings
+title: API metadata and generated documentation
 slug: /scripting/api-generation
 ---
 
-# API metadata and generated `oxid.d.ts`
+# API metadata and generated documentation
 
-The public scripting API is described by metadata declared alongside the Rust modules that expose it.
-
-That metadata is used to generate the `oxid.d.ts` file created by `oxid new`.
-
-## Source of truth
-
-The intended flow is:
+Oxid describes its public scripting API once, in Rust metadata placed alongside the native binding. That metadata now feeds two developer-facing outputs:
 
 ```text
-Rust scripting module
-       ↓
-API metadata
-       ↓
-┌──────┴────────┐
-│               │
-runtime       oxid.d.ts
+                 ModuleMeta / TypeMeta / FunctionMeta
+                              │
+                    ┌─────────┴─────────┐
+                    ▼                   ▼
+              oxid.d.ts            web API pages
+                    │                   │
+              editor tooling       Docusaurus
 ```
 
-This means `oxid.d.ts` is a generated artifact, not a second hand-maintained API definition.
+## Why this exists
 
-## What is described
+Without a shared description, the following can drift independently:
 
-Modules can describe:
+1. what the runtime actually exports;
+2. what `oxid.d.ts` tells the editor exists;
+3. what the website tells a developer exists.
 
-- exported classes and their constructors
-- public properties
-- property mutability
-- functions
-- parameters and optional parameters
+Metadata does not eliminate every documentation error — semantic behavior still needs prose — but it makes the structural API contract single-source.
+
+## What metadata describes
+
+- module name and description
+- exported classes
+- constructors and constructor parameters
+- properties and mutability
+- functions and parameters
+- optional parameters
 - return types
-- documentation strings
 - cross-module custom types
 
-For example, `Vector2D` is declared by `oxid/math` and functions in other modules can reference it through metadata.
+## Generate the reference
 
-The metadata also prevents semantic names from drifting away from their runtime representation. For example, the old two-component `Transform2D` value was renamed to `Vector2D` because it only represented `x` and `y`; it is not kept as a misleading alias.
-
-## Generating a project
-
-The normal workflow is simply:
+From the repository root:
 
 ```bash
-oxid new my-game
+oxid docs
 ```
 
-The command writes `oxid.d.ts` from the API metadata available in that Oxid build.
+This writes the generated Markdown pages to `website/docs/api/generated/`. The documentation workflow runs the same command before Docusaurus builds the site.
 
-You normally should not edit this file manually. If the engine API changes, recreate or regenerate the project typings using the corresponding Oxid build.
+`oxid new` continues to generate `oxid.d.ts` for game projects.
+
+## What should remain hand-written
+
+Do not put every semantic detail into metadata. Generated reference is ideal for signatures and inventory; conceptual documentation is better for things such as:
+
+- lifecycle restrictions;
+- coordinate conventions;
+- units such as degrees vs radians;
+- caching and ownership behavior;
+- architectural reasons;
+- examples that combine several modules.
+
+This is why the site has both a generated reference and hand-written module guides.
 
 ## Adding a native API
 
-When extending Oxid itself, keep the runtime implementation and metadata together:
+When adding a function:
 
-1. expose the Rust function or type from the module
-2. add its `FunctionMeta` or `TypeMeta`
-3. use `ScriptType` for its parameter, property, and return types
-4. reference custom types with both their module and exported name
-5. add the module to the scripting API registry
-6. update the documentation when the behavior is user-facing
+1. implement the runtime binding;
+2. add its `FunctionMeta`;
+3. describe every parameter and its return type;
+4. use `ScriptType::Custom(module, name)` for exported types from another module;
+5. register the plugin;
+6. run `cargo test`;
+7. run `oxid docs`;
+8. update the conceptual guide if the behavior needs explanation.
 
-The generator then includes the API in `oxid.d.ts` without a separate hand-written declaration.
-
-## Runtime versus typings
-
-`oxid.d.ts` does not implement the runtime. It gives JavaScript-aware editors and TypeScript's checker enough information to understand the native API while the actual implementation remains in Rust and QuickJS.
+See [Creating scripting plugins](../technical-information/native-modules) for the complete implementation flow.

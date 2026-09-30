@@ -19,6 +19,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Generate API reference
+        run: cargo run --quiet -- docs
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
