@@ -61,11 +61,18 @@ pub fn api_metadata() -> Vec<crate::scripting::plugins::ModuleMeta> {
 }
 
 pub fn global_plugins() -> &'static [GlobalPluginRegistration] {
-    static PLUGINS: [GlobalPluginRegistration; 1] = [GlobalPluginRegistration {
-        name: ConsolePlugin::NAME,
-        metadata: ConsolePlugin::metadata,
-        register: ConsolePlugin::register,
-    }];
+    static PLUGINS: [GlobalPluginRegistration; 2] = [
+        GlobalPluginRegistration {
+            name: ConsolePlugin::NAME,
+            metadata: ConsolePlugin::metadata,
+            register: ConsolePlugin::register,
+        },
+        GlobalPluginRegistration {
+            name: <ColorPlugin as GlobalPlugin>::NAME,
+            metadata: <ColorPlugin as GlobalPlugin>::metadata,
+            register: <ColorPlugin as GlobalPlugin>::register,
+        },
+    ];
 
     &PLUGINS
 }
@@ -141,9 +148,19 @@ mod tests {
             let console_log_type = ctx
                 .eval::<String, _>("typeof console.log")
                 .unwrap();
+            let console_methods = ctx
+                .eval::<bool, _>(
+                    "typeof console.info === 'function' && typeof console.warn === 'function' && typeof console.error === 'function' && typeof console.debug === 'function' && typeof console.assert === 'function' && typeof console.trace === 'function' && typeof console.clear === 'function'",
+                )
+                .unwrap();
+            let red_is_color = ctx
+                .eval::<bool, _>("RED && RED.r !== undefined && RED.g !== undefined && RED.b !== undefined && RED.a !== undefined")
+                .unwrap();
 
             assert_eq!(result, 42);
             assert_eq!(console_log_type, "function");
+            assert!(console_methods);
+            assert!(red_is_color);
         });
     }
 

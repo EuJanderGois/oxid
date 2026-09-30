@@ -156,14 +156,20 @@ pub fn generate_module_d_ts(meta: &ModuleMeta) -> String {
     output
 }
 
-fn generate_global_constant_d_ts(
-    name: &str,
-    docs: &str,
-    ty: ScriptType,
-) -> String {
+fn generate_global_type_d_ts(ty: ScriptType) -> String {
+    match ty {
+        ScriptType::Custom(module, name) => format!("import(\"{module}\").{name}"),
+        _ => ty.to_string(),
+    }
+}
+
+fn generate_global_constant_d_ts(name: &str, docs: &str, ty: ScriptType) -> String {
     let mut output = String::new();
     output.push_str(&generate_jsdoc(docs, &[]));
-    output.push_str(&format!("declare const {name}: {ty};\n"));
+    output.push_str(&format!(
+        "declare const {name}: {};\n",
+        generate_global_type_d_ts(ty)
+    ));
     output
 }
 
@@ -313,7 +319,25 @@ mod tests {
         let output = generate_globals_d_ts(&GLOBALS);
 
         assert!(output.contains("declare namespace console"));
-        assert!(output.contains("function log(message: string): void;"));
+        assert!(output.contains("function log(message?: string): void;"));
+    }
+
+    #[test]
+    fn generates_import_type_expression_for_global_constants() {
+        static GLOBALS: [GlobalMeta; 1] = [GlobalMeta {
+            name: "colors",
+            docs: "Standard colors.",
+            constants: &[crate::scripting::plugins::GlobalConstantMeta {
+                name: "RED",
+                docs: "Red color.",
+                ty: ScriptType::Custom("oxid/color", "Color"),
+            }],
+            functions: &[],
+        }];
+
+        let output = generate_globals_d_ts(&GLOBALS);
+
+        assert!(output.contains("declare const RED: import(\"oxid/color\").Color;"));
     }
 
     #[test]
