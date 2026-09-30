@@ -20,15 +20,25 @@ pub fn generate_api_docs(output: &Path) -> Result<(), String> {
             .unwrap_or(module.name)
             .replace('/', "-");
         let path = output.join(format!("{filename}.md"));
-        fs::write(&path, oxid::scripting::generator::generate_module_docs_md(module))
-            .map_err(|err| format!("could not write {}: {err}", path.display()))?;
+        fs::write(
+            &path,
+            oxid::scripting::generator::generate_module_docs_md(module),
+        )
+        .map_err(|err| format!("could not write {}: {err}", path.display()))?;
     }
 
     let globals = oxid::scripting::plugins::registry::global_metadata();
     let globals_path = output.join("globals.md");
-    fs::write(&globals_path, oxid::scripting::generator::generate_globals_docs_md(&globals))
-        .map_err(|err| format!("could not write {}: {err}", globals_path.display()))?;
+    fs::write(
+        &globals_path,
+        oxid::scripting::generator::generate_globals_docs_md(&globals),
+    )
+    .map_err(|err| format!("could not write {}: {err}", globals_path.display()))?;
 
-    println!("Generated {} API module pages in {}", modules.len(), output.display());
+    println!(
+        "Generated {} API module pages in {}",
+        modules.len(),
+        output.display()
+    );
     Ok(())
 }

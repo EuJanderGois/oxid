@@ -1,8 +1,8 @@
 //! Scripting plugin metadata and registration helpers.
 
 pub mod color;
-pub mod global;
 pub mod core;
+pub mod global;
 pub mod input;
 pub mod math;
 pub mod shapes;
@@ -123,11 +123,7 @@ pub struct GlobalPluginRegistration {
     pub register: for<'js> fn(&Ctx<'js>) -> Result<()>,
 }
 
-pub fn register_global_function<'js, F, P>(
-    ctx: &Ctx<'js>,
-    name: &str,
-    function: F,
-) -> Result<()>
+pub fn register_global_function<'js, F, P>(ctx: &Ctx<'js>, name: &str, function: F) -> Result<()>
 where
     F: rquickjs::function::IntoJsFunc<'js, P> + 'js,
 {

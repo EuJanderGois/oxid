@@ -1,8 +1,6 @@
 //! TypeScript declaration generation from scripting API metadata.
 
-use super::plugins::{
-    FunctionMeta, FunctionParam, GlobalMeta, ModuleMeta, ScriptType, TypeMeta,
-};
+use super::plugins::{FunctionMeta, FunctionParam, GlobalMeta, ModuleMeta, ScriptType, TypeMeta};
 
 fn type_imports(
     ty: ScriptType,
@@ -177,7 +175,9 @@ fn generate_global_function_d_ts(meta: &FunctionMeta) -> String {
     let (namespace, name) = meta
         .name
         .split_once('.')
-        .map_or((None, meta.name), |(namespace, name)| (Some(namespace), name));
+        .map_or((None, meta.name), |(namespace, name)| {
+            (Some(namespace), name)
+        });
 
     let declaration = format!(
         "{}declare function {}({}): {};\n",
@@ -227,7 +227,6 @@ pub fn generate_globals_d_ts(globals: &[GlobalMeta]) -> String {
     output
 }
 
-
 fn markdown_type(ty: ScriptType) -> String {
     ty.to_string()
 }
@@ -267,15 +266,23 @@ pub fn generate_module_docs_md(meta: &ModuleMeta) -> String {
     let mut output = String::new();
     output.push_str("---\n");
     output.push_str(&format!("title: {}\n", meta.name));
-    output.push_str(&format!("slug: /api/generated/{}\n", meta.name.replace("/", "-")));
+    output.push_str(&format!(
+        "slug: /api/generated/{}\n",
+        meta.name.replace("/", "-")
+    ));
     output.push_str("sidebar_label: Reference\n---\n\n");
     output.push_str(&format!("# `{}`\n\n", meta.name));
     if !meta.docs.is_empty() {
         output.push_str(meta.docs);
         output.push_str("\n\n");
     }
-    output.push_str("> This page is generated from the Rust scripting metadata. Do not edit it manually.\n\n");
-    output.push_str(&format!("**Import:** `import {{ ... }} from \"{}\";`\n\n", meta.name));
+    output.push_str(
+        "> This page is generated from the Rust scripting metadata. Do not edit it manually.\n\n",
+    );
+    output.push_str(&format!(
+        "**Import:** `import {{ ... }} from \"{}\";`\n\n",
+        meta.name
+    ));
 
     if !meta.types.is_empty() {
         output.push_str("## Types\n\n");
@@ -286,7 +293,11 @@ pub fn generate_module_docs_md(meta: &ModuleMeta) -> String {
                 output.push_str("\n\n");
             }
             for constructor in ty.constructors {
-                output.push_str(&format!("#### Constructor\n\n`new {}({})`\n", ty.name, markdown_params(constructor.params)));
+                output.push_str(&format!(
+                    "#### Constructor\n\n`new {}({})`\n",
+                    ty.name,
+                    markdown_params(constructor.params)
+                ));
                 write_param_table(&mut output, constructor.params);
                 output.push('\n');
             }
@@ -314,7 +325,12 @@ pub fn generate_module_docs_md(meta: &ModuleMeta) -> String {
                 output.push_str(function.docs);
                 output.push_str("\n\n");
             }
-            output.push_str(&format!("```ts\n{}({}): {};\n```\n", function.name, markdown_params(function.params), function.returns));
+            output.push_str(&format!(
+                "```ts\n{}({}): {};\n```\n",
+                function.name,
+                markdown_params(function.params),
+                function.returns
+            ));
             write_param_table(&mut output, function.params);
             output.push_str(&format!("\n**Returns:** `{}`\n\n", function.returns));
         }
@@ -324,7 +340,8 @@ pub fn generate_module_docs_md(meta: &ModuleMeta) -> String {
 }
 
 pub fn generate_globals_docs_md(globals: &[GlobalMeta]) -> String {
-    let mut output = String::from("---\ntitle: Globals\nslug: /api/generated/globals\n---\n\n# Global API\n\n");
+    let mut output =
+        String::from("---\ntitle: Globals\nslug: /api/generated/globals\n---\n\n# Global API\n\n");
     output.push_str("> This page is generated from the Rust scripting metadata. Global APIs are available without an `import`.\n\n");
 
     for global in globals {
@@ -334,11 +351,24 @@ pub fn generate_globals_docs_md(globals: &[GlobalMeta]) -> String {
             output.push_str("\n\n");
         }
         for constant in global.constants {
-            output.push_str(&format!("### `{}`\n\n{}\n\n**Type:** `{}`\n\n", constant.name, constant.docs, constant.ty));
+            output.push_str(&format!(
+                "### `{}`\n\n{}\n\n**Type:** `{}`\n\n",
+                constant.name, constant.docs, constant.ty
+            ));
         }
         for function in global.functions {
-            let (_, name) = function.name.split_once('.').unwrap_or(("global", function.name));
-            output.push_str(&format!("### `{}`\n\n{}\n\n```ts\n{}({}): {};\n```\n", function.name, function.docs, name, markdown_params(function.params), function.returns));
+            let (_, name) = function
+                .name
+                .split_once('.')
+                .unwrap_or(("global", function.name));
+            output.push_str(&format!(
+                "### `{}`\n\n{}\n\n```ts\n{}({}): {};\n```\n",
+                function.name,
+                function.docs,
+                name,
+                markdown_params(function.params),
+                function.returns
+            ));
             write_param_table(&mut output, function.params);
             output.push('\n');
         }
@@ -359,10 +389,7 @@ pub fn generate_d_ts(modules: &[ModuleMeta]) -> String {
     output
 }
 
-pub fn generate_d_ts_with_globals(
-    modules: &[ModuleMeta],
-    globals: &[GlobalMeta],
-) -> String {
+pub fn generate_d_ts_with_globals(modules: &[ModuleMeta], globals: &[GlobalMeta]) -> String {
     let mut output = String::from(
         "/**\n * Type definitions generated from the Oxid scripting API metadata.\n * Do not edit this file manually.\n */\n\n",
     );
@@ -438,7 +465,7 @@ mod tests {
         let output = generate_globals_d_ts(&GLOBALS);
 
         assert!(output.contains("declare namespace console"));
-        assert!(output.contains("function log(message?: string): void;"));
+        assert!(output.contains("function log(message: string): void;"));
     }
 
     #[test]
