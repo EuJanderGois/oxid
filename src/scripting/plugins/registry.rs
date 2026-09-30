@@ -22,9 +22,9 @@ pub fn plugins() -> &'static [PluginRegistration] {
             register: MathPlugin::register,
         },
         PluginRegistration {
-            name: ColorPlugin::NAME,
-            metadata: ColorPlugin::metadata,
-            register: ColorPlugin::register,
+            name: <ColorPlugin as ScriptPlugin>::NAME,
+            metadata: <ColorPlugin as ScriptPlugin>::metadata,
+            register: <ColorPlugin as ScriptPlugin>::register,
         },
         PluginRegistration {
             name: ShapesPlugin::NAME,

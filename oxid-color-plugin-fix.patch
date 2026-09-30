@@ -1,0 +1,44 @@
+--- a/src/scripting/plugins/color.rs
++++ b/src/scripting/plugins/color.rs
+@@ -166,7 +166,7 @@
+ fn register_global_color<'js>(ctx: &Ctx<'js>, name: &str, color: RendererColor) -> Result<()> {
+     ctx.globals().set(
+         name,
+-        Class::instance(ctx, Color::new(color.r, color.g, color.b, color.a))?,
++        Class::instance(ctx.clone(), Color::new(color.r, color.g, color.b, color.a))?,
+     )?;
+     Ok(())
+ }
+@@ -193,7 +193,7 @@
+ 
+     fn metadata() -> GlobalMeta {
+         GlobalMeta {
+-            name: Self::NAME,
++            name: <ColorPlugin as GlobalPlugin>::NAME,
+             docs: "Standard colors available globally.",
+             constants: GLOBAL_CONSTANTS,
+             functions: &[],
+@@ -232,7 +232,7 @@
+ 
+ impl ScriptPlugin for ColorPlugin {
+     fn register<'js>(ctx: &Ctx<'js>) -> Result<()> {
+-        register_module_def::<Self>(ctx, Self::NAME)
++        register_module_def::<Self>(ctx, <ColorPlugin as ScriptPlugin>::NAME)
+     }
+ 
+     const NAME: &'static str = "oxid/color";
+--- a/src/scripting/plugins/registry.rs
++++ b/src/scripting/plugins/registry.rs
+@@ -22,9 +22,9 @@
+             register: MathPlugin::register,
+         },
+         PluginRegistration {
+-            name: ColorPlugin::NAME,
+-            metadata: ColorPlugin::metadata,
+-            register: ColorPlugin::register,
++            name: <ColorPlugin as ScriptPlugin>::NAME,
++            metadata: <ColorPlugin as ScriptPlugin>::metadata,
++            register: <ColorPlugin as ScriptPlugin>::register,
+         },
+         PluginRegistration {
+             name: ShapesPlugin::NAME,
